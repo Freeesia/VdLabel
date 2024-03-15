@@ -65,7 +65,7 @@ jobs:
             --use-project-assets-json \
             --manual-package-information manual-package-information.json \
             -f licenses
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: licenses
           path: licenses/
