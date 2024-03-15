@@ -49,8 +49,8 @@ jobs:
   license:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: licenses
           key: ${{ runner.os }}-licenses-${{ hashFiles('**/*.csproj') }} #hash of project files
@@ -78,34 +78,34 @@ jobs:
     # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
           restore-keys: |
             ${{ runner.os }}-nuget-
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - uses: gittools/actions/gitversion/setup@v0.10.2
+      - uses: gittools/actions/gitversion/setup@v1.1.1
         with:
           versionSpec: "5.x"
       - id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.10.2
+        uses: gittools/actions/gitversion/execute@v1.1.1
       - run: |
           dotnet publish -c Release -o publish --sc ${{ matrix.self }} `
             -p:Version=${{ steps.gitversion.outputs.fullSemVer }} `
             -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
             -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
             -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: licenses
           path: publish\licenses
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
@@ -115,13 +115,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - run: |
           for dir in */; do
             base=$(basename "$dir")
             (cd "$dir" && zip -r "../${base}.zip" .)
           done
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           draft: true
