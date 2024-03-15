@@ -63,13 +63,14 @@ jobs:
             -m -i . \
             --include-project-file \
             --use-project-assets-json \
-            --manual-package-information .\manual-package-information.json \
+            --manual-package-information manual-package-information.json \
             -f licenses
       - uses: actions/upload-artifact@v3
         with:
           name: licenses
           path: licenses/
   build:
+    needs: license
     strategy:
       matrix:
         self: [true, false]
