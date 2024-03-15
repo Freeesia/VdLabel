@@ -95,7 +95,7 @@ jobs:
       - id: gitversion
         uses: gittools/actions/gitversion/execute@v1.1.1
       - run: |
-          dotnet publish -c Release --property:PublishDir=.\publish --sc ${{ matrix.self }} `
+          dotnet publish VdLabel -c Release -o publish --sc ${{ matrix.self }} `
             -p:Version=${{ steps.gitversion.outputs.fullSemVer }} `
             -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
             -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
