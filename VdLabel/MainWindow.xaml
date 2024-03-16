@@ -157,6 +157,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Label
@@ -180,18 +181,26 @@
                                 IsReadOnly="{Binding IsDefault}"
                                 PlaceholderText="{Binding Id, Mode=OneWay}"
                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-                            <CheckBox
+                            <ui:InfoBar
+                                Title="注意"
                                 Grid.Row="2"
+                                Grid.Column="1"
+                                IsClosable="False"
+                                IsOpen="{Binding ShowChangeNameWarning}"
+                                Message="現在のWindowsバージョンでは仮想デスクトップの名前同期はサポートされません"
+                                Severity="Warning" />
+                            <CheckBox
+                                Grid.Row="3"
                                 Grid.Column="1"
                                 Margin="4"
                                 Content="画像が設定されているときに名前を表示するかどうか"
                                 IsChecked="{Binding IsVisibleName}" />
                             <Label
-                                Grid.Row="3"
+                                Grid.Row="4"
                                 Grid.Column="0"
                                 Content="切り替え通知画像" />
                             <DockPanel
-                                Grid.Row="3"
+                                Grid.Row="4"
                                 Grid.Column="1"
                                 Margin="4">
                                 <Button

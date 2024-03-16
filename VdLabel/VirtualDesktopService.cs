@@ -8,11 +8,12 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IHostedService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, IVirtualDesktopCompat virtualDesktopCompat) : IHostedService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
+    private readonly IVirtualDesktopCompat virtualDesktopCompat = virtualDesktopCompat;
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
 
@@ -39,15 +40,16 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
                 c = defaultConfig with { Id = desktop.Id };
                 config.DesktopConfigs.Add(c);
             }
-            if (!string.IsNullOrEmpty(c.Name))
+            var name = c.Name;
+            if (!string.IsNullOrEmpty(name) && this.virtualDesktopCompat.IsSupportedChangeName)
             {
-                desktop.Name = c.Name;
+                desktop.Name = name;
             }
             else if (!string.IsNullOrEmpty(desktop.Name))
             {
-                c.Name = desktop.Name;
+                name = desktop.Name;
             }
-            var name = desktop.Name;
+            c.Name = name;
             if (string.IsNullOrEmpty(name))
             {
                 name = $"Desktop {i + 1}";
@@ -152,4 +154,19 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_window")]
     static extern ref Window GetWindow(WindowHandle window);
+}
+
+class VirtualDesktopCompat : IVirtualDesktopCompat
+{
+    public bool IsSupportedChangeName { get; }
+
+    public VirtualDesktopCompat()
+    {
+        this.IsSupportedChangeName = false;
+        //this.IsSupportedChangeName = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
+    }
+}
+interface IVirtualDesktopCompat
+{
+    bool IsSupportedChangeName { get; }
 }

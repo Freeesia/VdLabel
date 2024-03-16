@@ -12,6 +12,7 @@ partial class MainViewModel : ObservableObject
 {
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
+    private readonly IVirtualDesktopCompat virtualDesktopCompat;
     [ObservableProperty]
     private bool isBusy;
 
@@ -28,10 +29,11 @@ partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<OverlayPosition> Positions { get; } = Enum.GetValues<OverlayPosition>();
 
-    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService)
+    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirtualDesktopCompat virtualDesktopCompat)
     {
         this.configStore = configStore;
         this.dialogService = dialogService;
+        this.virtualDesktopCompat = virtualDesktopCompat;
         this.isStartup = GetIsStartup();
         Load();
     }
@@ -45,7 +47,7 @@ partial class MainViewModel : ObservableObject
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
-                this.DesktopConfigs.Add(new DesktopConfigViewModel(desktopConfig));
+                this.DesktopConfigs.Add(new DesktopConfigViewModel(desktopConfig, this.virtualDesktopCompat));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
         }
@@ -101,8 +103,10 @@ partial class MainViewModel : ObservableObject
     }
 }
 
-partial class DesktopConfigViewModel(DesktopConfig desktopConfig) : ObservableObject
+partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDesktopCompat virtualDesktopCompat) : ObservableObject
 {
+    private readonly IVirtualDesktopCompat virtualDesktopCompat = virtualDesktopCompat;
+
     public DesktopConfig DesktopConfig { get; } = desktopConfig;
 
     public Guid Id => this.DesktopConfig.Id;
@@ -128,6 +132,8 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig) : ObservableOb
             }
         }
     }
+
+    public bool ShowChangeNameWarning => !this.virtualDesktopCompat.IsSupportedChangeName;
 
     public string? ImagePath
     {
