@@ -35,7 +35,11 @@
         <ui:TitleBar
             Title="VdLabel"
             DockPanel.Dock="Top"
-            ShowMinimize="False" />
+            ShowMinimize="False">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="/app.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
         <tray:NotifyIcon>
             <tray:NotifyIcon.Menu>
                 <ContextMenu>

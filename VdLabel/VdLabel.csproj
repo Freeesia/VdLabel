@@ -8,12 +8,8 @@
     <UseWPF>true</UseWPF>
     <Company>StudioFreesia</Company>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="App.xaml" />
-    <None Remove="DefaultStyles.xaml" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Kamishibai.Hosting" Version="2.6.0" />
@@ -27,6 +23,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="app.ico" />
   </ItemGroup>
 
 </Project>
