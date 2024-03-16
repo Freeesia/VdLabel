@@ -186,7 +186,7 @@
                                 Grid.Row="2"
                                 Grid.Column="1"
                                 IsClosable="False"
-                                IsOpen="{Binding ShowChangeNameWarning}"
+                                IsOpen="{Binding ShowNameWarning}"
                                 Message="現在のWindowsバージョンでは仮想デスクトップの名前同期はサポートされません"
                                 Severity="Warning" />
                             <CheckBox

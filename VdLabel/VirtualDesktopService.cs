@@ -41,7 +41,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
                 config.DesktopConfigs.Add(c);
             }
             var name = c.Name;
-            if (!string.IsNullOrEmpty(name) && this.virtualDesktopCompat.IsSupportedChangeName)
+            if (!string.IsNullOrEmpty(name) && this.virtualDesktopCompat.IsSupportedName)
             {
                 desktop.Name = name;
             }
@@ -158,15 +158,15 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
 class VirtualDesktopCompat : IVirtualDesktopCompat
 {
-    public bool IsSupportedChangeName { get; }
+    public bool IsSupportedName { get; }
 
     public VirtualDesktopCompat()
     {
-        this.IsSupportedChangeName = false;
-        //this.IsSupportedChangeName = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
+        //this.IsSupportedName = false;
+        this.IsSupportedName = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
     }
 }
 interface IVirtualDesktopCompat
 {
-    bool IsSupportedChangeName { get; }
+    bool IsSupportedName { get; }
 }

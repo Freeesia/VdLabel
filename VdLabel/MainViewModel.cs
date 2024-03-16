@@ -133,7 +133,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDeskto
         }
     }
 
-    public bool ShowChangeNameWarning => !this.virtualDesktopCompat.IsSupportedChangeName;
+    public bool ShowNameWarning => !this.virtualDesktopCompat.IsSupportedName;
 
     public string? ImagePath
     {
