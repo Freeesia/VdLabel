@@ -13,5 +13,17 @@ builder.Services.AddHostedService<VirtualDesktopService>()
     .AddPresentation<MainWindow, MainViewModel>()
     .AddPresentation<OverlayWindow, OverlayViewModel>();
 var app = builder.Build();
-app.Startup += (s, e) => VirtualDesktop.Configure();
+app.Startup += static (s, e) => VirtualDesktop.Configure();
+
+using var mutex = new Mutex(false, "VdLael", out var createdNew);
+if (!createdNew)
+{
+    new MessageDialog()
+    {
+        Caption = "VdLabel",
+        Icon = MessageBoxImage.Error,
+        Text = "すでにVdLabelが起動中です",
+    }.Show();
+    return;
+}
 await app.RunAsync();
