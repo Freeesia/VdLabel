@@ -1,10 +1,10 @@
-# VdLabel
+# <img src="assets/app_256.png" width="32" > VdLabel
 
 [![.NET Desktop](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml)
 
 VdLabelは仮想デスクトップを便利に利用するためのアプリケーションです。
 
-![動作](amni.gif)
+![動作](assets/anim.gif)
 
 ## ダウンロード
 
@@ -31,3 +31,5 @@ Windowsの起動時に自動的に起動するように設定できます。
 ## 設定
 
 タスクトレイのアイコンをクリックして、設定を開きます。
+
+![設定](assets/settings.png)
