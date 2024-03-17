@@ -37,7 +37,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == desktop.Id);
             if (c is null)
             {
-                c = defaultConfig with { Id = desktop.Id };
+                c = new() { Id = desktop.Id };
                 config.DesktopConfigs.Add(c);
             }
             var name = c.Name;
@@ -120,9 +120,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
           => this.app.Dispatcher.Invoke(async () =>
           {
               var config = await this.configStore.Load();
-              var defaultConfig = config.DesktopConfigs.First(c => c.Id == Guid.Empty);
-              var c = defaultConfig with { Id = e.Id };
-              config.DesktopConfigs.Add(c);
+              config.DesktopConfigs.Add(new() { Id = e.Id });
               await OpenOverlay(e, $"Desktop {config.DesktopConfigs.Count - 1}");
               await this.configStore.Save(config);
           });
@@ -149,6 +147,11 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        VirtualDesktop.CurrentChanged -= VirtualDesktop_CurrentChanged;
+        VirtualDesktop.Destroyed -= VirtualDesktop_Destroyed;
+        VirtualDesktop.Created -= VirtualDesktop_Created;
+        VirtualDesktop.Renamed -= VirtualDesktop_Renamed;
+        VirtualDesktop.Moved -= VirtualDesktop_Moved;
         return Task.CompletedTask;
     }
 

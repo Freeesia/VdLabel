@@ -24,4 +24,24 @@ record DesktopConfig
     public bool IsVisibleName { get; set; } = true;
     public string? Name { get; set; }
     public string? ImagePath { get; set; }
+    public IReadOnlyList<WindowConfig> TargetWindows { get; init; } = [];
+}
+
+record WindowConfig
+{
+    public WindowMatchType MatchType { get; set; }
+    public WindowPatternType PatternType { get; set; }
+    public string Pattern { get; set; } = string.Empty;
+}
+
+enum WindowMatchType
+{
+    CommandLine,
+    Title,
+}
+
+enum WindowPatternType
+{
+    Wildcard,
+    Regex,
 }

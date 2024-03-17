@@ -8,8 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    Width="600"
-    Height="800"
+    Width="680"
+    Height="820"
     d:DataContext="{d:DesignInstance {x:Type local:MainViewModel}}"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -158,29 +158,34 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Label
                                 Grid.Row="0"
                                 Grid.Column="0"
-                                Content="ID" />
+                                Content="ID"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <TextBox
                                 Grid.Row="0"
                                 Grid.Column="1"
                                 Margin="4"
                                 IsReadOnly="True"
-                                Text="{Binding Id, Mode=OneWay}" />
+                                Text="{Binding Id, Mode=OneWay}"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <Label
                                 Grid.Row="1"
                                 Grid.Column="0"
-                                Content="名前" />
+                                Content="名前"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <ui:TextBox
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Margin="4"
-                                IsReadOnly="{Binding IsDefault}"
                                 PlaceholderText="{Binding Id, Mode=OneWay}"
-                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <ui:InfoBar
                                 Title="注意"
                                 Grid.Row="2"
@@ -188,21 +193,25 @@
                                 IsClosable="False"
                                 IsOpen="{Binding ShowNameWarning}"
                                 Message="現在のWindowsバージョンでは仮想デスクトップの名前同期はサポートされません"
-                                Severity="Warning" />
+                                Severity="Warning"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <CheckBox
                                 Grid.Row="3"
                                 Grid.Column="1"
                                 Margin="4"
                                 Content="画像が設定されているときに名前を表示するかどうか"
-                                IsChecked="{Binding IsVisibleName}" />
+                                IsChecked="{Binding IsVisibleName}"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <Label
                                 Grid.Row="4"
                                 Grid.Column="0"
-                                Content="切り替え通知画像" />
+                                Content="切り替え通知画像"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                             <DockPanel
                                 Grid.Row="4"
                                 Grid.Column="1"
-                                Margin="4">
+                                Margin="4"
+                                Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}">
                                 <Button
                                     Command="{Binding PickImageCommand}"
                                     Content="選択"
@@ -216,9 +225,58 @@
                             <ui:Image
                                 Grid.Row="5"
                                 Grid.ColumnSpan="2"
+                                Height="120"
                                 CornerRadius="4"
                                 Source="{Binding ImagePath}"
                                 Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
+                            <Label
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Content="対象ウィンドウ" />
+                            <Button
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Command="{Binding AddTargetWindowCommand}"
+                                Content="追加" />
+                            <ItemsControl
+                                Grid.Row="6"
+                                Grid.RowSpan="2"
+                                Grid.Column="1"
+                                MaxHeight="160"
+                                VerticalAlignment="Top"
+                                ItemsSource="{Binding TargetWindows}">
+                                <ItemsControl.Template>
+                                    <ControlTemplate>
+                                        <ui:DynamicScrollViewer>
+                                            <ItemsPresenter />
+                                        </ui:DynamicScrollViewer>
+                                    </ControlTemplate>
+                                </ItemsControl.Template>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="local:WindowConfig">
+                                        <DockPanel Margin="0,0,8,0">
+                                            <ComboBox
+                                                Width="148"
+                                                Margin="4"
+                                                ItemsSource="{Binding DataContext.MatchTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                SelectedItem="{Binding MatchType, Mode=TwoWay}" />
+                                            <ComboBox
+                                                Width="108"
+                                                Margin="4"
+                                                ItemsSource="{Binding DataContext.PatternTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                SelectedItem="{Binding PatternType, Mode=TwoWay}" />
+                                            <ui:Button
+                                                Command="{Binding DataContext.RemoveTargetWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                DockPanel.Dock="Right"
+                                                Icon="{ui:SymbolIcon Delete24}" />
+                                            <ui:TextBox Margin="4" Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ContentTemplate>

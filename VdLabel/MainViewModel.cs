@@ -66,7 +66,7 @@ partial class MainViewModel : ObservableObject
             this.Config!.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.DesktopConfigs)
             {
-                this.Config.DesktopConfigs.Add(desktopConfig.DesktopConfig);
+                this.Config.DesktopConfigs.Add(desktopConfig.GetSaveConfig());
             }
             await this.configStore.Save(this.Config);
         }
@@ -107,47 +107,33 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDeskto
 {
     private readonly IVirtualDesktopCompat virtualDesktopCompat = virtualDesktopCompat;
 
-    public DesktopConfig DesktopConfig { get; } = desktopConfig;
+    public Guid Id { get; } = desktopConfig.Id;
 
-    public Guid Id => this.DesktopConfig.Id;
+    public bool IsPin => this.Id == Guid.Empty;
+    public bool IsNotPin => !this.IsPin;
 
-    public bool IsDefault => this.DesktopConfig.Id == Guid.Empty;
+    public string Title => this.IsPin ? "全デスクトップ" : this.Name ?? this.Id.ToString();
 
-    public string Title => this.IsDefault ? "デフォルト設定" : this.DesktopConfig.Name ?? this.DesktopConfig.Id.ToString();
+    [ObservableProperty]
+    private bool isVisibleName = desktopConfig.IsVisibleName;
 
-    public bool IsVisibleName
-    {
-        get => this.DesktopConfig.IsVisibleName;
-        set => SetProperty(this.DesktopConfig.IsVisibleName, value, this.DesktopConfig, (c, v) => c.IsVisibleName = v);
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    private string? name = desktopConfig.Name;
 
-    public string? Name
-    {
-        get => this.DesktopConfig.Name;
-        set
-        {
-            if (SetProperty(this.DesktopConfig.Name, value, this.DesktopConfig, (c, v) => c.Name = v))
-            {
-                OnPropertyChanged(nameof(Title));
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsVisibleImage))]
+    private string? imagePath = desktopConfig.ImagePath;
 
     public bool ShowNameWarning => !this.virtualDesktopCompat.IsSupportedName;
 
-    public string? ImagePath
-    {
-        get => this.DesktopConfig.ImagePath;
-        set
-        {
-            if (SetProperty(this.DesktopConfig.ImagePath, value, this.DesktopConfig, (c, v) => c.ImagePath = v))
-            {
-                OnPropertyChanged(nameof(IsVisibleImage));
-            }
-        }
-    }
-
     public bool IsVisibleImage => this.ImagePath is not null;
+
+    public ObservableCollection<WindowConfig> TargetWindows { get; } = new(desktopConfig.TargetWindows);
+
+    public IReadOnlyList<WindowMatchType> MatchTypes { get; } = Enum.GetValues<WindowMatchType>();
+
+    public IReadOnlyList<WindowPatternType> PatternTypes { get; } = Enum.GetValues<WindowPatternType>();
 
     [RelayCommand]
     public void PickImage()
@@ -168,4 +154,22 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDeskto
 
         this.ImagePath = openFileDialog.FileName;
     }
+
+    [RelayCommand]
+    public void AddTargetWindow()
+        => this.TargetWindows.Add(new());
+
+    [RelayCommand]
+    public void RemoveTargetWindow(WindowConfig target)
+        => this.TargetWindows.Remove(target);
+
+    public DesktopConfig GetSaveConfig()
+        => new()
+        {
+            Id = this.Id,
+            Name = this.Name,
+            IsVisibleName = this.IsVisibleName,
+            ImagePath = this.ImagePath,
+            TargetWindows = this.TargetWindows.ToArray(),
+        };
 }

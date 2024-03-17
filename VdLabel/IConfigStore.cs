@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Microsoft.Extensions.Logging;
+using System.Drawing;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -11,10 +12,10 @@ interface IConfigStore
     event EventHandler? Saved;
 
     ValueTask<Config> Load();
-    ValueTask Save(Config? config = null);
+    ValueTask Save(Config config);
 }
 
-class ConfigStore : IConfigStore
+class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
 {
     private readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "VdLabel", "config.json");
     private static readonly JsonSerializerOptions options = new()
@@ -22,33 +23,34 @@ class ConfigStore : IConfigStore
         Converters = { new ColorJsonConverter() },
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
-    private Config? config;
+    private readonly ILogger<ConfigStore> logger = logger;
 
     public event EventHandler? Saved;
 
     public ValueTask<Config> Load()
     {
-        if (File.Exists(this.path))
+        Config? config = null;
+        try
         {
-            using var fs = File.OpenRead(this.path);
-            this.config = JsonSerializer.Deserialize<Config>(fs, options);
+            if (File.Exists(this.path))
+            {
+                using var fs = File.OpenRead(this.path);
+                config = JsonSerializer.Deserialize<Config>(fs, options);
+            }
         }
-        return new(this.config ??= new Config()
+        catch (Exception e)
         {
-            DesktopConfigs = { new() { Id = Guid.Empty } }
-        });
+            this.logger.LogError(e, "設定の読み込みに失敗しました");
+        }
+        return new(config ?? new Config() { DesktopConfigs = { new() { Id = Guid.Empty } } });
     }
 
-    public ValueTask Save(Config? config = null)
+    public ValueTask Save(Config config)
     {
-        if (config is not null)
-        {
-            this.config = config;
-        }
         Directory.CreateDirectory(Path.GetDirectoryName(this.path)!);
         using (var fs = File.Create(this.path))
         {
-            JsonSerializer.Serialize(fs, this.config, options);
+            JsonSerializer.Serialize(fs, config, options);
         }
         this.Saved?.Invoke(this, EventArgs.Empty);
         return default;
