@@ -84,7 +84,7 @@ partial class MainViewModel : ObservableObject
         var path = Environment.ProcessPath ?? throw new InvalidOperationException();
         if (value)
         {
-            key.SetValue(name, exe.Location);
+            key.SetValue(name, path);
             this.dialogService.ShowAlertAsync("自動起動", $"{name}を自動起動に登録しました。", "OK");
         }
         else
