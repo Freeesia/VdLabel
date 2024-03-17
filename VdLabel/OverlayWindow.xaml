@@ -12,6 +12,8 @@
     Background="Transparent"
     IsHitTestVisible="False"
     Left="0"
+    Loaded="Window_Loaded"
+    ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
     Top="0"
     Topmost="True"
