@@ -6,6 +6,7 @@ class Config
 {
     public OverlayPosition Position { get; set; } = OverlayPosition.TopLeft;
     public double FontSize { get; set; } = 48;
+    public double OverlaySize { get; set; } = 800;
     public Color Foreground { get; set; } = Color.WhiteSmoke;
     public Color Background { get; set; } = Color.FromArgb(0x0d1117);
     public double Duration { get; set; } = 2.5;

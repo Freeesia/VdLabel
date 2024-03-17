@@ -75,6 +75,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Label
                         Grid.Row="0"
@@ -94,33 +95,42 @@
                         Grid.Row="1"
                         Grid.Column="1"
                         Margin="4"
-                        Value="{Binding Config.FontSize}" />
+                        Value="{Binding Config.FontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Label
                         Grid.Row="2"
                         Grid.Column="0"
+                        Content="表示サイズ" />
+                    <ui:NumberBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="4"
+                        Value="{Binding Config.OverlaySize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Label
+                        Grid.Row="3"
+                        Grid.Column="0"
                         Content="背景色" />
                     <cp:PortableColorPicker
-                        Grid.Row="2"
+                        Grid.Row="3"
                         Grid.Column="1"
                         Margin="4"
                         SelectedColor="{Binding Config.Background, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
                         Style="{StaticResource DefaultColorPickerStyle}" />
                     <Label
-                        Grid.Row="3"
+                        Grid.Row="4"
                         Grid.Column="0"
                         Content="文字色" />
                     <cp:PortableColorPicker
-                        Grid.Row="3"
+                        Grid.Row="4"
                         Grid.Column="1"
                         Margin="4"
                         SelectedColor="{Binding Config.Foreground, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
                         Style="{StaticResource DefaultColorPickerStyle}" />
                     <Label
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="0"
                         Content="表示時間" />
                     <DockPanel
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="1"
                         Margin="4">
                         <TextBlock

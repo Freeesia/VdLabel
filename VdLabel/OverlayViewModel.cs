@@ -21,6 +21,9 @@ partial class OverlayViewModel : ObservableObject, IDisposable
     private double fontSize;
 
     [ObservableProperty]
+    private double overlaySize;
+
+    [ObservableProperty]
     private Color foreground;
 
     [ObservableProperty]
@@ -42,6 +45,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         this.name = name;
         var config = this.configStore.Load().AsTask().Result;
         this.fontSize = config.FontSize;
+        this.overlaySize = config.OverlaySize;
         this.foreground = config.Foreground;
         this.duration = config.Duration;
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
@@ -54,6 +58,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
     {
         var config = await this.configStore.Load();
         this.FontSize = config.FontSize;
+        this.OverlaySize = config.OverlaySize;
         this.Foreground = config.Foreground;
         this.Background = config.Background;
         this.duration = config.Duration;
