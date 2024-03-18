@@ -149,10 +149,14 @@
                 SelectedItem="{Binding SelectedDesktopConfig}">
                 <TabControl.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock
-                            Width="160"
-                            Text="{Binding Title}"
-                            TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal">
+                            <Image Height="16" Source="{Binding ImagePath}" />
+                            <TextBlock
+                                Width="160"
+                                Margin="4,0"
+                                Text="{Binding Title}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
                     </DataTemplate>
                 </TabControl.ItemTemplate>
                 <TabControl.ContentTemplate>
