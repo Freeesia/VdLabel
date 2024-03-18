@@ -34,9 +34,13 @@ partial class MainViewModel : ObservableObject
         this.configStore = configStore;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
+        this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
         this.isStartup = GetIsStartup();
         Load();
     }
+
+    private void VirualDesktopService_DesktopChanged(object? sender, DesktopChangedEventArgs e)
+         => this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == e.DesktopId) ?? this.DesktopConfigs.FirstOrDefault();
 
     private async void Load()
     {

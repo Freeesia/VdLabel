@@ -16,6 +16,8 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
 
+    public event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
+
     public bool IsSupportedName { get; } = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -90,6 +92,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         {
             vm.Popup();
         }
+        this.DesktopChanged?.Invoke(this, new(e.NewDesktop.Id));
     }
 
     private void VirtualDesktop_Destroyed(object? sender, VirtualDesktopDestroyEventArgs e)
@@ -165,6 +168,12 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
 public interface IVirualDesktopService : IHostedService
 {
+    event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
     bool IsSupportedName { get; }
     void Pin(Window window);
+}
+
+public class DesktopChangedEventArgs(Guid desktopId) : EventArgs
+{
+    public Guid DesktopId { get; } = desktopId;
 }
