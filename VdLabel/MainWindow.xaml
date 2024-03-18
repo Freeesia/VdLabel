@@ -13,12 +13,13 @@
     d:DataContext="{d:DesignInstance {x:Type local:MainViewModel}}"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Activated="FluentWindow_Activated"
     Closing="FluentWindow_Closing"
     ExtendsContentIntoTitleBar="True"
     Loaded="FluentWindow_Loaded"
     WindowBackdropType="Mica"
     WindowCornerPreference="Default"
-    mc:Ignorable="d" Activated="FluentWindow_Activated">
+    mc:Ignorable="d">
     <ui:FluentWindow.Resources>
         <Style BasedOn="{StaticResource {x:Type Label}}" TargetType="{x:Type Label}">
             <Setter Property="HorizontalAlignment" Value="Right" />
@@ -300,6 +301,11 @@
                     Command="{Binding SaveCommand}"
                     Content="適用"
                     DockPanel.Dock="Right" />
+                <ui:Button
+                    Command="{Binding ReloadDesktopsCommand}"
+                    DockPanel.Dock="Left"
+                    Icon="{ui:SymbolIcon ArrowCounterclockwise32}"
+                    ToolTip="デスクトップ一覧の更新" />
                 <ui:ToggleSwitch
                     Margin="4"
                     Content="PC起動時に自動起動"

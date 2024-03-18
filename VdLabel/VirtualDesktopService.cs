@@ -22,49 +22,12 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var desktops = VirtualDesktop.GetDesktops();
-        var config = await this.configStore.Load();
-        this.options = new()
-        {
-            WindowStartupLocation = config.Position switch
-            {
-                OverlayPosition.Center => WindowStartupLocation.CenterScreen,
-                OverlayPosition.TopLeft => WindowStartupLocation.Manual,
-                _ => throw new NotImplementedException(),
-            }
-        };
-        var defaultConfig = config.DesktopConfigs.First(c => c.Id == Guid.Empty);
-        for (var i = 0; i < desktops.Length; i++)
-        {
-            var desktop = desktops[i];
-            var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == desktop.Id);
-            if (c is null)
-            {
-                c = new() { Id = desktop.Id };
-                config.DesktopConfigs.Add(c);
-            }
-            var name = c.Name;
-            if (!string.IsNullOrEmpty(name) && this.IsSupportedName)
-            {
-                desktop.Name = name;
-            }
-            else if (!string.IsNullOrEmpty(desktop.Name))
-            {
-                name = desktop.Name;
-            }
-            c.Name = name;
-            if (string.IsNullOrEmpty(name))
-            {
-                name = $"Desktop {i + 1}";
-            }
-            await OpenOverlay(desktop, name);
-        }
+        await ReloadDesktops();
         VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
         VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
         VirtualDesktop.Created += VirtualDesktop_Created;
         VirtualDesktop.Renamed += VirtualDesktop_Renamed;
         VirtualDesktop.Moved += VirtualDesktop_Moved;
-        await this.configStore.Save(config);
     }
 
     private async void VirtualDesktop_Moved(object? sender, VirtualDesktopMovedEventArgs e)
@@ -164,6 +127,54 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public void Pin(Window window)
         => window.Pin();
+
+    public async ValueTask ReloadDesktops()
+    {
+        var desktops = VirtualDesktop.GetDesktops();
+        var config = await this.configStore.Load();
+        this.options = new()
+        {
+            WindowStartupLocation = config.Position switch
+            {
+                OverlayPosition.Center => WindowStartupLocation.CenterScreen,
+                OverlayPosition.TopLeft => WindowStartupLocation.Manual,
+                _ => throw new NotImplementedException(),
+            }
+        };
+        var desktopConfigs = config.DesktopConfigs.ToDictionary(c => c.Id);
+        config.DesktopConfigs.Clear();
+        var defaultConfig = desktopConfigs[Guid.Empty];
+        config.DesktopConfigs.Add(defaultConfig);
+        for (var i = 0; i < desktops.Length; i++)
+        {
+            var desktop = desktops[i];
+            if (!desktopConfigs.TryGetValue(desktop.Id, out var c))
+            {
+                c = new() { Id = desktop.Id };
+            }
+            config.DesktopConfigs.Add(c);
+            if (this.windows.ContainsKey(desktop.Id))
+            {
+                continue;
+            }
+            var name = c.Name;
+            if (!string.IsNullOrEmpty(name) && this.IsSupportedName)
+            {
+                desktop.Name = name;
+            }
+            else if (!string.IsNullOrEmpty(desktop.Name))
+            {
+                name = desktop.Name;
+            }
+            c.Name = name;
+            if (string.IsNullOrEmpty(name))
+            {
+                name = $"Desktop {i + 1}";
+            }
+            await OpenOverlay(desktop, name);
+        }
+        await this.configStore.Save(config);
+    }
 }
 
 public interface IVirualDesktopService : IHostedService
@@ -171,6 +182,7 @@ public interface IVirualDesktopService : IHostedService
     event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
     bool IsSupportedName { get; }
     void Pin(Window window);
+    ValueTask ReloadDesktops();
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs

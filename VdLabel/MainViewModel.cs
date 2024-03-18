@@ -45,6 +45,7 @@ partial class MainViewModel : ObservableObject
     private async void Load()
     {
         this.IsBusy = true;
+        this.configStore.Saved -= ConfigStore_Saved;
         try
         {
             this.Config = await this.configStore.Load();
@@ -59,12 +60,17 @@ partial class MainViewModel : ObservableObject
         {
             this.IsBusy = false;
         }
+        this.configStore.Saved += ConfigStore_Saved;
     }
+
+    private void ConfigStore_Saved(object? sender, EventArgs e)
+        => Load();
 
     [RelayCommand]
     public async Task Save()
     {
         this.IsBusy = true;
+        this.configStore.Saved -= ConfigStore_Saved;
         try
         {
             this.Config!.DesktopConfigs.Clear();
@@ -73,6 +79,21 @@ partial class MainViewModel : ObservableObject
                 this.Config.DesktopConfigs.Add(desktopConfig.GetSaveConfig());
             }
             await this.configStore.Save(this.Config);
+        }
+        finally
+        {
+            this.IsBusy = false;
+        }
+        this.configStore.Saved += ConfigStore_Saved;
+    }
+
+    [RelayCommand]
+    public async Task ReloadDesktops()
+    {
+        this.IsBusy = true;
+        try
+        {
+            await this.virualDesktopService.ReloadDesktops();
         }
         finally
         {
