@@ -227,6 +227,10 @@
                                 Grid.Column="1"
                                 Margin="4"
                                 Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}">
+                                <ui:Button
+                                    Command="{Binding RemoveImageCommand}"
+                                    DockPanel.Dock="Right"
+                                    Icon="{ui:SymbolIcon Delete24}" />
                                 <Button
                                     Command="{Binding PickImageCommand}"
                                     Content="選択"

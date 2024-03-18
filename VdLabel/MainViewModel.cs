@@ -148,6 +148,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsVisibleImage))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveImageCommand))]
     private string? imagePath = desktopConfig.ImagePath;
 
     public bool ShowNameWarning => !this.virualDesktopService.IsSupportedName;
@@ -179,6 +180,13 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
 
         this.ImagePath = openFileDialog.FileName;
     }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveImage))]
+    public void RemoveImage()
+        => this.ImagePath = null;
+
+    private bool CanRemoveImage
+        => this.ImagePath is not null;
 
     [RelayCommand]
     public void AddTargetWindow()
