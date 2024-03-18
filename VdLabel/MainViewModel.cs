@@ -112,7 +112,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDeskto
     public bool IsPin => this.Id == Guid.Empty;
     public bool IsNotPin => !this.IsPin;
 
-    public string Title => this.IsPin ? "全デスクトップ" : this.Name ?? this.Id.ToString();
+    public string Title => this.IsPin ? "全デスクトップ" : string.IsNullOrEmpty(this.Name) ? this.Id.ToString() : this.Name;
 
     [ObservableProperty]
     private bool isVisibleName = desktopConfig.IsVisibleName;
