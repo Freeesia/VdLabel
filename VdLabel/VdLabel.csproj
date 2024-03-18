@@ -9,6 +9,8 @@
     <Company>StudioFreesia</Company>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>ja</SatelliteResourceLanguages>
+    <NeutralLanguage>ja</NeutralLanguage>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishReadyToRun>true</PublishReadyToRun>
