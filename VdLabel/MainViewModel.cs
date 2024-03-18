@@ -12,7 +12,7 @@ partial class MainViewModel : ObservableObject
 {
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
-    private readonly IVirtualDesktopCompat virtualDesktopCompat;
+    private readonly IVirualDesktopService virualDesktopService;
     [ObservableProperty]
     private bool isBusy;
 
@@ -29,11 +29,11 @@ partial class MainViewModel : ObservableObject
 
     public IReadOnlyList<OverlayPosition> Positions { get; } = Enum.GetValues<OverlayPosition>();
 
-    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirtualDesktopCompat virtualDesktopCompat)
+    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirualDesktopService virualDesktopService)
     {
         this.configStore = configStore;
         this.dialogService = dialogService;
-        this.virtualDesktopCompat = virtualDesktopCompat;
+        this.virualDesktopService = virualDesktopService;
         this.isStartup = GetIsStartup();
         Load();
     }
@@ -47,7 +47,7 @@ partial class MainViewModel : ObservableObject
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
-                this.DesktopConfigs.Add(new DesktopConfigViewModel(desktopConfig, this.virtualDesktopCompat));
+                this.DesktopConfigs.Add(new DesktopConfigViewModel(desktopConfig, this.virualDesktopService));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
         }
@@ -103,9 +103,9 @@ partial class MainViewModel : ObservableObject
     }
 }
 
-partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDesktopCompat virtualDesktopCompat) : ObservableObject
+partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktopService virualDesktopService) : ObservableObject
 {
-    private readonly IVirtualDesktopCompat virtualDesktopCompat = virtualDesktopCompat;
+    private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
 
     public Guid Id { get; } = desktopConfig.Id;
 
@@ -125,7 +125,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirtualDeskto
     [NotifyPropertyChangedFor(nameof(IsVisibleImage))]
     private string? imagePath = desktopConfig.ImagePath;
 
-    public bool ShowNameWarning => !this.virtualDesktopCompat.IsSupportedName;
+    public bool ShowNameWarning => !this.virualDesktopService.IsSupportedName;
 
     public bool IsVisibleImage => this.ImagePath is not null;
 

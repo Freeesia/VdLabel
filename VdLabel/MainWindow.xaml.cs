@@ -11,12 +11,14 @@ namespace VdLabel;
 public partial class MainWindow
 {
     private readonly IContentDialogService contentDialogService;
+    private readonly IVirualDesktopService virualDesktopService;
 
-    public MainWindow(IContentDialogService contentDialogService)
+    public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService)
     {
         SystemThemeWatcher.Watch(this);
         InitializeComponent();
         this.contentDialogService = contentDialogService;
+        this.virualDesktopService = virualDesktopService;
         this.contentDialogService.SetContentPresenter(this.RootContentDialog);
     }
 
@@ -37,6 +39,10 @@ public partial class MainWindow
 
     private void FluentWindow_Loaded(object sender, RoutedEventArgs e)
         => this.Dispatcher.InvokeAsync(Hide);
+
+    private void FluentWindow_Activated(object sender, EventArgs e)
+        => this.Dispatcher.InvokeAsync(() =>
+            this.virualDesktopService.Pin(this));
 }
 
 [ValueConversion(typeof(System.Drawing.Color), typeof(System.Windows.Media.Color))]

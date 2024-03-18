@@ -8,14 +8,15 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, IVirtualDesktopCompat virtualDesktopCompat) : IHostedService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IVirualDesktopService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
-    private readonly IVirtualDesktopCompat virtualDesktopCompat = virtualDesktopCompat;
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
+
+    public bool IsSupportedName { get; } = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -41,7 +42,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
                 config.DesktopConfigs.Add(c);
             }
             var name = c.Name;
-            if (!string.IsNullOrEmpty(name) && this.virtualDesktopCompat.IsSupportedName)
+            if (!string.IsNullOrEmpty(name) && this.IsSupportedName)
             {
                 desktop.Name = name;
             }
@@ -157,19 +158,13 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_window")]
     static extern ref Window GetWindow(WindowHandle window);
+
+    public void Pin(Window window)
+        => window.Pin();
 }
 
-class VirtualDesktopCompat : IVirtualDesktopCompat
-{
-    public bool IsSupportedName { get; }
-
-    public VirtualDesktopCompat()
-    {
-        //this.IsSupportedName = false;
-        this.IsSupportedName = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
-    }
-}
-interface IVirtualDesktopCompat
+public interface IVirualDesktopService : IHostedService
 {
     bool IsSupportedName { get; }
+    void Pin(Window window);
 }

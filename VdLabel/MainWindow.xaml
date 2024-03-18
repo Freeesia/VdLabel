@@ -18,7 +18,7 @@
     Loaded="FluentWindow_Loaded"
     WindowBackdropType="Mica"
     WindowCornerPreference="Default"
-    mc:Ignorable="d">
+    mc:Ignorable="d" Activated="FluentWindow_Activated">
     <ui:FluentWindow.Resources>
         <Style BasedOn="{StaticResource {x:Type Label}}" TargetType="{x:Type Label}">
             <Setter Property="HorizontalAlignment" Value="Right" />

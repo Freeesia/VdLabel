@@ -6,9 +6,10 @@ using WindowsDesktop;
 using Wpf.Ui;
 
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
-builder.Services.AddHostedService<VirtualDesktopService>()
+builder.Services
+    .AddHostedService(sp => sp.GetRequiredService<IVirualDesktopService>())
     .AddHostedService<WindowMonitor>()
-    .AddSingleton<IVirtualDesktopCompat, VirtualDesktopCompat>()
+    .AddSingleton<IVirualDesktopService, VirtualDesktopService>()
     .AddSingleton<IConfigStore, ConfigStore>()
     .AddSingleton<IContentDialogService, ContentDialogService>()
     .AddPresentation<MainWindow, MainViewModel>()
