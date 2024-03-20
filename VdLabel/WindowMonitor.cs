@@ -133,8 +133,8 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
 
     private static string? GetCommandLine(int processId)
     {
-        string query = $"SELECT CommandLine FROM Win32_Process WHERE ProcessId = '{processId}'";
-        using var searcher = new ManagementObjectSearcher(query);
-        return (string?)searcher.Get().Cast<ManagementBaseObject>().Single()["CommandLine"];
+        using var searcher = new ManagementObjectSearcher($"SELECT CommandLine FROM Win32_Process WHERE ProcessId = '{processId}'");
+        using var mo = searcher.Get().Cast<ManagementBaseObject>().SingleOrDefault();
+        return mo?["CommandLine"] as string;
     }
 }
