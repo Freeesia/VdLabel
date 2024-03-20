@@ -1,7 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Interop;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
+using static Windows.Win32.PInvoke;
 
 namespace VdLabel;
 
@@ -38,7 +42,23 @@ public partial class MainWindow
         => Application.Current.Shutdown();
 
     private void FluentWindow_Loaded(object sender, RoutedEventArgs e)
-        => this.Dispatcher.InvokeAsync(Hide);
+    {
+        this.Dispatcher.InvokeAsync(Hide);
+        var window = new WindowInteropHelper(this);
+        var hoge = RegisterHotKey(new(window.Handle), 0, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
+        var source = HwndSource.FromHwnd(window.Handle);
+        source.AddHook(WndProc);
+
+    }
+
+    private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
+    {
+        if (msg == WM_HOTKEY)
+        {
+            this.virualDesktopService.PopupOverlay();
+        }
+        return 0;
+    }
 
     private void FluentWindow_Activated(object sender, EventArgs e)
         => this.Dispatcher.InvokeAsync(() =>
