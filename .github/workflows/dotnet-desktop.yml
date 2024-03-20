@@ -116,9 +116,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          ls -l
           for dir in VdLabel-*/; do
             base=$(basename "$dir")
+            mkdir -p ${dir}licenses/
             cp -r licenses/* ${dir}licenses/
             (cd "$dir" && zip -r "../${base}.zip" .)
           done
