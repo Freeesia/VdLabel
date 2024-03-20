@@ -70,7 +70,6 @@ jobs:
           name: licenses
           path: licenses/
   build:
-    needs: license
     strategy:
       matrix:
         self: [true, false]
