@@ -35,7 +35,7 @@
     </ui:FluentWindow.Resources>
     <DockPanel>
         <ui:TitleBar
-            Title="VdLabel"
+            Title="{Binding Title}"
             DockPanel.Dock="Top"
             ShowMinimize="False">
             <ui:TitleBar.Icon>
@@ -89,7 +89,7 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         Margin="4"
-                        ItemsSource="{Binding Positions, Mode=OneWay}"
+                        ItemsSource="{Binding OverlayPositions, Mode=OneWay}"
                         SelectedItem="{Binding Config.Position, Mode=TwoWay}" />
                     <Label
                         Grid.Row="1"
