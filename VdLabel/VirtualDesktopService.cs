@@ -26,7 +26,6 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
         VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
         VirtualDesktop.Created += VirtualDesktop_Created;
-        VirtualDesktop.Renamed += VirtualDesktop_Renamed;
         VirtualDesktop.Moved += VirtualDesktop_Moved;
     }
 
@@ -92,32 +91,11 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
               await this.configStore.Save(config);
           });
 
-    private void VirtualDesktop_Renamed(object? sender, VirtualDesktopRenamedEventArgs e)
-        => this.app.Dispatcher.Invoke(async () =>
-        {
-            var config = await this.configStore.Load();
-            var c = config.DesktopConfigs.First(c => c.Id == e.Desktop.Id);
-            if (!string.IsNullOrEmpty(e.Name))
-            {
-                c.Name = e.Name;
-            }
-            else
-            {
-                c.Name = null;
-            }
-            if (this.windows.TryGetValue(c.Id, out var pair))
-            {
-                pair.vm.Name = c.Name ?? $"Desktop {config.DesktopConfigs.IndexOf(c)}";
-            }
-            await this.configStore.Save(config);
-        });
-
     public Task StopAsync(CancellationToken cancellationToken)
     {
         VirtualDesktop.CurrentChanged -= VirtualDesktop_CurrentChanged;
         VirtualDesktop.Destroyed -= VirtualDesktop_Destroyed;
         VirtualDesktop.Created -= VirtualDesktop_Created;
-        VirtualDesktop.Renamed -= VirtualDesktop_Renamed;
         VirtualDesktop.Moved -= VirtualDesktop_Moved;
         return Task.CompletedTask;
     }
@@ -175,6 +153,18 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         }
         await this.configStore.Save(config);
     }
+
+    public void SetName(Guid id, string v)
+    {
+        if (this.windows.TryGetValue(id, out var pair))
+        {
+            pair.vm.Name = v;
+        }
+        if (this.IsSupportedName && VirtualDesktop.FromId(id) is { } desktop)
+        {
+            desktop.Name = v.ReplaceLineEndings(string.Empty);
+        }
+    }
 }
 
 public interface IVirualDesktopService : IHostedService
@@ -183,6 +173,7 @@ public interface IVirualDesktopService : IHostedService
     bool IsSupportedName { get; }
     void Pin(Window window);
     ValueTask ReloadDesktops();
+    void SetName(Guid id, string v);
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs

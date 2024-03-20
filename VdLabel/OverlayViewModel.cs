@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Drawing;
+using System.Windows.Controls;
 
 namespace VdLabel;
 
@@ -13,6 +14,9 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private bool visible;
+
+    [ObservableProperty]
+    private Dock position;
 
     [ObservableProperty]
     private string name;
@@ -48,6 +52,12 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         this.overlaySize = config.OverlaySize;
         this.foreground = config.Foreground;
         this.duration = config.Duration;
+        this.position = config.NamePosition switch
+        {
+            NamePosition.Top => Dock.Top,
+            NamePosition.Bottom => Dock.Bottom,
+            _ => throw new NotImplementedException(),
+        };
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
         this.imagePath = c?.ImagePath;
         this.isVisibleName = c?.IsVisibleName ?? true;
@@ -62,6 +72,12 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         this.Foreground = config.Foreground;
         this.Background = config.Background;
         this.duration = config.Duration;
+        this.Position = config.NamePosition switch
+        {
+            NamePosition.Top => Dock.Top,
+            NamePosition.Bottom => Dock.Bottom,
+            _ => throw new NotImplementedException(),
+        };
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
         if (c?.Name is not null)
         {

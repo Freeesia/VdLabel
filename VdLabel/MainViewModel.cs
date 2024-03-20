@@ -27,7 +27,8 @@ partial class MainViewModel : ObservableObject
 
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
-    public IReadOnlyList<OverlayPosition> Positions { get; } = Enum.GetValues<OverlayPosition>();
+    public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
+    public IReadOnlyList<NamePosition> NamePositions { get; } = Enum.GetValues<NamePosition>();
 
     public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirualDesktopService virualDesktopService)
     {
@@ -147,6 +148,9 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
     private string? name = desktopConfig.Name;
 
     [ObservableProperty]
+    private string? command = desktopConfig.Command;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsVisibleImage))]
     [NotifyCanExecuteChangedFor(nameof(RemoveImageCommand))]
     private string? imagePath = desktopConfig.ImagePath;
@@ -200,8 +204,9 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
         => new()
         {
             Id = this.Id,
-            Name = this.Name,
             IsVisibleName = this.IsVisibleName,
+            Name = this.Name,
+            Command = this.Command,
             ImagePath = this.ImagePath,
             TargetWindows = this.TargetWindows.ToArray(),
         };

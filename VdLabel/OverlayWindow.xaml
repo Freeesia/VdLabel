@@ -62,17 +62,18 @@
             </Border.Effect>
         </Border>
         <Border Padding="48">
-            <StackPanel>
-                <ui:Image
-                    CornerRadius="8"
-                    Source="{Binding ImagePath}"
-                    Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
+            <DockPanel>
                 <TextBlock
+                    DockPanel.Dock="{Binding Position, Mode=OneWay}"
                     FontSize="{Binding FontSize}"
                     Foreground="{Binding Foreground, Converter={x:Static local:SystemColorToSolidBrushConverter.Default}}"
                     Text="{Binding Name}"
                     Visibility="{Binding IsVisibleName, Converter={StaticResource b2vConv}}" />
-            </StackPanel>
+                <ui:Image
+                    CornerRadius="8"
+                    Source="{Binding ImagePath}"
+                    Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
+            </DockPanel>
         </Border>
     </Grid>
 </Window>
