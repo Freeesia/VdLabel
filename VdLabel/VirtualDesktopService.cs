@@ -50,10 +50,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     private void VirtualDesktop_CurrentChanged(object? sender, VirtualDesktopChangedEventArgs e)
     {
-        foreach (var (_, vm) in this.windows.Values)
-        {
-            vm.Popup();
-        }
+        PopupOverlay();
         this.DesktopChanged?.Invoke(this, new(e.NewDesktop.Id));
     }
 
@@ -165,6 +162,14 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             desktop.Name = v.ReplaceLineEndings(string.Empty);
         }
     }
+
+    public void PopupOverlay()
+    {
+        foreach (var (_, vm) in this.windows.Values)
+        {
+            vm.Popup();
+        }
+    }
 }
 
 public interface IVirualDesktopService : IHostedService
@@ -174,6 +179,7 @@ public interface IVirualDesktopService : IHostedService
     void Pin(Window window);
     ValueTask ReloadDesktops();
     void SetName(Guid id, string v);
+    void PopupOverlay();
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs

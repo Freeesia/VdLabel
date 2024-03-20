@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="VdLabel"
     Width="680"
     Height="820"
     d:DataContext="{d:DesignInstance {x:Type local:MainViewModel}}"
