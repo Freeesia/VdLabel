@@ -9,6 +9,7 @@ var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 builder.Services
     .AddHostedService(sp => sp.GetRequiredService<IVirualDesktopService>())
     .AddHostedService<WindowMonitor>()
+    .AddHostedService<NameCommandService>()
     .AddSingleton<IVirualDesktopService, VirtualDesktopService>()
     .AddSingleton<IConfigStore, ConfigStore>()
     .AddSingleton<IContentDialogService, ContentDialogService>()

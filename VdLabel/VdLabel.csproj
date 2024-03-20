@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Kamishibai.Hosting" Version="2.6.0" />
     <PackageReference Include="PInvoke.User32" Version="0.7.124" />
+    <PackageReference Include="ProcessX" Version="1.5.5" />
     <PackageReference Include="Slions.VirtualDesktop.WPF" Version="6.6.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="System.Management" Version="8.0.0" />
