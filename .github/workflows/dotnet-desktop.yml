@@ -119,7 +119,7 @@ jobs:
           ls -l
           for dir in VdLabel-*/; do
             base=$(basename "$dir")
-            cp -r licenses/* $dir/licenses/
+            cp -r licenses/* ${dir}licenses/
             (cd "$dir" && zip -r "../${base}.zip" .)
           done
       - uses: softprops/action-gh-release@v2
