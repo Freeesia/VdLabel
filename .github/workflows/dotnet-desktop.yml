@@ -46,29 +46,6 @@ on:
     branches: [master]
 
 jobs:
-  license:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: licenses
-          key: ${{ runner.os }}-licenses-${{ hashFiles('**/*.csproj') }} #hash of project files
-          restore-keys: |
-            ${{ runner.os }}-licenses-
-      - run: |
-          dotnet tool restore
-          dotnet project-licenses -t -u \
-            --packages-filter /Analyzers$/ \
-            -m -i . \
-            --include-project-file \
-            --manual-package-information manual-package-information.json \
-            -f licenses
-      - uses: actions/upload-artifact@v4
-        with:
-          name: licenses
-          path: licenses/
   build:
     strategy:
       matrix:
@@ -100,18 +77,38 @@ jobs:
             -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
             -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
             -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
-      - uses: actions/download-artifact@v4
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        with:
-          name: licenses
-          path: publish\licenses
       - uses: actions/upload-artifact@v4
         with:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
+  license:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: licenses
+          key: ${{ runner.os }}-licenses-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-licenses-
+      - run: |
+          dotnet tool restore
+          dotnet project-licenses -t -u \
+            --packages-filter /Analyzers$/ \
+            -m -i . \
+            --include-project-file \
+            --manual-package-information manual-package-information.json \
+            -f licenses
+      - uses: actions/upload-artifact@v4
+        with:
+          name: licenses
+          path: licenses/
   release:
     if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
-    needs: build
+    needs:
+      - build
+      - license
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -119,8 +116,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          for dir in */; do
+          for dir in VdLabel-*/; do
             base=$(basename "$dir")
+            cp license/* $dir/license/
             (cd "$dir" && zip -r "../${base}.zip" .)
           done
       - uses: softprops/action-gh-release@v2
