@@ -13,6 +13,7 @@ partial class MainViewModel : ObservableObject
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
+
     [ObservableProperty]
     private bool isBusy;
 
@@ -24,6 +25,8 @@ partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isStartup;
+
+    public string Title { get; } = $"VdLabel {Assembly.GetExecutingAssembly().GetName().Version}";
 
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
