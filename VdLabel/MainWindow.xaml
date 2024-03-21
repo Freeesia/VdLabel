@@ -142,7 +142,7 @@
                             VerticalAlignment="Center"
                             DockPanel.Dock="Right"
                             Text="秒" />
-                        <ui:NumberBox Value="{Binding Config.Duration}" />
+                        <ui:NumberBox Value="{Binding Config.Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </DockPanel>
                     <Label
                         Grid.Row="6"
@@ -167,7 +167,7 @@
                             VerticalAlignment="Center"
                             DockPanel.Dock="Right"
                             Text="秒" />
-                        <ui:NumberBox Value="{Binding Config.CommandInterval}" />
+                        <ui:NumberBox Value="{Binding Config.CommandInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </DockPanel>
                 </Grid>
             </GroupBox>
