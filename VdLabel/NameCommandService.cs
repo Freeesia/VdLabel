@@ -1,12 +1,18 @@
 ﻿using Cysharp.Diagnostics;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace VdLabel;
 
-class NameCommandService(IConfigStore configStore, IVirualDesktopService virualDesktopService) : BackgroundService
+partial class NameCommandService(IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<NameCommandService> logger) : BackgroundService
 {
     private readonly IConfigStore configStore = configStore;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
+    private readonly ILogger<NameCommandService> logger = logger;
+
+    [GeneratedRegex(@"^(""[^""]+""|\S+)", RegexOptions.Compiled)]
+    private static partial Regex FilePathRegex();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -27,9 +33,26 @@ class NameCommandService(IConfigStore configStore, IVirualDesktopService virualD
                 {
                     continue;
                 }
-                var lines = await ProcessX.StartAsync(desktopConfig.Command).ToTask(stoppingToken);
+                // 最初のスペースで区切られた部分または全体をファイルとする。"で囲まれているときはスペースを無視する
+                // それ以降は引数として渡す
+                var match = FilePathRegex().Match(desktopConfig.Command);
+                if (!match.Success)
+                {
+                    this.logger.LogWarning("コマンドが見つかりませんでした");
+                    continue;
+                }
+                var command = match.Value;
+                var args = desktopConfig.Command[match.Length..].Trim();
+                try
+                {
+                    var lines = await ProcessX.StartAsync(fileName: command, args).ToTask(stoppingToken);
+                    this.virualDesktopService.SetName(desktopConfig.Id, string.Join(Environment.NewLine, lines));
+                }
+                catch (Exception e)
+                {
+                    this.logger.LogError(e, "コマンド実行エラー");
+                }
                 stoppingToken.ThrowIfCancellationRequested();
-                this.virualDesktopService.SetName(desktopConfig.Id, string.Join(Environment.NewLine, lines));
             }
             await timer.WaitForNextTickAsync(stoppingToken);
         }
