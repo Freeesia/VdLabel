@@ -7,6 +7,7 @@ using Wpf.Ui;
 
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 builder.Services
+    .Configure<HostOptions>(op => op.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore)
     .AddHostedService(sp => sp.GetRequiredService<IVirualDesktopService>())
     .AddHostedService<WindowMonitor>()
     .AddHostedService<NameCommandService>()
