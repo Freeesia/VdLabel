@@ -45,7 +45,14 @@ public partial class MainWindow
     {
         this.Dispatcher.InvokeAsync(Hide);
         var window = new WindowInteropHelper(this);
-        var hoge = RegisterHotKey(new(window.Handle), 0, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
+        for (var i = 0; i < 20; i++)
+        {
+            var mod = HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL;
+            mod |= i < 10 ? 0 : HOT_KEY_MODIFIERS.MOD_ALT;
+            var key = (i < 10 ? i : i - 10) + Key.NumPad0;
+            RegisterHotKey(new(window.Handle), i, mod, (uint)KeyInterop.VirtualKeyFromKey(key));
+        }
+        RegisterHotKey(new(window.Handle), 20, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
         var source = HwndSource.FromHwnd(window.Handle);
         source.AddHook(WndProc);
 
@@ -53,7 +60,16 @@ public partial class MainWindow
 
     private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
     {
-        if (msg == WM_HOTKEY)
+        if (msg != WM_HOTKEY)
+        {
+            return 0;
+        }
+        var i = wParam.ToInt32();
+        if (i < 20)
+        {
+            this.virualDesktopService.Swtich(i);
+        }
+        else
         {
             this.virualDesktopService.PopupOverlay();
         }
