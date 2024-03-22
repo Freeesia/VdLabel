@@ -237,12 +237,16 @@
                                     Content="名前コマンド"
                                     ToolTip="コマンドの出力結果を名前に反映させます"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
-                                <ui:TextBox
+                                <DockPanel
                                     Grid.Row="2"
                                     Grid.Column="1"
-                                    Margin="4"
-                                    Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}"
-                                    Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
+                                    Margin="4">
+                                    <Button
+                                        Command="{Binding TestCommandCommand}"
+                                        Content="テスト"
+                                        DockPanel.Dock="Right" />
+                                    <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
+                                </DockPanel>
                                 <ui:InfoBar
                                     Title="注意"
                                     Grid.Row="3"
