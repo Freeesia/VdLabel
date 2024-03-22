@@ -101,21 +101,30 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             {
                 return true;
             }
-            if (target.DesktopId == Guid.Empty)
+            try
             {
-                if (!VirtualDesktop.IsPinnedWindow(hWnd))
+                if (target.DesktopId == Guid.Empty)
                 {
-                    this.logger.LogDebug($"ウィンドウ検出: {windowTitle} 固定");
-                    VirtualDesktop.PinWindow(hWnd);
+                    if (!VirtualDesktop.IsPinnedWindow(hWnd))
+                    {
+                        this.logger.LogDebug($"ウィンドウ検出: {windowTitle} 固定");
+                        VirtualDesktop.PinWindow(hWnd);
+                    }
+                }
+                else if (VirtualDesktop.FromId(target.DesktopId) is { } desktop)
+                {
+                    if (VirtualDesktop.FromHwnd(hWnd)?.Id != desktop.Id)
+                    {
+                        this.logger.LogDebug($"ウィンドウ検出: {windowTitle} to {desktop.Name}");
+                        VirtualDesktop.MoveToDesktop(hWnd, desktop);
+                    }
                 }
             }
-            else if (VirtualDesktop.FromId(target.DesktopId) is { } desktop)
+            catch (Exception)
             {
-                if (VirtualDesktop.FromHwnd(hWnd)?.Id != desktop.Id)
-                {
-                    this.logger.LogDebug($"ウィンドウ検出: {windowTitle} to {desktop.Name}");
-                    VirtualDesktop.MoveToDesktop(hWnd, desktop);
-                }
+                // 移動するタイミングですでにウィンドウが閉じられていることがある
+                this.logger.LogWarning($"ウィンドウ移動失敗: {windowTitle}, {commandLine}");
+                this.checkedWindows.Remove(hWnd);
             }
             return true;
         }, nint.Zero);
