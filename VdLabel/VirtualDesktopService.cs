@@ -170,6 +170,16 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             vm.Popup();
         }
     }
+
+    public void Swtich(int index)
+    {
+        var desktops = VirtualDesktop.GetDesktops();
+        if (index < 0 || index >= desktops.Length)
+        {
+            return;
+        }
+        desktops[index].Switch();
+    }
 }
 
 public interface IVirualDesktopService : IHostedService
@@ -180,6 +190,7 @@ public interface IVirualDesktopService : IHostedService
     ValueTask ReloadDesktops();
     void SetName(Guid id, string v);
     void PopupOverlay();
+    void Swtich(int index);
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs
