@@ -13,6 +13,7 @@ partial class MainViewModel : ObservableObject
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
+    private readonly ICommandLabelService commandLabelService;
 
     [ObservableProperty]
     private bool isBusy;
@@ -33,11 +34,12 @@ partial class MainViewModel : ObservableObject
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
     public IReadOnlyList<NamePosition> NamePositions { get; } = Enum.GetValues<NamePosition>();
 
-    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirualDesktopService virualDesktopService)
+    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirualDesktopService virualDesktopService, ICommandLabelService commandLabelService)
     {
         this.configStore = configStore;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
+        this.commandLabelService = commandLabelService;
         this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
         this.isStartup = GetIsStartup();
         Load();
@@ -56,7 +58,7 @@ partial class MainViewModel : ObservableObject
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
-                this.DesktopConfigs.Add(new DesktopConfigViewModel(desktopConfig, this.virualDesktopService));
+                this.DesktopConfigs.Add(new(desktopConfig, this.dialogService, this.virualDesktopService, this.commandLabelService));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
         }
@@ -132,9 +134,11 @@ partial class MainViewModel : ObservableObject
     }
 }
 
-partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktopService virualDesktopService) : ObservableObject
+partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialogService dialogService, IVirualDesktopService virualDesktopService, ICommandLabelService commandLabelService) : ObservableObject
 {
+    private readonly IContentDialogService dialogService = dialogService;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
+    private readonly ICommandLabelService commandLabelService = commandLabelService;
 
     public Guid Id { get; } = desktopConfig.Id;
 
@@ -151,6 +155,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
     private string? name = desktopConfig.Name;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(TestCommandCommand))]
     private string? command = desktopConfig.Command;
 
     [ObservableProperty]
@@ -194,6 +199,24 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IVirualDesktop
 
     private bool CanRemoveImage
         => this.ImagePath is not null;
+
+    [RelayCommand(CanExecute = nameof(CanTestCommand))]
+    public async Task TestCommand()
+    {
+        var command = this.Command ?? throw new InvalidOperationException();
+        try
+        {
+            var result = await this.commandLabelService.ExecuteCommand(command);
+            await this.dialogService.ShowAlertAsync("コマンド成功", result, "OK");
+        }
+        catch (Exception e)
+        {
+            await this.dialogService.ShowAlertAsync("コマンド失敗", e.Message, "OK");
+        }
+    }
+
+    private bool CanTestCommand
+        => !string.IsNullOrEmpty(this.Command);
 
     [RelayCommand]
     public void AddTargetWindow()

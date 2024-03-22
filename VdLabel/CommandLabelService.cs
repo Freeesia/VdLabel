@@ -5,14 +5,29 @@ using System.Text.RegularExpressions;
 
 namespace VdLabel;
 
-partial class NameCommandService(IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<NameCommandService> logger) : BackgroundService
+partial class CommandLabelService(IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandLabelService
 {
     private readonly IConfigStore configStore = configStore;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
-    private readonly ILogger<NameCommandService> logger = logger;
+    private readonly ILogger<CommandLabelService> logger = logger;
 
     [GeneratedRegex(@"^(""[^""]+""|\S+)", RegexOptions.Compiled)]
     private static partial Regex FilePathRegex();
+
+    public async ValueTask<string> ExecuteCommand(string command, CancellationToken token = default)
+    {
+        // 最初のスペースで区切られた部分または全体をファイルとする。"で囲まれているときはスペースを無視する
+        // それ以降は引数として渡す
+        var match = FilePathRegex().Match(command);
+        if (!match.Success)
+        {
+            throw new InvalidOperationException("ファイルパスの解析に失敗しました");
+        }
+        var fileName = match.Value;
+        var args = command[match.Length..].Trim();
+        var lines = await ProcessX.StartAsync(fileName: fileName, args).ToTask(token).ConfigureAwait(false);
+        return string.Join(Environment.NewLine, lines);
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -33,20 +48,10 @@ partial class NameCommandService(IConfigStore configStore, IVirualDesktopService
                 {
                     continue;
                 }
-                // 最初のスペースで区切られた部分または全体をファイルとする。"で囲まれているときはスペースを無視する
-                // それ以降は引数として渡す
-                var match = FilePathRegex().Match(desktopConfig.Command);
-                if (!match.Success)
-                {
-                    this.logger.LogWarning("コマンドが見つかりませんでした");
-                    continue;
-                }
-                var command = match.Value;
-                var args = desktopConfig.Command[match.Length..].Trim();
                 try
                 {
-                    var lines = await ProcessX.StartAsync(fileName: command, args).ToTask(stoppingToken);
-                    this.virualDesktopService.SetName(desktopConfig.Id, string.Join(Environment.NewLine, lines));
+                    var result = await ExecuteCommand(desktopConfig.Command, stoppingToken).ConfigureAwait(false);
+                    this.virualDesktopService.SetName(desktopConfig.Id, result);
                 }
                 catch (Exception e)
                 {
@@ -58,4 +63,10 @@ partial class NameCommandService(IConfigStore configStore, IVirualDesktopService
         }
         timer?.Dispose();
     }
+}
+
+
+interface ICommandLabelService : IHostedService
+{
+    ValueTask<string> ExecuteCommand(string command, CancellationToken token = default);
 }
