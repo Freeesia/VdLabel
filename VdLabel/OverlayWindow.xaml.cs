@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using PInvoke;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -21,6 +22,13 @@ public partial class OverlayWindow : Window
         var windowHandle = new WindowInteropHelper(this).Handle;
         var extendedStyle = (SetWindowLongFlags)GetWindowLong(windowHandle, WindowLongIndexFlags.GWL_EXSTYLE);
         SetWindowLong(windowHandle, WindowLongIndexFlags.GWL_EXSTYLE, extendedStyle | SetWindowLongFlags.WS_EX_TRANSPARENT);
+
+        // ShowInTaskbarをfalseにすると↓の方法で一番上に表示する必要がある
+        // https://social.msdn.microsoft.com/Forums/en-US/cdbe457f-d653-4a18-9295-bb9b609bc4e3/desktop-apps-on-top-of-metro-extended
+        IntPtr hWndHiddenOwner = User32.GetWindow(windowHandle, GetWindowCommands.GW_OWNER);
+        SetWindowPos(hWndHiddenOwner, new(-1), 0, 0, 0, 0, SetWindowPosFlags.SWP_NOMOVE | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE);
+        // 2回呼ばないと安定して最上位にならない
+        SetWindowPos(hWndHiddenOwner, new(-1), 0, 0, 0, 0, SetWindowPosFlags.SWP_NOMOVE | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE);
     }
 }
 
