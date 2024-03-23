@@ -1,6 +1,7 @@
 # <img src="assets/app_256.png" width="32" > VdLabel
 
 [![.NET Desktop](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml)
+[![version](https://badge.fury.io/gh/Freeesia%2FVdLabel.svg)](https://badge.fury.io/gh/Freeesia%2FVdLabel)
 
 VdLabelは仮想デスクトップを便利に利用するためのアプリケーションです。
 
