@@ -179,6 +179,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             return;
         }
         desktops[index].Switch();
+        PopupOverlay();
     }
 }
 
