@@ -31,7 +31,7 @@
     <PackageReference Include="Slions.VirtualDesktop.WPF" Version="6.6.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="WPF-UI" Version="3.0.2" />
+    <PackageReference Include="WPF-UI" Version="3.0.3" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
     <PackageReference Include="WPF-UI.Tray" Version="3.0.2" />
     <PackageReference Include="WpfAnalyzers" Version="4.1.1">
