@@ -1,9 +1,15 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using WixSharp;
+using Directory = System.IO.Directory;
+using Path = System.IO.Path;
 
 const string App = "VdLabel";
 const string Executable = $"{App}.exe";
 const string Version = "0.0.2.0";
+
+var exePath = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, ".." ), "VdLabel.exe").First();
 
 var project = new ManagedProject(App,
     new Dir(@$"%ProgramFiles%\StudioFreesia\{App}", new File(@$"..\{Executable}") { AddCloseAction = true }));
