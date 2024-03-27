@@ -69,8 +69,15 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
         }
         User32.EnumWindows((hWnd, lParam) =>
         {
+            // ウィンドウが表示されていない場合は今後再チェックする
+            if (!User32.IsWindowVisible(hWnd))
+            {
+                return true;
+            }
             windows.Add(hWnd);
-            if (!this.checkedWindows.Add(hWnd) || !User32.IsWindowVisible(hWnd))
+
+            // すでにチェック済みのウィンドウはスキップ
+            if (!this.checkedWindows.Add(hWnd))
             {
                 return true;
             }
@@ -90,7 +97,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             catch (Win32Exception)
             {
                 // 仮想デスクトップを切り替えるタイミングで例外が発生することがある
-                this.checkedWindows.Remove(hWnd);
+                windows.Remove(hWnd);
                 return true;
             }
             if (string.IsNullOrEmpty(commandLine) || string.IsNullOrEmpty(windowTitle))
@@ -124,7 +131,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             {
                 // 移動するタイミングですでにウィンドウが閉じられていることがある
                 this.logger.LogWarning($"ウィンドウ移動失敗: {windowTitle}, {commandLine}");
-                this.checkedWindows.Remove(hWnd);
+                windows.Remove(hWnd);
             }
             return true;
         }, nint.Zero);
