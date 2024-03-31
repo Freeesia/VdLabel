@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using WixSharp;
-using Directory = System.IO.Directory;
 using Path = System.IO.Path;
 
 const string App = "VdLabel";
+const string ArtifactsDir = @"..\artifacts";
+const string LicensesDir = @"..\licenses";
+const string PublishDir = @"..\publish";
 const string Executable = $"{App}.exe";
-const string Version = "0.0.2.0";
 
-var exePath = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, ".." ), "VdLabel.exe").First();
+var exePath = Path.Combine(Environment.CurrentDirectory, ArtifactsDir, Executable);
+var info = FileVersionInfo.GetVersionInfo(exePath);
+var version = info.FileVersion;
 
 var project = new ManagedProject(App,
-    new Dir(@$"%ProgramFiles%\StudioFreesia\{App}", new File(@$"..\{Executable}") { AddCloseAction = true }));
+    new Dir(@$"%ProgramFiles%\StudioFreesia\{App}",
+        new File(exePath) { AddCloseAction = true },
+        new Dir(LicensesDir)));
 
 project.RebootSupressing = RebootSupressing.Suppress;
 project.GUID = new("FE947636-81DB-4819-A5D9-939125903F4C");
 project.Platform = Platform.x64;
 project.Language = "ja-JP";
-project.Version = new(Version);
+project.Version = new(version);
 
 // どっちか片方しか設定できない
 //project.MajorUpgrade = MajorUpgrade.Default;
@@ -41,4 +45,4 @@ project.AfterInstall += static e =>
     }
 };
 
-project.BuildMsi($"{App}_{Version}.msi");
+project.BuildMsi(Path.Combine(PublishDir, $"{App}_{version}.msi"));

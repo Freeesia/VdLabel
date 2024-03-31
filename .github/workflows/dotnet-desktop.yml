@@ -81,30 +81,8 @@ jobs:
         with:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
-  installer:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-      - uses: actions/download-artifact@v4
-      - run: |
-          dotnet build VdLabel.Wix -c Release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: VdLabel-*.msi
-          path: publish\
   license:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -126,9 +104,42 @@ jobs:
         with:
           name: licenses
           path: licenses/
+  installer:
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    needs:
+      - build
+      - license
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: VdLabel-full-*
+      - uses: actions/download-artifact@v4
+        with:
+          path: licenses
+          name: licenses
+      - run: |
+          ls -R
+          dotnet build VdLabel.Wix -c Release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VdLabel-*.msi
+          path: publish\
   release:
     if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
     needs:
+      - installer
       - build
       - license
     runs-on: ubuntu-latest
