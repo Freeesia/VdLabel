@@ -96,7 +96,7 @@ jobs:
           dotnet tool restore
           dotnet project-licenses -t -u \
             --packages-filter /Analyzers$/ \
-            -m -i . \
+            -m -i VdLabel \
             --include-project-file \
             --manual-package-information manual-package-information.json \
             -f licenses
@@ -130,9 +130,7 @@ jobs:
         with:
           path: artifacts/licenses
           name: licenses
-      - run: |
-          ls -R
-          dotnet build VdLabel.Wix -c Release
+      - run: dotnet build VdLabel.Wix -c Release
       - uses: actions/upload-artifact@v4
         with:
           name: VdLabel-*.msi

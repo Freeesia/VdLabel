@@ -44,4 +44,4 @@ project.AfterInstall += static e =>
     }
 };
 
-project.BuildMsi(Path.Combine(PublishDir, $"{App}_{version}.msi"));
+project.BuildMsi(Path.Combine(PublishDir, $"{App}-{version}.msi"));
