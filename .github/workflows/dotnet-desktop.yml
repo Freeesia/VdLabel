@@ -138,7 +138,7 @@ jobs:
           name: VdLabel-${{ needs.build.outputs.version }}.msi
           path: publish\
   release:
-    if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
     needs:
       - installer
       - build
@@ -161,4 +161,4 @@ jobs:
           generate_release_notes: true
           draft: true
           prerelease: false
-          files: VdLabel-*.zip
+          files: VdLabel-*.*
