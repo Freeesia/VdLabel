@@ -53,6 +53,8 @@ jobs:
     # For a list of available runner types, refer to
     # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.gitversion.outputs.assemblySemFileVer }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -94,11 +96,11 @@ jobs:
             ${{ runner.os }}-licenses-
       - run: |
           dotnet tool restore
-          dotnet project-licenses -t -u \
+          dotnet project-licenses -t -u -m -e \
             --packages-filter /Analyzers$/ \
-            -m -i VdLabel \
             --include-project-file \
             --manual-package-information manual-package-information.json \
+            -i VdLabel \
             -f licenses
       - uses: actions/upload-artifact@v4
         with:
@@ -133,7 +135,7 @@ jobs:
       - run: dotnet build VdLabel.Wix -c Release
       - uses: actions/upload-artifact@v4
         with:
-          name: VdLabel-*.msi
+          name: VdLabel-${{ needs.build.outputs.version }}.msi
           path: publish\
   release:
     if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
