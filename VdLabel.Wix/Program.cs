@@ -5,7 +5,6 @@ using Path = System.IO.Path;
 
 const string App = "VdLabel";
 const string ArtifactsDir = @"..\artifacts";
-const string LicensesDir = @"..\licenses";
 const string PublishDir = @"..\publish";
 const string Executable = $"{App}.exe";
 
@@ -16,7 +15,7 @@ var version = info.FileVersion;
 var project = new ManagedProject(App,
     new Dir(@$"%ProgramFiles%\StudioFreesia\{App}",
         new File(exePath) { AddCloseAction = true },
-        new Dir(LicensesDir)));
+        new Files(Path.Combine(ArtifactsDir, "*.*"), p => !p.EndsWith(Executable))));
 
 project.RebootSupressing = RebootSupressing.Suppress;
 project.GUID = new("FE947636-81DB-4819-A5D9-939125903F4C");
