@@ -152,9 +152,18 @@ jobs:
       - run: |
           for dir in VdLabel-*/; do
             base=$(basename "$dir")
-            mkdir -p ${dir}licenses/
-            cp -r licenses/* ${dir}licenses/
+              # .msiファイルの存在を確認
+              msi_file=$(find "$dir" -maxdepth 1 -type f -name "*.msi")
+
+              if [[ -n $msi_file ]]; then
+                  # .msiファイルが存在する場合、.msiファイルを移動
+                  mv $msi_file ../
+              else
+                  # .msiファイルが存在しない場合、フォルダをzip化
+                  mkdir -p "${dir}licenses/"
+                  cp -r licenses/* "${dir}licenses/"
             (cd "$dir" && zip -r "../${base}.zip" .)
+              fi
           done
       - uses: softprops/action-gh-release@v2
         with:
