@@ -125,9 +125,10 @@ jobs:
         with:
           path: artifacts
           pattern: VdLabel-full-*
+          merge-multiple: true
       - uses: actions/download-artifact@v4
         with:
-          path: licenses
+          path: artifacts/licenses
           name: licenses
       - run: |
           ls -R
