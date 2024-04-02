@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PInvoke;
+using System.Diagnostics;
 using System.Management;
 using System.Text.RegularExpressions;
 using WindowsDesktop;
@@ -88,6 +89,19 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             {
                 return true;
             }
+            string path;
+            try
+            {
+                using var process = Process.GetProcessById(processId);
+                using var module = process.MainModule;
+                path = module?.FileName ?? string.Empty;
+            }
+            catch (Exception)
+            {
+                // プロセスが終了している場合がある
+                windows.Remove(hWnd);
+                return true;
+            }
             var commandLine = GetCommandLine(processId);
             string windowTitle;
             try
@@ -104,7 +118,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             {
                 return true;
             }
-            if (this.targetWindows.FirstOrDefault(t => t.Regex.IsMatch(GetCheckText(t.MatchType, commandLine, windowTitle))) is not { } target)
+            if (this.targetWindows.FirstOrDefault(t => t.Regex.IsMatch(GetCheckText(t.MatchType, path, commandLine, windowTitle))) is not { } target)
             {
                 return true;
             }
@@ -139,11 +153,12 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
         this.logger.LogDebug("プロセスチェック終了");
     }
 
-    private static string GetCheckText(WindowMatchType type, string commandLine, string windowTitle)
+    private static string GetCheckText(WindowMatchType type, string path, string commandLine, string windowTitle)
         => type switch
         {
             WindowMatchType.CommandLine => commandLine,
             WindowMatchType.Title => windowTitle,
+            WindowMatchType.Path => path,
             _ => string.Empty,
         };
 
