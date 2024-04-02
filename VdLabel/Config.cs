@@ -28,6 +28,7 @@ record DesktopConfig
     public bool IsVisibleName { get; set; } = true;
     public string? Name { get; set; }
     public string? Command { get; set; }
+    public bool Utf8Command { get; set; }
     public string? ImagePath { get; set; }
     public IReadOnlyList<WindowConfig> TargetWindows { get; init; } = [];
 }

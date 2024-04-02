@@ -159,6 +159,9 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
     private string? command = desktopConfig.Command;
 
     [ObservableProperty]
+    private bool utf8Command = desktopConfig.Utf8Command;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsVisibleImage))]
     [NotifyCanExecuteChangedFor(nameof(RemoveImageCommand))]
     private string? imagePath = desktopConfig.ImagePath;
@@ -206,7 +209,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
         var command = this.Command ?? throw new InvalidOperationException();
         try
         {
-            var result = await this.commandLabelService.ExecuteCommand(command);
+            var result = await this.commandLabelService.ExecuteCommand(command, this.Utf8Command);
             await this.dialogService.ShowAlertAsync("コマンド成功", result, "OK");
         }
         catch (Exception e)
@@ -232,6 +235,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
             Id = this.Id,
             IsVisibleName = this.IsVisibleName,
             Name = this.Name,
+            Utf8Command = this.Utf8Command,
             Command = this.Command,
             ImagePath = this.ImagePath,
             TargetWindows = this.TargetWindows.ToArray(),
