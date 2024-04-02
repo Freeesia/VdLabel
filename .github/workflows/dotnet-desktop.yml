@@ -150,14 +150,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          if ! find "$dir" -maxdepth 1 -type f -name "*.msi" | read; then
-              # .msiファイルが存在しない場合、既存の処理を実行
-              mkdir -p "${dir}licenses/"
-              cp -r licenses/* "${dir}licenses/"
-              (cd "$dir" && zip -r "../${base}.zip" .)
-          fi
-          # .msiファイルが存在する場合は何もしない
-          ls -l
+          for dir in VdLabel-*/; do
+            base=$(basename "$dir")
+            if ! find "$dir" -maxdepth 1 -type f -name "*.msi" | read; then
+                # .msiファイルが存在しない場合、既存の処理を実行
+                mkdir -p "${dir}licenses/"
+                cp -r licenses/* "${dir}licenses/"
+                (cd "$dir" && zip -r "../${base}.zip" .)
+            fi
+            # .msiファイルが存在する場合は何もしない
+          done
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
