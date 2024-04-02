@@ -150,24 +150,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          ls -lR
-          for dir in VdLabel-*/; do
-            base=$(basename "$dir")
-              # .msiファイルの存在を確認
-              msi_file=$(find "$dir" -maxdepth 1 -type f -name "*.msi")
-              ls -l "$dir"
-              if [[ -n $msi_file ]]; then
-                  # .msiファイルが存在する場合、.msiファイルを移動
-                  echo "move msi file"
-                  mv $msi_file ../
-              else
-                  # .msiファイルが存在しない場合、フォルダをzip化
-                  echo "create zip file"
-                  mkdir -p "${dir}licenses/"
-                  cp -r licenses/* "${dir}licenses/"
-            (cd "$dir" && zip -r "../${base}.zip" .)
-              fi
-          done
+          if ! find "$dir" -maxdepth 1 -type f -name "*.msi" | read; then
+              # .msiファイルが存在しない場合、既存の処理を実行
+              mkdir -p "${dir}licenses/"
+              cp -r licenses/* "${dir}licenses/"
+              (cd "$dir" && zip -r "../${base}.zip" .)
+          fi
+          # .msiファイルが存在する場合は何もしない
           ls -l
       - uses: softprops/action-gh-release@v2
         with:
@@ -176,4 +165,4 @@ jobs:
           prerelease: false
           files: |
             VdLabel-*.zip
-            VdLabel-*.msi
+            VdLabel-*.msi/VdLabel-*.msi
