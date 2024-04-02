@@ -206,6 +206,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Label
@@ -241,16 +242,24 @@
                                 <DockPanel
                                     Grid.Row="2"
                                     Grid.Column="1"
-                                    Margin="4">
+                                    Margin="4"
+                                    Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}">
                                     <Button
                                         Command="{Binding TestCommandCommand}"
                                         Content="テスト"
                                         DockPanel.Dock="Right" />
-                                    <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
+                                    <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" />
                                 </DockPanel>
+                                <CheckBox
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Margin="4"
+                                    Content="コマンドの結果をUTF-8として受け取る"
+                                    IsChecked="{Binding Utf8Command, Mode=TwoWay}"
+                                    Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <ui:InfoBar
                                     Title="注意"
-                                    Grid.Row="3"
+                                    Grid.Row="4"
                                     Grid.Column="1"
                                     IsClosable="False"
                                     IsOpen="{Binding ShowNameWarning}"
@@ -258,19 +267,19 @@
                                     Severity="Warning"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <CheckBox
-                                    Grid.Row="4"
+                                    Grid.Row="5"
                                     Grid.Column="1"
                                     Margin="4"
                                     Content="画像が設定されているときに名前を表示するかどうか"
                                     IsChecked="{Binding IsVisibleName}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <Label
-                                    Grid.Row="5"
+                                    Grid.Row="6"
                                     Grid.Column="0"
                                     Content="切り替え通知画像"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <DockPanel
-                                    Grid.Row="5"
+                                    Grid.Row="6"
                                     Grid.Column="1"
                                     Margin="4"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}">
@@ -289,25 +298,25 @@
                                         Text="{Binding ImagePath}" />
                                 </DockPanel>
                                 <ui:Image
-                                    Grid.Row="6"
+                                    Grid.Row="7"
                                     Grid.ColumnSpan="2"
                                     Height="120"
                                     CornerRadius="4"
                                     Source="{Binding ImagePath}"
                                     Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
                                 <Label
-                                    Grid.Row="7"
+                                    Grid.Row="8"
                                     Grid.Column="0"
                                     Content="対象ウィンドウ" />
                                 <Button
-                                    Grid.Row="8"
+                                    Grid.Row="9"
                                     Grid.Column="0"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
                                     Command="{Binding AddTargetWindowCommand}"
                                     Content="追加" />
                                 <ItemsControl
-                                    Grid.Row="7"
+                                    Grid.Row="8"
                                     Grid.RowSpan="2"
                                     Grid.Column="1"
                                     MaxHeight="160"
