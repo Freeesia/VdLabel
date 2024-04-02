@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cp="clr-namespace:ColorPicker;assembly=ColorPicker"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
     xmlns:local="clr-namespace:VdLabel"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
@@ -180,7 +181,7 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <Image Height="16" Source="{Binding ImagePath}" />
-                            <TextBlock
+                            <emoji:TextBlock
                                 Width="160"
                                 Margin="4,0"
                                 Text="{Binding Title}"
