@@ -43,6 +43,7 @@ enum WindowMatchType
 {
     CommandLine,
     Title,
+    Path,
 }
 
 enum WindowPatternType
