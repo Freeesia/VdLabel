@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Version Condition="'$(Version)' != ''">0.0.0-local</Version>
+    <Version Condition="'$(Version)' == ''">0.0.0-local</Version>
     <Company>StudioFreesia</Company>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationIcon>app.ico</ApplicationIcon>
@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="Kamishibai.Hosting" Version="2.6.0" />
+    <PackageReference Include="Octokit" Version="10.0.0" />
     <PackageReference Include="PInvoke.User32" Version="0.7.124" />
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
       <PrivateAssets>all</PrivateAssets>

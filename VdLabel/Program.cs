@@ -11,6 +11,7 @@ builder.Services
     .AddHostedService(sp => sp.GetRequiredService<IVirualDesktopService>())
     .AddHostedService<WindowMonitor>()
     .AddHostedService(sp => sp.GetRequiredService<ICommandLabelService>())
+    .AddHostedService<UpdateChecker>()
     .AddSingleton<IVirualDesktopService, VirtualDesktopService>()
     .AddSingleton<ICommandLabelService, CommandLabelService>()
     .AddSingleton<IConfigStore, ConfigStore>()
