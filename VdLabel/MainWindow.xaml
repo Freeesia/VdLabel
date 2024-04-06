@@ -42,6 +42,43 @@
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="/app.ico" />
             </ui:TitleBar.Icon>
+            <ui:TitleBar.Header>
+                <ui:DropDownButton
+                    Width="44"
+                    Height="30"
+                    VerticalAlignment="Top"
+                    VerticalContentAlignment="Stretch"
+                    Background="Goldenrod"
+                    BorderThickness="0"
+                    CornerRadius="0"
+                    Icon="{ui:SymbolIcon ArrowDownload48}"
+                    MouseOverBackground="Gold"
+                    Style="{StaticResource DefaultUiButtonStyle}"
+                    Visibility="{Binding HasUpdate, Converter={StaticResource b2vConv}}">
+                    <ui:DropDownButton.ToolTip>
+                        <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} がリリースされました}" />
+                    </ui:DropDownButton.ToolTip>
+                    <ui:DropDownButton.Flyout>
+                        <ContextMenu>
+                            <ui:MenuItem Command="{Binding InstallUpdateCommand}">
+                                <ui:MenuItem.Header>
+                                    <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} のインストール}" />
+                                </ui:MenuItem.Header>
+                                <ui:MenuItem.Icon>
+                                    <ui:SymbolIcon
+                                        Filled="True"
+                                        Foreground="LawnGreen"
+                                        Symbol="PresenceAvailable24" />
+                                </ui:MenuItem.Icon>
+                            </ui:MenuItem>
+                            <ui:MenuItem
+                                Command="{Binding OpenReleaseNotesCommand}"
+                                Header="更新内容の確認"
+                                Icon="{ui:SymbolIcon Globe24}" />
+                        </ContextMenu>
+                    </ui:DropDownButton.Flyout>
+                </ui:DropDownButton>
+            </ui:TitleBar.Header>
         </ui:TitleBar>
         <tray:NotifyIcon>
             <tray:NotifyIcon.Menu>

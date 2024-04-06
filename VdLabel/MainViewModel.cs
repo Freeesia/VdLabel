@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
@@ -14,6 +15,7 @@ partial class MainViewModel : ObservableObject
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
     private readonly ICommandLabelService commandLabelService;
+    private readonly IUpdateChecker updateChecker;
 
     [ObservableProperty]
     private bool isBusy;
@@ -27,6 +29,15 @@ partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool isStartup;
 
+    [ObservableProperty]
+    private bool hasUpdate;
+
+    [ObservableProperty]
+    private string? newVersion;
+
+    private string? newVersionUrl;
+    private string? installPath;
+
     public string Title { get; } = $"VdLabel {Assembly.GetExecutingAssembly().GetName().Version}";
 
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
@@ -34,15 +45,37 @@ partial class MainViewModel : ObservableObject
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
     public IReadOnlyList<NamePosition> NamePositions { get; } = Enum.GetValues<NamePosition>();
 
-    public MainViewModel(IConfigStore configStore, IContentDialogService dialogService, IVirualDesktopService virualDesktopService, ICommandLabelService commandLabelService)
+    public MainViewModel(
+        IConfigStore configStore,
+        IContentDialogService dialogService,
+        IVirualDesktopService virualDesktopService,
+        ICommandLabelService commandLabelService,
+        IUpdateChecker updateChecker)
     {
         this.configStore = configStore;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
         this.commandLabelService = commandLabelService;
+        this.updateChecker = updateChecker;
         this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
+        this.updateChecker.UpdateAvailable += UpdateChecker_UpdateAvailable;
         this.isStartup = GetIsStartup();
+        SetUpUpdateInfo();
         Load();
+    }
+
+    private void UpdateChecker_UpdateAvailable(object? sender, EventArgs e)
+        => SetUpUpdateInfo();
+
+    private async void SetUpUpdateInfo()
+    {
+        if (this.updateChecker.HasUpdate && await this.configStore.LoadUpdateInfo() is { } info)
+        {
+            this.NewVersion = info.Version;
+            this.newVersionUrl = info.Url;
+            this.installPath = info.Path;
+            this.HasUpdate = true;
+        }
     }
 
     private void VirualDesktopService_DesktopChanged(object? sender, DesktopChangedEventArgs e)
@@ -106,6 +139,14 @@ partial class MainViewModel : ObservableObject
             this.IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    public void OpenReleaseNotes()
+        => Process.Start(new ProcessStartInfo(this.newVersionUrl!) { UseShellExecute = true });
+
+    [RelayCommand]
+    public void InstallUpdate()
+        => Process.Start("msiexec", $"/i {this.installPath}");
 
     partial void OnIsStartupChanged(bool value)
     {

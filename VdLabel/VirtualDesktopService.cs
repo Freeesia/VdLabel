@@ -8,7 +8,7 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IVirualDesktopService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IHostedService, IVirualDesktopService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
@@ -20,13 +20,17 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public bool IsSupportedName { get; } = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        await ReloadDesktops();
-        VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
-        VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
-        VirtualDesktop.Created += VirtualDesktop_Created;
-        VirtualDesktop.Moved += VirtualDesktop_Moved;
+        this.app.Startup += async (_, _) =>
+        {
+            await ReloadDesktops();
+            VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
+            VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
+            VirtualDesktop.Created += VirtualDesktop_Created;
+            VirtualDesktop.Moved += VirtualDesktop_Moved;
+        };
+        return Task.CompletedTask;
     }
 
     private async void VirtualDesktop_Moved(object? sender, VirtualDesktopMovedEventArgs e)
@@ -39,14 +43,16 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         await this.configStore.Save(config);
     }
 
-    private async Task OpenOverlay(VirtualDesktop desktop, string name)
-    {
-        var vm = new OverlayViewModel(desktop.Id, name, configStore);
-        var window = await this.windowService.OpenWindowAsync(vm, null, this.options);
-        this.windows[desktop.Id] = (window, vm);
-        var w = GetWindow((WindowHandle)window);
-        _ = w.Dispatcher.InvokeAsync(() => w.MoveToDesktop(desktop));
-    }
+    private void OpenOverlay(VirtualDesktop desktop, string name)
+        => this.app.Dispatcher.Invoke(async () =>
+        {
+            var vm = new OverlayViewModel(desktop.Id, name, configStore);
+            var window = await this.windowService.OpenWindowAsync(vm, null, this.options);
+            this.windows[desktop.Id] = (window, vm);
+            var w = GetWindow((WindowHandle)window);
+            w.MoveToDesktop(desktop);
+        });
+
 
     private void VirtualDesktop_CurrentChanged(object? sender, VirtualDesktopChangedEventArgs e)
     {
@@ -84,8 +90,8 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
           {
               var config = await this.configStore.Load();
               config.DesktopConfigs.Add(new() { Id = e.Id });
-              await OpenOverlay(e, $"Desktop {config.DesktopConfigs.Count - 1}");
               await this.configStore.Save(config);
+              OpenOverlay(e, $"Desktop {config.DesktopConfigs.Count - 1}");
           });
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -146,7 +152,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             {
                 name = $"Desktop {i + 1}";
             }
-            await OpenOverlay(desktop, name);
+            OpenOverlay(desktop, name);
         }
         await this.configStore.Save(config);
     }
@@ -183,7 +189,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
     }
 }
 
-public interface IVirualDesktopService : IHostedService
+public interface IVirualDesktopService
 {
     event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
     bool IsSupportedName { get; }

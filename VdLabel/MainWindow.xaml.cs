@@ -6,13 +6,14 @@ using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using static Windows.Win32.PInvoke;
+using Wpf.Ui.Controls;
 
 namespace VdLabel;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow
+public partial class MainWindow : FluentWindow
 {
     private readonly IContentDialogService contentDialogService;
     private readonly IVirualDesktopService virualDesktopService;
