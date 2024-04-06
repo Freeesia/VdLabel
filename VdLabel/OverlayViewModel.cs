@@ -51,6 +51,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         this.fontSize = config.FontSize;
         this.overlaySize = config.OverlaySize;
         this.foreground = config.Foreground;
+        this.background = config.Background;
         this.duration = config.Duration;
         this.position = config.NamePosition switch
         {

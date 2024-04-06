@@ -13,11 +13,17 @@ interface IConfigStore
 
     ValueTask<Config> Load();
     ValueTask Save(Config config);
+
+    ValueTask<UpdateInfo?> LoadUpdateInfo();
+    ValueTask SaveUpdateInfo(UpdateInfo updateInfo);
 }
 
 class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
 {
-    private readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "VdLabel", "config.json");
+    private static readonly string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "VdLabel");
+    private static readonly string configPath = Path.Combine(baseDir, "config.json");
+    private static readonly string updateInfoPath = Path.Combine(baseDir, "update.json");
+
     private static readonly JsonSerializerOptions options = new()
     {
         Converters = { new ColorJsonConverter() },
@@ -27,33 +33,63 @@ class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
 
     public event EventHandler? Saved;
 
-    public ValueTask<Config> Load()
+    public async ValueTask<Config> Load()
     {
         Config? config = null;
         try
         {
-            if (File.Exists(this.path))
+            if (File.Exists(configPath))
             {
-                using var fs = File.OpenRead(this.path);
-                config = JsonSerializer.Deserialize<Config>(fs, options);
+                using var fs = File.OpenRead(configPath);
+                config = await JsonSerializer.DeserializeAsync<Config>(fs, options).ConfigureAwait(false);
             }
         }
         catch (Exception e)
         {
             this.logger.LogError(e, "設定の読み込みに失敗しました");
         }
-        return new(config ?? new Config() { DesktopConfigs = { new() { Id = Guid.Empty } } });
+        return config ?? new Config() { DesktopConfigs = { new() { Id = Guid.Empty } } };
     }
 
-    public ValueTask Save(Config config)
+    public async ValueTask<UpdateInfo?> LoadUpdateInfo()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(this.path)!);
-        using (var fs = File.Create(this.path))
+        try
         {
-            JsonSerializer.Serialize(fs, config, options);
+            if (File.Exists(updateInfoPath))
+            {
+                using var fs = File.OpenRead(updateInfoPath);
+                return await JsonSerializer.DeserializeAsync<UpdateInfo>(fs, options);
+            }
+        }
+        catch (Exception e)
+        {
+            this.logger.LogError(e, "更新情報の読み込みに失敗しました");
+        }
+        return null;
+    }
+
+    public async ValueTask Save(Config config)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
+        using (var fs = File.Create(configPath))
+        {
+            await JsonSerializer.SerializeAsync(fs, config, options);
         }
         this.Saved?.Invoke(this, EventArgs.Empty);
-        return default;
+    }
+
+    public async ValueTask SaveUpdateInfo(UpdateInfo updateInfo)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(updateInfoPath)!);
+            using var fs = File.Create(updateInfoPath);
+            await JsonSerializer.SerializeAsync(fs, updateInfo, options);
+        }
+        catch (Exception)
+        {
+            this.logger.LogError("更新情報の保存に失敗しました");
+        }
     }
 
     private class ColorJsonConverter : JsonConverter<Color>
@@ -64,3 +100,5 @@ class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
             => writer.WriteStringValue(ColorTranslator.ToHtml(value));
     }
 }
+
+record UpdateInfo(string Version, string Url, string? Path, DateTime CheckedAt, bool Skip);

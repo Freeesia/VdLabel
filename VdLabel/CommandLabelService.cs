@@ -6,8 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace VdLabel;
 
-partial class CommandLabelService(IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandLabelService
+partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandLabelService
 {
+    private readonly App app = app;
     private readonly IConfigStore configStore = configStore;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
     private readonly ILogger<CommandLabelService> logger = logger;
@@ -33,6 +34,7 @@ partial class CommandLabelService(IConfigStore configStore, IVirualDesktopServic
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         PeriodicTimer? timer = null;
+        await this.app.WaitForStartupAsync();
         while (!stoppingToken.IsCancellationRequested)
         {
             var config = await this.configStore.Load();
@@ -67,7 +69,7 @@ partial class CommandLabelService(IConfigStore configStore, IVirualDesktopServic
 }
 
 
-interface ICommandLabelService : IHostedService
+interface ICommandLabelService
 {
     ValueTask<string> ExecuteCommand(string command, bool utf8, CancellationToken token = default);
 }
