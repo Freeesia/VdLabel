@@ -69,7 +69,7 @@ partial class MainViewModel : ObservableObject
 
     private async void SetUpUpdateInfo()
     {
-        if (this.updateChecker.HasUpdate && await this.configStore.LoadUpdateInfo() is { } info)
+        if (this.updateChecker.HasUpdate && await this.configStore.LoadUpdateInfo() is { } info && !info.Skip)
         {
             this.NewVersion = info.Version;
             this.newVersionUrl = info.Url;
