@@ -13,7 +13,7 @@ var info = FileVersionInfo.GetVersionInfo(exePath);
 var version = info.FileVersion;
 
 var project = new ManagedProject(App,
-    new Dir(@$"%ProgramFiles%\StudioFreesia\{App}",
+    new Dir(@$"%LocalAppData%\StudioFreesia\{App}",
         new File(exePath) { AddCloseAction = true },
         new Files(Path.Combine(ArtifactsDir, "*.*"), p => !p.EndsWith(Executable))));
 
@@ -39,6 +39,9 @@ project.MajorUpgradeStrategy = MajorUpgradeStrategy.Default;
 project.BackgroundImage = @"..\assets\installer_back.png";
 project.ValidateBackgroundImage = false;
 project.BannerImage = @"..\assets\installer_bunner.png";
+
+// ユーザーレベルのインストールを強制する
+project.InstallScope = InstallScope.perUser;
 
 // ライセンスファイルの設定
 project.LicenceFile = @"..\LICENSE.rtf";
