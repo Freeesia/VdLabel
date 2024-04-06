@@ -23,6 +23,15 @@ project.Platform = Platform.x64;
 project.Language = "ja-JP";
 project.Version = new(version);
 
+// コントロールパネルの情報を設定
+project.ControlPanelInfo = new()
+{
+    Manufacturer = "StudioFreesia",
+    ProductIcon = @"..\VdLabel\app.ico",
+    UrlInfoAbout = "https://github.com/Freeesia/VdLabel",
+    UrlUpdateInfo = "https://github.com/Freeesia/VdLabel/releases",
+};
+
 // どっちか片方しか設定できない
 //project.MajorUpgrade = MajorUpgrade.Default;
 project.MajorUpgradeStrategy = MajorUpgradeStrategy.Default;
