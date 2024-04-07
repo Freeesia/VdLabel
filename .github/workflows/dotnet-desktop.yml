@@ -135,7 +135,8 @@ jobs:
       - run: |
           dotnet tool restore
           dotnet wix extension -g add WixToolset.Util.wixext WixToolset.UI.wixext
-          dotnet build VdLabel.Wix -c Release
+          dotnet build -c Release
+        working-directory: VdLabel.Wix
       - uses: actions/upload-artifact@v4
         with:
           name: VdLabel-${{ needs.build.outputs.version }}.msi
