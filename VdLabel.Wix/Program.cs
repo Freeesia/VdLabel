@@ -3,6 +3,7 @@ using System.Diagnostics;
 using WixSharp;
 using Path = System.IO.Path;
 
+const string Manufacturer = "StudioFreesia";
 const string App = "VdLabel";
 const string ArtifactsDir = @"..\artifacts";
 const string PublishDir = @"..\publish";
@@ -13,9 +14,12 @@ var info = FileVersionInfo.GetVersionInfo(exePath);
 var version = info.FileVersion;
 
 var project = new ManagedProject(App,
-    new Dir(@$"%LocalAppData%\StudioFreesia\{App}",
+    new Dir(@$"%LocalAppData%\{Manufacturer}\{App}",
         new File(exePath) { AddCloseAction = true },
-        new Files(Path.Combine(ArtifactsDir, "*.*"), p => !p.EndsWith(Executable))));
+        new Files(Path.Combine(ArtifactsDir, "*.*"), p => !p.EndsWith(Executable))),
+    // スタートメニューにショートカットを追加
+    new Dir(@$"%ProgramMenu%\{Manufacturer}\{App}",
+        new ExeFileShortcut(App, $"[INSTALLDIR]{App}", "")));
 
 project.RebootSupressing = RebootSupressing.Suppress;
 project.GUID = new("FE947636-81DB-4819-A5D9-939125903F4C");
@@ -26,7 +30,7 @@ project.Version = new(version);
 // コントロールパネルの情報を設定
 project.ControlPanelInfo = new()
 {
-    Manufacturer = "StudioFreesia",
+    Manufacturer = Manufacturer,
     ProductIcon = @"..\VdLabel\app.ico",
     UrlInfoAbout = "https://github.com/Freeesia/VdLabel",
     UrlUpdateInfo = "https://github.com/Freeesia/VdLabel/releases",
