@@ -84,7 +84,7 @@ jobs:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
   license:
-    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -106,8 +106,8 @@ jobs:
         with:
           name: licenses
           path: licenses/
-  installer_:
-    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  installer:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     needs:
       - build
       - license
@@ -144,7 +144,7 @@ jobs:
   release:
     if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
     needs:
-      - installer_
+      - installer
       - build
       - license
     runs-on: ubuntu-latest
