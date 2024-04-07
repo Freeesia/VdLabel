@@ -132,7 +132,11 @@ jobs:
         with:
           path: artifacts/licenses
           name: licenses
-      - run: Get-ChildItem -Path ~/.nuget/packages -Recurse -File -Name
+      - run: |
+          dotnet restore
+          cat .\VdLabel.Wix\obj\project.assets.json
+          cat .\VdLabel.Wix\obj\project.nuget.cache
+          Get-ChildItem -Path ~/.nuget/packages -Recurse -File -Name
       - run: dotnet build VdLabel.Wix -c Release
       - uses: actions/upload-artifact@v4
         with:
