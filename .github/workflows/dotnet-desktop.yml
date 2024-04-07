@@ -84,7 +84,7 @@ jobs:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
   license:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,7 +107,7 @@ jobs:
           name: licenses
           path: licenses/
   installer:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     needs:
       - build
       - license
@@ -132,6 +132,7 @@ jobs:
         with:
           path: artifacts/licenses
           name: licenses
+      - run: dir /S /B
       - run: dotnet build VdLabel.Wix -c Release
       - uses: actions/upload-artifact@v4
         with:
