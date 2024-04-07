@@ -133,6 +133,7 @@ jobs:
           path: artifacts/licenses
           name: licenses
       - run: |
+          Remove-Item -Path '~/.wix' -Recurse
           dotnet restore
           cat .\VdLabel.Wix\obj\project.assets.json
           cat .\VdLabel.Wix\obj\project.nuget.cache
