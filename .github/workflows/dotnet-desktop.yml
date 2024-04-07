@@ -106,7 +106,7 @@ jobs:
         with:
           name: licenses
           path: licenses/
-  installer:
+  installer_:
     # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     needs:
       - build
@@ -114,12 +114,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+      # - uses: actions/cache@v4
+      #   with:
+      #     path: ~/.nuget/packages
+      #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+      #     restore-keys: |
+      #       ${{ runner.os }}-nuget-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -145,7 +145,7 @@ jobs:
   release:
     if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
     needs:
-      - installer
+      - installer_
       - build
       - license
     runs-on: ubuntu-latest
