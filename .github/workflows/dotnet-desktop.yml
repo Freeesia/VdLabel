@@ -114,12 +114,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ~/.nuget/packages
-      #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
-      #     restore-keys: |
-      #       ${{ runner.os }}-nuget-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -133,12 +133,9 @@ jobs:
           path: artifacts/licenses
           name: licenses
       - run: |
-          dotnet nuget locals -c all
-          dotnet restore
-          cat .\VdLabel.Wix\obj\project.assets.json
-          cat .\VdLabel.Wix\obj\project.nuget.cache
-          Get-ChildItem -Path ~/.nuget/packages -Recurse -File -Name
-      - run: dotnet build VdLabel.Wix -c Release
+          dotnet tool restore
+          dotnet wix extension -g add WixToolset.Util.wixext WixToolset.UI.wixext
+          dotnet build VdLabel.Wix -c Release
       - uses: actions/upload-artifact@v4
         with:
           name: VdLabel-${{ needs.build.outputs.version }}.msi

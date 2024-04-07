@@ -41,7 +41,7 @@ project.ValidateBackgroundImage = false;
 project.BannerImage = @"..\assets\installer_bunner.png";
 
 // ユーザーレベルのインストールを強制する
-project.InstallScope = InstallScope.perUser;
+project.Scope = InstallScope.perUser;
 
 // ライセンスファイルの設定
 project.LicenceFile = @"..\LICENSE.rtf";
