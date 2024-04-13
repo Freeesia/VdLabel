@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "VdLabel": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "LOGGING__LOGLEVEL__DEFAULT": "Debug"
+      }
+    }
+  }
+}
