@@ -29,8 +29,26 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
             VirtualDesktop.Created += VirtualDesktop_Created;
             VirtualDesktop.Moved += VirtualDesktop_Moved;
+            VirtualDesktop.Renamed += VirtualDesktop_Renamed;
         };
         return Task.CompletedTask;
+    }
+
+    private async void VirtualDesktop_Renamed(object? sender, VirtualDesktopRenamedEventArgs e)
+    {
+        if (!this.windows.TryGetValue(e.Desktop.Id, out var pair) || pair.vm.Name != e.Name)
+        {
+            return;
+        }
+        pair.vm.Name = e.Name;
+        var config = await this.configStore.Load();
+        var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == e.Desktop.Id);
+        if (c is null)
+        {
+            return;
+        }
+        c.Name = e.Name;
+        await this.configStore.Save(config);
     }
 
     private async void VirtualDesktop_Moved(object? sender, VirtualDesktopMovedEventArgs e)
@@ -100,6 +118,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         VirtualDesktop.Destroyed -= VirtualDesktop_Destroyed;
         VirtualDesktop.Created -= VirtualDesktop_Created;
         VirtualDesktop.Moved -= VirtualDesktop_Moved;
+        VirtualDesktop.Renamed += VirtualDesktop_Renamed;
         return Task.CompletedTask;
     }
 

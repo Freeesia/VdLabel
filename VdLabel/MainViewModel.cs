@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows.Data;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
 
@@ -52,6 +53,7 @@ partial class MainViewModel : ObservableObject
         ICommandLabelService commandLabelService,
         IUpdateChecker updateChecker)
     {
+        BindingOperations.EnableCollectionSynchronization(this.DesktopConfigs, new());
         this.configStore = configStore;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
