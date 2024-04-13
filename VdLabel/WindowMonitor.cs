@@ -11,7 +11,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
 {
     private readonly ILogger<WindowMonitor> logger = logger;
     private readonly IConfigStore configStore = configStore;
-    private readonly HashSet<IntPtr> checkedWindows = [];
+    private readonly Dictionary<IntPtr, string> checkedWindows = [];
     private bool needReload = true;
     private TargetWindow[] targetWindows = [];
 
@@ -19,19 +19,22 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         this.logger.LogInformation("ウィンドウ監視開始");
         await ReloadTargetProcess().ConfigureAwait(false);
         this.configStore.Saved += ConfigStore_Saved;
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            var now = DateTime.Now;
             if (this.needReload)
             {
                 this.needReload = false;
                 await ReloadTargetProcess().ConfigureAwait(false);
             }
-            CheckProcesses();
+            CheckWindows();
             stoppingToken.ThrowIfCancellationRequested();
-            await Task.Delay(500, stoppingToken);
+            await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false);
             stoppingToken.ThrowIfCancellationRequested();
         }
         this.logger.LogInformation("ウィンドウ監視終了");
@@ -60,66 +63,60 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
     private void ConfigStore_Saved(object? sender, EventArgs e)
         => this.needReload = true;
 
-    private void CheckProcesses()
+    private void CheckWindows()
     {
-        this.logger.LogDebug("プロセスチェック開始");
-        var windows = new HashSet<IntPtr>();
+        var now = DateTime.Now;
+        this.logger.LogDebug("ウィンドウチェック開始");
         if (this.targetWindows.Length == 0)
         {
             return;
         }
+        var windows = new HashSet<nint>();
         User32.EnumWindows((hWnd, lParam) =>
         {
+            windows.Add(hWnd);
             // ウィンドウが表示されていない場合は今後再チェックする
             if (!User32.IsWindowVisible(hWnd))
             {
                 return true;
             }
-            windows.Add(hWnd);
-
-            // すでにチェック済みのウィンドウはスキップ
-            if (!this.checkedWindows.Add(hWnd))
-            {
-                return true;
-            }
-
             _ = User32.GetWindowThreadProcessId(hWnd, out var processId);
             // 自分自身のプロセスは無視
             if (processId == Environment.ProcessId)
             {
                 return true;
             }
-            string path;
-            try
-            {
-                using var process = Process.GetProcessById(processId);
-                using var module = process.MainModule;
-                path = module?.FileName ?? string.Empty;
-            }
-            catch (Exception)
-            {
-                // プロセスが終了している場合がある
-                windows.Remove(hWnd);
-                return true;
-            }
-            var commandLine = GetCommandLine(processId);
-            string windowTitle;
-            try
-            {
-                windowTitle = User32.GetWindowText(hWnd);
-            }
-            catch (Win32Exception)
-            {
-                // 仮想デスクトップを切り替えるタイミングで例外が発生することがある
-                windows.Remove(hWnd);
-                return true;
-            }
-            if (string.IsNullOrEmpty(commandLine) || string.IsNullOrEmpty(windowTitle))
+
+            // ウィンドウタイトルが取得できない場合はスキップ
+            if (GetWindowTitle(hWnd) is not { } windowTitle)
             {
                 return true;
             }
+
+            // すでにチェック済みかつタイトルが変わっていない場合はスキップ
+            if (this.checkedWindows.TryGetValue(hWnd, out var exist) && exist == windowTitle)
+            {
+                return true;
+            }
+
+            // ウィンドウが所属するプロセスのパスが取得できない場合はスキップ
+            if (GetProcessPath(processId) is not { } path)
+            {
+                this.checkedWindows[hWnd] = windowTitle;
+                return true;
+            }
+
+            // ウィンドウが所属するプロセスのコマンドラインが取得できない場合はスキップ
+            if (GetCommandLine(processId) is not { } commandLine)
+            {
+                this.checkedWindows[hWnd] = windowTitle;
+                return true;
+            }
+
             if (this.targetWindows.FirstOrDefault(t => t.Regex.IsMatch(GetCheckText(t.MatchType, path, commandLine, windowTitle))) is not { } target)
             {
+                // ウィンドウがターゲットでない場合はチェック済みとする
+                this.checkedWindows[hWnd] = windowTitle;
                 return true;
             }
             try
@@ -140,19 +137,52 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
                         VirtualDesktop.MoveToDesktop(hWnd, desktop);
                     }
                 }
+
+                // 固定 or 移動したウィンドウはチェック済みとする
+                this.checkedWindows[hWnd] = windowTitle;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // 移動するタイミングですでにウィンドウが閉じられていることがある
-                this.logger.LogWarning($"ウィンドウ移動失敗: {windowTitle}, {commandLine}");
-                windows.Remove(hWnd);
+                this.logger.LogWarning(e, $"ウィンドウ移動失敗: {windowTitle}, {commandLine}");
             }
             return true;
-        }, nint.Zero);
-        this.checkedWindows.IntersectWith(windows);
-        this.logger.LogDebug("プロセスチェック終了");
+        }, 0);
+        // 存在しないウィンドウは削除
+        foreach (var hWnd in this.checkedWindows.Keys.Except(windows).ToArray())
+        {
+            this.checkedWindows.Remove(hWnd);
+        }
+        this.logger.LogDebug($"ウィンドウチェック終了: {DateTime.Now - now}");
     }
 
+    private static string? GetWindowTitle(nint hWnd)
+    {
+        try
+        {
+            return User32.GetWindowText(hWnd);
+        }
+        catch (Win32Exception)
+        {
+            // 仮想デスクトップを切り替えるタイミングで例外が発生することがある
+            return null;
+        }
+    }
+
+    private static string? GetProcessPath(int processId)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            using var module = process.MainModule;
+            return module?.FileName ?? string.Empty;
+        }
+        catch (Exception)
+        {
+            // プロセスが終了している場合がある
+            return null;
+        }
+    }
     private static string GetCheckText(WindowMatchType type, string path, string commandLine, string windowTitle)
         => type switch
         {
