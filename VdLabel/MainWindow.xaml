@@ -51,7 +51,7 @@
                     Background="Goldenrod"
                     BorderThickness="0"
                     CornerRadius="0"
-                    Icon="{ui:SymbolIcon ArrowDownload48}"
+                    Icon="{ui:SymbolIcon MegaphoneLoud32}"
                     MouseOverBackground="Gold"
                     Style="{StaticResource DefaultUiButtonStyle}"
                     Visibility="{Binding HasUpdate, Converter={StaticResource b2vConv}}">
