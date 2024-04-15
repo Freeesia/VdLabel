@@ -7,12 +7,21 @@ VdLabelは仮想デスクトップを便利に利用するためのアプリケ�
 
 ![動作](assets/switch.gif)
 
-## ダウンロード
+## インストール
 
-[GitHubのリリースページ](https://github.com/Freeesia/VdLabel/releases/latest)からzipをダウンロードして任意のフォルダに展開します
+[GitHubのリリースページ](https://github.com/Freeesia/VdLabel/releases/latest)からダウンロード
 
-* `WindowTranslator-(バージョン).zip`は.NETがインストールされている環境で動作します
-* `WindowTranslator-full-(バージョン).zip`は.NETがインストールされていない環境でも動作します
+### インストーラー版
+
+`VdLabel-(バージョン).msi`をダウンロードして実行します。    
+.NETがインストールされていない環境でも動作します。
+
+### ポータブル版
+
+`VdLabel-(バージョン).zip`または`VdLabel-full-(バージョン).zip`をダウンロードして任意のディレクトリに解凍し、`VdLabel.exe`を実行します。
+
+* `VdLabel-(バージョン).zip`は.NETがインストールされている環境で動作します
+* `VdLabel-full-(バージョン).zip`は.NETがインストールされていない環境でも動作します
 
 ## 特徴
 
