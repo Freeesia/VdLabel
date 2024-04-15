@@ -181,6 +181,25 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         }
     }
 
+    public async Task Check(CancellationToken token)
+    {
+        var updateInfo = await this.configStore.LoadUpdateInfo();
+        if (updateInfo is null)
+        {
+            await CheckAndDownload(token);
+        }
+        else if (new Version(updateInfo.Version) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
+        {
+            ShowUpdateNotification(updateInfo.Version, updateInfo.Url, updateInfo.Path, false);
+            this.HasUpdate = true;
+        }
+        else
+        {
+            await this.configStore.SaveUpdateInfo(updateInfo with { CheckedAt = DateTime.MinValue, Skip = false }).ConfigureAwait(false);
+            await CheckAndDownload(token);
+        }
+    }
+
     private enum ToastActions
     {
         Install,
@@ -194,4 +213,6 @@ interface IUpdateChecker
     bool HasUpdate { get; }
 
     event EventHandler? UpdateAvailable;
+
+    Task Check(CancellationToken token);
 }
