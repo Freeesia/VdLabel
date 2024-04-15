@@ -24,7 +24,7 @@ public partial class MainWindow : FluentWindow
         InitializeComponent();
         this.contentDialogService = contentDialogService;
         this.virualDesktopService = virualDesktopService;
-        this.contentDialogService.SetContentPresenter(this.RootContentDialog);
+        this.contentDialogService.SetDialogHost(this.RootContentDialog);
     }
 
     private void FluentWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
