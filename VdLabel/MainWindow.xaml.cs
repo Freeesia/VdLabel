@@ -99,3 +99,19 @@ public sealed class SystemColorToMediaColorConverter : IValueConverter
         return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
 }
+
+[ValueConversion(typeof(bool), typeof(Visibility))]
+public sealed class FalseToVisibilityConverter : IValueConverter
+{
+    public static FalseToVisibilityConverter Default { get; } = new FalseToVisibilityConverter();
+
+    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    {
+        return value is bool b && b ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    {
+        return value is Visibility v && v != Visibility.Visible;
+    }
+}

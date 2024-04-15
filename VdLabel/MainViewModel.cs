@@ -150,6 +150,10 @@ partial class MainViewModel : ObservableObject
     public void InstallUpdate()
         => Process.Start("msiexec", $"/i {this.installPath}");
 
+    [RelayCommand]
+    public Task CheckUpdate(CancellationToken token)
+        => this.updateChecker.Check(token);
+
     partial void OnIsStartupChanged(bool value)
     {
         var exe = Assembly.GetExecutingAssembly();
