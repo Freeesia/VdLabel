@@ -214,6 +214,21 @@
                 Margin="4"
                 ItemsSource="{Binding DesktopConfigs}"
                 SelectedItem="{Binding SelectedDesktopConfig}">
+                <TabControl.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="TabItem">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="追加">
+                                        <MenuItem Command="{Binding AddLeftDesktopCommand}" Header="左に追加" />
+                                        <MenuItem Command="{Binding AddRightDesktopCommand}" Header="右に追加" />
+                                    </MenuItem>
+                                    <MenuItem Command="{Binding RemoveDesktopCommand}" Header="削除" />
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.ItemContainerStyle>
                 <TabControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
