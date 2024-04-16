@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using static PInvoke.User32;
 
 namespace VdLabel;
@@ -12,12 +13,31 @@ namespace VdLabel;
 /// </summary>
 public partial class OverlayWindow : Window
 {
-    public OverlayWindow()
+    private readonly DispatcherTimer timer;
+
+    public OverlayWindow(App app)
     {
+        this.timer = new(TimeSpan.FromSeconds(1), DispatcherPriority.Normal, OnTick, app.Dispatcher);
         InitializeComponent();
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        TopMost();
+        await Task.Delay(Random.Shared.Next(100, 2000));
+        this.timer.Start();
+    }
+    private void OnTick(object? sender, EventArgs e)
+        => TopMost();
+
+    protected override void OnClosed(EventArgs e)
+    {
+        this.timer.Stop();
+        base.OnClosed(e);
+    }
+
+
+    private void TopMost()
     {
         var windowHandle = new WindowInteropHelper(this).Handle;
         var extendedStyle = (SetWindowLongFlags)GetWindowLong(windowHandle, WindowLongIndexFlags.GWL_EXSTYLE);
