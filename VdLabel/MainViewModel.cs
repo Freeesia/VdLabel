@@ -276,6 +276,12 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
     public void RemoveTargetWindow(WindowConfig target)
         => this.TargetWindows.Remove(target);
 
+    [RelayCommand]
+    public void FindWindow()
+    {
+        Debug.WriteLine("FindWindow");
+    }
+
     public DesktopConfig GetSaveConfig()
         => new()
         {
