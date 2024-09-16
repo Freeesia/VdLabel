@@ -21,7 +21,8 @@ builder.Services
     .AddSingleton<IConfigStore, ConfigStore>()
     .AddSingleton<IContentDialogService, ContentDialogService>()
     .AddPresentation<MainWindow, MainViewModel>()
-    .AddPresentation<OverlayWindow, OverlayViewModel>();
+    .AddPresentation<OverlayWindow, OverlayViewModel>()
+    .AddPresentation<TargetWindowOverlay, TargetWindowViewModel>();
 var app = builder.Build();
 app.Startup += static (s, e) => VirtualDesktop.Configure();
 

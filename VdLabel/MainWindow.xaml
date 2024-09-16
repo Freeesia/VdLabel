@@ -339,11 +339,11 @@
                                         DockPanel.Dock="Right"
                                         Icon="{ui:SymbolIcon Delete24}" />
                                     <Button
+                                        Margin="4,0"
                                         Command="{Binding PickImageCommand}"
                                         Content="選択"
                                         DockPanel.Dock="Right" />
                                     <ui:TextBox
-                                        Margin="4"
                                         IsReadOnly="True"
                                         PlaceholderText="画像パス"
                                         Text="{Binding ImagePath}" />
@@ -375,15 +375,14 @@
                                     ItemsSource="{Binding TargetWindows}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="local:WindowConfig">
-                                            <DockPanel Margin="0,0,8,0">
+                                            <DockPanel Margin="4,2">
                                                 <ComboBox
                                                     Width="148"
-                                                    Margin="4"
                                                     ItemsSource="{Binding DataContext.MatchTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     SelectedItem="{Binding MatchType, Mode=TwoWay}" />
                                                 <ComboBox
                                                     Width="108"
-                                                    Margin="4"
+                                                    Margin="4,0"
                                                     ItemsSource="{Binding DataContext.PatternTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     SelectedItem="{Binding PatternType, Mode=TwoWay}" />
                                                 <ui:Button
@@ -391,7 +390,13 @@
                                                     CommandParameter="{Binding}"
                                                     DockPanel.Dock="Right"
                                                     Icon="{ui:SymbolIcon Delete24}" />
-                                                <ui:TextBox Margin="4" Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <ui:Button
+                                                    Margin="4,0"
+                                                    Command="{Binding DataContext.FindWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    DockPanel.Dock="Right"
+                                                    Icon="{ui:SymbolIcon WindowLocationTarget20}" />
+                                                <ui:TextBox Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

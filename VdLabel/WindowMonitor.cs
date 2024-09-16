@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PInvoke;
-using System.Diagnostics;
-using System.Management;
 using System.Text.RegularExpressions;
 using WindowsDesktop;
+using static VdLabel.ProcessUtility;
 
 namespace VdLabel;
 class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : BackgroundService
@@ -156,33 +155,6 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
         this.logger.LogDebug($"ウィンドウチェック終了: {DateTime.Now - now}");
     }
 
-    private static string? GetWindowTitle(nint hWnd)
-    {
-        try
-        {
-            return User32.GetWindowText(hWnd);
-        }
-        catch (Win32Exception)
-        {
-            // 仮想デスクトップを切り替えるタイミングで例外が発生することがある
-            return null;
-        }
-    }
-
-    private static string? GetProcessPath(int processId)
-    {
-        try
-        {
-            using var process = Process.GetProcessById(processId);
-            using var module = process.MainModule;
-            return module?.FileName ?? string.Empty;
-        }
-        catch (Exception)
-        {
-            // プロセスが終了している場合がある
-            return null;
-        }
-    }
     private static string GetCheckText(WindowMatchType type, string path, string commandLine, string windowTitle)
         => type switch
         {
@@ -191,11 +163,4 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             WindowMatchType.Path => path,
             _ => string.Empty,
         };
-
-    private static string? GetCommandLine(int processId)
-    {
-        using var searcher = new ManagementObjectSearcher($"SELECT CommandLine FROM Win32_Process WHERE ProcessId = '{processId}'");
-        using var mo = searcher.Get().Cast<ManagementBaseObject>().SingleOrDefault();
-        return mo?["CommandLine"] as string;
-    }
 }

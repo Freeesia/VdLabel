@@ -33,12 +33,7 @@ record DesktopConfig
     public IReadOnlyList<WindowConfig> TargetWindows { get; init; } = [];
 }
 
-record WindowConfig
-{
-    public WindowMatchType MatchType { get; set; }
-    public WindowPatternType PatternType { get; set; }
-    public string Pattern { get; set; } = string.Empty;
-}
+record WindowConfig(WindowMatchType MatchType, WindowPatternType PatternType, string Pattern);
 
 enum WindowMatchType
 {
