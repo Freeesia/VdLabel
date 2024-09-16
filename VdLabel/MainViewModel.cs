@@ -16,6 +16,7 @@ partial class MainViewModel : ObservableObject
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
     private readonly ICommandLabelService commandLabelService;
+    private readonly IPresentationService presentationService;
     private readonly IUpdateChecker updateChecker;
 
     [ObservableProperty]
@@ -48,6 +49,7 @@ partial class MainViewModel : ObservableObject
 
     public MainViewModel(
         IConfigStore configStore,
+        IPresentationService presentationService,
         IContentDialogService dialogService,
         IVirualDesktopService virualDesktopService,
         ICommandLabelService commandLabelService,
@@ -55,6 +57,7 @@ partial class MainViewModel : ObservableObject
     {
         BindingOperations.EnableCollectionSynchronization(this.DesktopConfigs, new());
         this.configStore = configStore;
+        this.presentationService = presentationService;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
         this.commandLabelService = commandLabelService;
@@ -93,7 +96,7 @@ partial class MainViewModel : ObservableObject
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
-                this.DesktopConfigs.Add(new(desktopConfig, this.dialogService, this.virualDesktopService, this.commandLabelService));
+                this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandLabelService));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
         }
@@ -181,8 +184,15 @@ partial class MainViewModel : ObservableObject
     }
 }
 
-partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialogService dialogService, IVirualDesktopService virualDesktopService, ICommandLabelService commandLabelService) : ObservableObject
+partial class DesktopConfigViewModel(
+    DesktopConfig desktopConfig,
+    IPresentationService presentationService,
+    IContentDialogService dialogService,
+    IVirualDesktopService virualDesktopService,
+    ICommandLabelService commandLabelService)
+    : ObservableObject
 {
+    private readonly IPresentationService presentationService = presentationService;
     private readonly IContentDialogService dialogService = dialogService;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
     private readonly ICommandLabelService commandLabelService = commandLabelService;
@@ -217,7 +227,7 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
 
     public bool IsVisibleImage => this.ImagePath is not null;
 
-    public ObservableCollection<WindowConfig> TargetWindows { get; } = new(desktopConfig.TargetWindows);
+    public ObservableCollection<WindowConfigViewModel> TargetWindows { get; } = new(desktopConfig.TargetWindows.Select(c => new WindowConfigViewModel(c)));
 
     public IReadOnlyList<WindowMatchType> MatchTypes { get; } = Enum.GetValues<WindowMatchType>();
 
@@ -273,13 +283,24 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
         => this.TargetWindows.Add(new());
 
     [RelayCommand]
-    public void RemoveTargetWindow(WindowConfig target)
+    public void RemoveTargetWindow(WindowConfigViewModel target)
         => this.TargetWindows.Remove(target);
 
     [RelayCommand]
-    public void FindWindow()
+    public async Task FindWindow(WindowConfigViewModel config)
     {
-        Debug.WriteLine("FindWindow");
+        var info = await this.presentationService.OpenTargetWindowDialogAsync();
+        if (info is null)
+        {
+            return;
+        }
+        config.Pattern = config.MatchType switch
+        {
+            WindowMatchType.CommandLine => info.CommandLine,
+            WindowMatchType.Title => info.Title,
+            WindowMatchType.Path => info.Path,
+            _ => throw new NotSupportedException(),
+        };
     }
 
     public DesktopConfig GetSaveConfig()
@@ -291,6 +312,16 @@ partial class DesktopConfigViewModel(DesktopConfig desktopConfig, IContentDialog
             Utf8Command = this.Utf8Command,
             Command = this.Command,
             ImagePath = this.ImagePath,
-            TargetWindows = this.TargetWindows.ToArray(),
+            TargetWindows = this.TargetWindows.Select(c => new WindowConfig(c.MatchType, c.PatternType, c.Pattern)).ToArray(),
         };
+}
+
+partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObject
+{
+    [ObservableProperty]
+    private WindowMatchType matchType = config?.MatchType ?? default;
+    [ObservableProperty]
+    private WindowPatternType patternType = config?.PatternType ?? default;
+    [ObservableProperty]
+    private string pattern = config?.Pattern ?? string.Empty;
 }
