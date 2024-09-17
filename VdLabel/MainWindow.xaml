@@ -10,8 +10,8 @@
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="VdLabel"
-    Width="680"
-    Height="820"
+    Width="820"
+    Height="680"
     d:DataContext="{d:DesignInstance {x:Type local:MainViewModel}}"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -34,216 +34,231 @@
         </Style>
         <BooleanToVisibilityConverter x:Key="b2vConv" />
     </ui:FluentWindow.Resources>
-    <DockPanel>
-        <ui:TitleBar
-            Title="{Binding Title}"
-            DockPanel.Dock="Top"
-            ShowMinimize="False">
-            <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="/app.ico" />
-            </ui:TitleBar.Icon>
-            <ui:TitleBar.Header>
-                <StackPanel Orientation="Horizontal">
-                    <ui:DropDownButton
-                        Width="44"
-                        Height="30"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Stretch"
-                        Background="Goldenrod"
-                        BorderThickness="0"
-                        CornerRadius="0"
-                        Icon="{ui:SymbolIcon MegaphoneLoud32}"
-                        MouseOverBackground="Gold"
-                        Style="{StaticResource DefaultUiButtonStyle}"
-                        Visibility="{Binding HasUpdate, Converter={StaticResource b2vConv}}">
-                        <ui:DropDownButton.ToolTip>
-                            <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} がリリースされました}" />
-                        </ui:DropDownButton.ToolTip>
-                        <ui:DropDownButton.Flyout>
-                            <ContextMenu>
-                                <ui:MenuItem Command="{Binding InstallUpdateCommand}">
-                                    <ui:MenuItem.Header>
-                                        <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} のインストール}" />
-                                    </ui:MenuItem.Header>
-                                    <ui:MenuItem.Icon>
-                                        <ui:SymbolIcon
-                                            Filled="True"
-                                            Foreground="LawnGreen"
-                                            Symbol="PresenceAvailable24" />
-                                    </ui:MenuItem.Icon>
-                                </ui:MenuItem>
-                                <ui:MenuItem
-                                    Command="{Binding OpenReleaseNotesCommand}"
-                                    Header="更新内容の確認"
-                                    Icon="{ui:SymbolIcon Globe24}" />
-                            </ContextMenu>
-                        </ui:DropDownButton.Flyout>
-                    </ui:DropDownButton>
-                    <ui:Button
-                        Width="44"
-                        Height="30"
-                        VerticalAlignment="Top"
-                        VerticalContentAlignment="Stretch"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Command="{Binding CheckUpdateCommand}"
-                        CornerRadius="0"
-                        Icon="{ui:SymbolIcon ArrowSync24}"
-                        ToolTip="新しいバージョンのチェック"
-                        Visibility="{Binding HasUpdate, Converter={x:Static local:FalseToVisibilityConverter.Default}}" />
-                </StackPanel>
-            </ui:TitleBar.Header>
-        </ui:TitleBar>
-        <tray:NotifyIcon>
-            <tray:NotifyIcon.Menu>
-                <ContextMenu>
-                    <MenuItem Click="MenuItem_Click" Header="設定" />
-                    <MenuItem Click="MenuItem_Click_1" Header="終了" />
-                </ContextMenu>
-            </tray:NotifyIcon.Menu>
-        </tray:NotifyIcon>
-        <ProgressBar
-            Height="4"
-            DockPanel.Dock="Top"
-            IsIndeterminate="{Binding IsBusy, Mode=OneWay}" />
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <GroupBox
-                Grid.Row="0"
-                Margin="4"
-                Background="{ui:ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ui:ThemeResource CardStrokeColorDefaultBrush}"
-                Header="全般設定">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Label
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Content="表示位置" />
-                    <ComboBox
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Margin="4"
-                        ItemsSource="{Binding OverlayPositions, Mode=OneWay}"
-                        SelectedItem="{Binding Config.Position, Mode=TwoWay}" />
-                    <Label
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Content="フォントサイズ" />
-                    <ui:NumberBox
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Margin="4"
-                        Value="{Binding Config.FontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Content="表示サイズ" />
-                    <ui:NumberBox
-                        Grid.Row="2"
-                        Grid.Column="1"
-                        Margin="4"
-                        Value="{Binding Config.OverlaySize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label
-                        Grid.Row="3"
-                        Grid.Column="0"
-                        Content="背景色" />
-                    <cp:PortableColorPicker
-                        Grid.Row="3"
-                        Grid.Column="1"
-                        Margin="4"
-                        SelectedColor="{Binding Config.Background, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
-                        Style="{StaticResource DefaultColorPickerStyle}" />
-                    <Label
-                        Grid.Row="4"
-                        Grid.Column="0"
-                        Content="文字色" />
-                    <cp:PortableColorPicker
-                        Grid.Row="4"
-                        Grid.Column="1"
-                        Margin="4"
-                        SelectedColor="{Binding Config.Foreground, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
-                        Style="{StaticResource DefaultColorPickerStyle}" />
-                    <Label
-                        Grid.Row="5"
-                        Grid.Column="0"
-                        Content="表示時間" />
-                    <DockPanel
-                        Grid.Row="5"
-                        Grid.Column="1"
-                        Margin="4">
-                        <TextBlock
+    <Grid>
+        <DockPanel>
+            <ui:TitleBar
+                Title="{Binding Title}"
+                DockPanel.Dock="Top"
+                ShowMinimize="False">
+                <ui:TitleBar.Icon>
+                    <ui:ImageIcon Source="/app.ico" />
+                </ui:TitleBar.Icon>
+                <ui:TitleBar.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:DropDownButton
+                            Width="44"
+                            Height="30"
+                            VerticalAlignment="Top"
+                            VerticalContentAlignment="Stretch"
+                            Background="Goldenrod"
+                            BorderThickness="0"
+                            CornerRadius="0"
+                            Icon="{ui:SymbolIcon MegaphoneLoud32}"
+                            MouseOverBackground="Gold"
+                            Style="{StaticResource DefaultUiButtonStyle}"
+                            Visibility="{Binding HasUpdate, Converter={StaticResource b2vConv}}">
+                            <ui:DropDownButton.ToolTip>
+                                <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} がリリースされました}" />
+                            </ui:DropDownButton.ToolTip>
+                            <ui:DropDownButton.Flyout>
+                                <ContextMenu>
+                                    <ui:MenuItem Command="{Binding InstallUpdateCommand}">
+                                        <ui:MenuItem.Header>
+                                            <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} のインストール}" />
+                                        </ui:MenuItem.Header>
+                                        <ui:MenuItem.Icon>
+                                            <ui:SymbolIcon
+                                                Filled="True"
+                                                Foreground="LawnGreen"
+                                                Symbol="PresenceAvailable24" />
+                                        </ui:MenuItem.Icon>
+                                    </ui:MenuItem>
+                                    <ui:MenuItem
+                                        Command="{Binding OpenReleaseNotesCommand}"
+                                        Header="更新内容の確認"
+                                        Icon="{ui:SymbolIcon Globe24}" />
+                                </ContextMenu>
+                            </ui:DropDownButton.Flyout>
+                        </ui:DropDownButton>
+                        <ui:Button
+                            Width="44"
+                            Height="30"
+                            VerticalAlignment="Top"
+                            VerticalContentAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Command="{Binding CheckUpdateCommand}"
+                            CornerRadius="0"
+                            Icon="{ui:SymbolIcon ArrowSync24}"
+                            ToolTip="新しいバージョンのチェック"
+                            Visibility="{Binding HasUpdate, Converter={x:Static local:FalseToVisibilityConverter.Default}}" />
+                    </StackPanel>
+                </ui:TitleBar.Header>
+            </ui:TitleBar>
+            <tray:NotifyIcon>
+                <tray:NotifyIcon.Menu>
+                    <ContextMenu>
+                        <MenuItem Click="MenuItem_Click" Header="設定" />
+                        <MenuItem Click="MenuItem_Click_1" Header="終了" />
+                    </ContextMenu>
+                </tray:NotifyIcon.Menu>
+            </tray:NotifyIcon>
+            <ProgressBar
+                Height="4"
+                DockPanel.Dock="Top"
+                IsIndeterminate="{Binding IsBusy, Mode=OneWay}" />
+            <DockPanel Margin="4,0" DockPanel.Dock="Bottom">
+                <Button
+                    Command="{Binding SaveCommand}"
+                    Content="適用"
+                    DockPanel.Dock="Right" />
+                <ui:Button
+                    Command="{Binding ReloadDesktopsCommand}"
+                    DockPanel.Dock="Left"
+                    Icon="{ui:SymbolIcon ArrowCounterclockwise32}"
+                    ToolTip="デスクトップ一覧の更新" />
+                <ui:ToggleSwitch
+                    Margin="4"
+                    Content="PC起動時に自動起動"
+                    IsChecked="{Binding IsStartup, Mode=TwoWay}" />
+            </DockPanel>
+            <TabControl>
+                <TabItem Header="全般設定">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Content="表示位置" />
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
                             Margin="4"
-                            VerticalAlignment="Center"
-                            DockPanel.Dock="Right"
-                            Text="秒" />
-                        <ui:NumberBox Value="{Binding Config.Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </DockPanel>
-                    <Label
-                        Grid.Row="6"
-                        Grid.Column="0"
-                        Content="名前表示位置" />
-                    <ComboBox
-                        Grid.Row="6"
-                        Grid.Column="1"
-                        Margin="4"
-                        ItemsSource="{Binding NamePositions, Mode=OneWay}"
-                        SelectedItem="{Binding Config.NamePosition, Mode=TwoWay}" />
-                    <Label
-                        Grid.Row="7"
-                        Grid.Column="0"
-                        Content="コマンド間隔" />
-                    <DockPanel
-                        Grid.Row="7"
-                        Grid.Column="1"
-                        Margin="4">
-                        <TextBlock
+                            ItemsSource="{Binding OverlayPositions, Mode=OneWay}"
+                            SelectedItem="{Binding Config.Position, Mode=TwoWay}" />
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Content="フォントサイズ" />
+                        <ui:NumberBox
+                            Grid.Row="1"
+                            Grid.Column="1"
                             Margin="4"
-                            VerticalAlignment="Center"
-                            DockPanel.Dock="Right"
-                            Text="秒" />
-                        <ui:NumberBox Value="{Binding Config.CommandInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </DockPanel>
-                </Grid>
-            </GroupBox>
-            <TabControl
-                Grid.Row="1"
-                Margin="4"
-                ItemsSource="{Binding DesktopConfigs}"
-                SelectedItem="{Binding SelectedDesktopConfig}">
-                <TabControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <Image Height="16" Source="{Binding ImagePath}" />
-                            <emoji:TextBlock
-                                Width="160"
-                                Margin="4,0"
-                                Text="{Binding Title}"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </DataTemplate>
-                </TabControl.ItemTemplate>
-                <TabControl.ContentTemplate>
-                    <DataTemplate DataType="local:DesktopConfigViewModel">
-                        <ui:DynamicScrollViewer>
-                            <Grid>
+                            Value="{Binding Config.FontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Content="表示サイズ" />
+                        <ui:NumberBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="4"
+                            Value="{Binding Config.OverlaySize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Content="背景色" />
+                        <cp:PortableColorPicker
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Margin="4"
+                            SelectedColor="{Binding Config.Background, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
+                            Style="{StaticResource DefaultColorPickerStyle}" />
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Content="文字色" />
+                        <cp:PortableColorPicker
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Margin="4"
+                            SelectedColor="{Binding Config.Foreground, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
+                            Style="{StaticResource DefaultColorPickerStyle}" />
+                        <Label
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Content="表示時間" />
+                        <DockPanel
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Margin="4">
+                            <TextBlock
+                                Margin="4"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Right"
+                                Text="秒" />
+                            <ui:NumberBox Value="{Binding Config.Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
+                        <Label
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Content="名前表示位置" />
+                        <ComboBox
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Margin="4"
+                            ItemsSource="{Binding NamePositions, Mode=OneWay}"
+                            SelectedItem="{Binding Config.NamePosition, Mode=TwoWay}" />
+                        <Label
+                            Grid.Row="7"
+                            Grid.Column="0"
+                            Content="コマンド間隔" />
+                        <DockPanel
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Margin="4">
+                            <TextBlock
+                                Margin="4"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Right"
+                                Text="秒" />
+                            <ui:NumberBox Value="{Binding Config.CommandInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="デスクトップ設定">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:ListView
+                            Grid.Column="0"
+                            Margin="4"
+                            ItemsSource="{Binding DesktopConfigs}"
+                            SelectedItem="{Binding SelectedDesktopConfig}">
+                            <ui:ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel>
+                                        <Image
+                                            Height="16"
+                                            DockPanel.Dock="Left"
+                                            Source="{Binding ImagePath}" />
+                                        <emoji:TextBlock
+                                            Margin="4,0"
+                                            Text="{Binding Title}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ui:ListView.ItemTemplate>
+                        </ui:ListView>
+                        <GridSplitter Grid.Column="1" ResizeBehavior="PreviousAndNext" />
+                        <ui:DynamicScrollViewer Grid.Column="2" DataContext="{Binding SelectedDesktopConfig}">
+                            <Grid Margin="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
@@ -403,25 +418,10 @@
                                 </ItemsControl>
                             </Grid>
                         </ui:DynamicScrollViewer>
-                    </DataTemplate>
-                </TabControl.ContentTemplate>
+                    </Grid>
+                </TabItem>
             </TabControl>
-            <DockPanel Grid.Row="2" Margin="4">
-                <Button
-                    Command="{Binding SaveCommand}"
-                    Content="適用"
-                    DockPanel.Dock="Right" />
-                <ui:Button
-                    Command="{Binding ReloadDesktopsCommand}"
-                    DockPanel.Dock="Left"
-                    Icon="{ui:SymbolIcon ArrowCounterclockwise32}"
-                    ToolTip="デスクトップ一覧の更新" />
-                <ui:ToggleSwitch
-                    Margin="4"
-                    Content="PC起動時に自動起動"
-                    IsChecked="{Binding IsStartup, Mode=TwoWay}" />
-            </DockPanel>
-            <ContentPresenter x:Name="RootContentDialog" Grid.RowSpan="3" />
-        </Grid>
-    </DockPanel>
+        </DockPanel>
+        <ContentPresenter x:Name="RootContentDialog" Grid.RowSpan="3" />
+    </Grid>
 </ui:FluentWindow>
