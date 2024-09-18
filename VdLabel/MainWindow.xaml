@@ -385,34 +385,51 @@
                                     Grid.Row="8"
                                     Grid.RowSpan="2"
                                     Grid.Column="1"
-                                    MaxHeight="160"
                                     VerticalAlignment="Top"
                                     ItemsSource="{Binding TargetWindows}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="local:WindowConfig">
-                                            <DockPanel Margin="4,2">
+                                            <Grid Margin="4,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="3*" />
+                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
                                                 <ComboBox
-                                                    Width="148"
+                                                    Grid.Row="0"
+                                                    Grid.Column="0"
                                                     ItemsSource="{Binding DataContext.MatchTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     SelectedItem="{Binding MatchType, Mode=TwoWay}" />
                                                 <ComboBox
-                                                    Width="108"
+                                                    Grid.Row="0"
+                                                    Grid.Column="1"
                                                     Margin="4,0"
                                                     ItemsSource="{Binding DataContext.PatternTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     SelectedItem="{Binding PatternType, Mode=TwoWay}" />
                                                 <ui:Button
-                                                    Command="{Binding DataContext.RemoveTargetWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    DockPanel.Dock="Right"
-                                                    Icon="{ui:SymbolIcon Delete24}" />
-                                                <ui:Button
-                                                    Margin="4,0"
+                                                    Grid.Row="0"
+                                                    Grid.Column="2"
                                                     Command="{Binding DataContext.FindWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     CommandParameter="{Binding}"
-                                                    DockPanel.Dock="Right"
                                                     Icon="{ui:SymbolIcon WindowLocationTarget20}" />
-                                                <ui:TextBox Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </DockPanel>
+                                                <ui:Button
+                                                    Grid.Row="0"
+                                                    Grid.Column="3"
+                                                    Margin="4,0"
+                                                    Command="{Binding DataContext.RemoveTargetWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Icon="{ui:SymbolIcon Delete24}" />
+                                                <ui:TextBox
+                                                    Grid.Row="1"
+                                                    Grid.ColumnSpan="4"
+                                                    Margin="0,4"
+                                                    Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
