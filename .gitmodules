@@ -1,0 +1,4 @@
+[submodule "Lib/VirtualDesktop"]
+	path = Lib/VirtualDesktop
+	url = git@github.com:Slion/VirtualDesktop.git
+	branch = support_26100
