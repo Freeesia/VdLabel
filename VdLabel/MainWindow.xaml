@@ -44,7 +44,7 @@
                     <ui:ImageIcon Source="/app.ico" />
                 </ui:TitleBar.Icon>
                 <ui:TitleBar.Header>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsUpdatable, Converter={StaticResource b2vConv}}">
                         <ui:DropDownButton
                             Width="44"
                             Height="30"
