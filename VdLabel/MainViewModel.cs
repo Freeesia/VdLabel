@@ -42,6 +42,8 @@ partial class MainViewModel : ObservableObject
 
     public string Title { get; } = $"VdLabel {Assembly.GetExecutingAssembly().GetName().Version}";
 
+    public bool IsUpdatable => this.updateChecker.IsUpdatable;
+
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();

@@ -37,6 +37,8 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         }
     }
 
+    public bool IsUpdatable { get; }
+
     public UpdateChecker(ILogger<UpdateChecker> logger, IConfigStore configStore, App app)
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -47,10 +49,16 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         this.logger = logger;
         this.configStore = configStore;
         this.app = app;
+        this.IsUpdatable = IsInstalled();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if (!this.IsUpdatable)
+        {
+            this.logger.LogInformation("インストールされていないアプリなのでチェックしない");
+            return;
+        }
 
         await this.app.WaitForStartupAsync();
         ToastNotificationManagerCompat.OnActivated += ToastNotificationManagerCompat_OnActivated;
@@ -200,6 +208,10 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         }
     }
 
+    private static bool IsInstalled()
+        => Path.GetDirectoryName(Environment.ProcessPath)
+        == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StudioFreesia", "VdLabel");
+
     private enum ToastActions
     {
         Install,
@@ -210,6 +222,8 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
 
 interface IUpdateChecker
 {
+    bool IsUpdatable { get; }
+
     bool HasUpdate { get; }
 
     event EventHandler? UpdateAvailable;
