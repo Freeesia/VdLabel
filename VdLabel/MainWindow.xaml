@@ -95,10 +95,11 @@
                     </StackPanel>
                 </ui:TitleBar.Header>
             </ui:TitleBar>
-            <tray:NotifyIcon>
+            <tray:NotifyIcon DataContextChanged="NotifyIcon_DataContextChanged">
                 <tray:NotifyIcon.Menu>
                     <ContextMenu>
                         <MenuItem Click="MenuItem_Click" Header="設定" />
+                        <MenuItem Command="{Binding ShowDesktopCagalogCommand}" Header="デスクトップ一覧" />
                         <MenuItem Click="MenuItem_Click_1" Header="終了" />
                     </ContextMenu>
                 </tray:NotifyIcon.Menu>

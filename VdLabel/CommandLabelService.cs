@@ -12,6 +12,7 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
     private readonly IConfigStore configStore = configStore;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
     private readonly ILogger<CommandLabelService> logger = logger;
+    private readonly Dictionary<Guid, string> commandCache = new();
 
     [GeneratedRegex(@"^(""[^""]+""|\S+)", RegexOptions.Compiled)]
     private static partial Regex FilePathRegex();
@@ -30,6 +31,9 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
         var lines = await ProcessX.StartAsync(fileName: fileName, args, encoding: utf8 ? Encoding.UTF8 : null).ToTask(token).ConfigureAwait(false);
         return string.Join(Environment.NewLine, lines);
     }
+
+    public string? GetCacheResult(Guid desktopId)
+        => this.commandCache.TryGetValue(desktopId, out var result) ? result : null;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -54,6 +58,7 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
                 try
                 {
                     var result = await ExecuteCommand(desktopConfig.Command, desktopConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                    this.commandCache[desktopConfig.Id] = result;
                     this.virualDesktopService.SetName(desktopConfig.Id, result);
                 }
                 catch (Exception e)
@@ -72,4 +77,5 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
 interface ICommandLabelService
 {
     ValueTask<string> ExecuteCommand(string command, bool utf8, CancellationToken token = default);
+    string? GetCacheResult(Guid desktopId);
 }

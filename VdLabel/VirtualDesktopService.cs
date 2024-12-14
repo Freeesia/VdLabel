@@ -13,8 +13,10 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
-    private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
+    private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
+
+    public bool IsEnableOverlay { get; set; } = true;
 
     public event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
 
@@ -190,6 +192,10 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public void PopupOverlay()
     {
+        if (!this.IsEnableOverlay)
+        {
+            return;
+        }
         foreach (var (_, vm) in this.windows.Values)
         {
             vm.Popup();
@@ -206,17 +212,38 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         desktops[index].Switch();
         PopupOverlay();
     }
+
+    public void Switch(Guid id)
+    {
+        var desktop = VirtualDesktop.FromId(id);
+        desktop?.Switch();
+        PopupOverlay();
+    }
+
+    public string? GetWallpaperPath(Guid id)
+    {
+        var vd = VirtualDesktop.FromId(id) ?? throw new InvalidOperationException();
+        return vd.WallpaperPath is { Length: > 0 } path ? path : null;
+    }
+
+    public Guid GetCurrent()
+        => VirtualDesktop.Current.Id;
 }
 
 public interface IVirualDesktopService
 {
     event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
     bool IsSupportedName { get; }
+    bool IsEnableOverlay { get; set; }
+
     void Pin(Window window);
     ValueTask ReloadDesktops();
     void SetName(Guid id, string v);
     void PopupOverlay();
     void Swtich(int index);
+    void Switch(Guid id);
+    string? GetWallpaperPath(Guid id);
+    Guid GetCurrent();
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs
