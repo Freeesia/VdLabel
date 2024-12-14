@@ -56,8 +56,17 @@ public partial class MainWindow : FluentWindow
             var key = (i < 10 ? i : i - 10) + Key.NumPad0;
             RegisterHotKey(new(window.Handle), i, mod, (uint)KeyInterop.VirtualKeyFromKey(key));
         }
-        RegisterHotKey(new(window.Handle), 20, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
-        RegisterHotKey(new(window.Handle), 21, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Down));
+        // Win10とWin11で使えるのショートカットが異なるので、バージョンで判定して登録するショートカットを切り替える
+        if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000, 0))
+        {
+            RegisterHotKey(new(window.Handle), 20, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
+            RegisterHotKey(new(window.Handle), 21, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Down));
+        }
+        else
+        {
+            RegisterHotKey(new(window.Handle), 20, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_ALT, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
+            RegisterHotKey(new(window.Handle), 21, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_ALT, (uint)KeyInterop.VirtualKeyFromKey(Key.Down));
+        }
         var source = HwndSource.FromHwnd(window.Handle);
         source.AddHook(WndProc);
 
@@ -74,7 +83,7 @@ public partial class MainWindow : FluentWindow
         {
             this.virualDesktopService.Swtich(i);
         }
-        else if(i == 20)
+        else if (i == 20)
         {
             this.virualDesktopService.PopupOverlay();
         }
