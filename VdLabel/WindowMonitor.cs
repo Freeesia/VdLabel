@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PInvoke;
 using System.Text.RegularExpressions;
 using WindowsDesktop;
+using static Windows.Win32.PInvoke;
 using static VdLabel.ProcessUtility;
 
 namespace VdLabel;
@@ -79,6 +80,12 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             {
                 return true;
             }
+            // ツールチップやコンテキストメニューは無視
+            var className = User32.GetClassName(hWnd);
+            if (className is "tooltips_class32" or "#32768")
+            {
+                return true;
+            }
             _ = User32.GetWindowThreadProcessId(hWnd, out var processId);
             // 自分自身のプロセスは無視
             if (processId == Environment.ProcessId)
@@ -143,7 +150,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             catch (Exception e)
             {
                 // 移動するタイミングですでにウィンドウが閉じられていることがある
-                this.logger.LogWarning(e, $"ウィンドウ移動失敗: {windowTitle}, {commandLine}");
+                this.logger.LogWarning(e, $"ウィンドウ移動失敗: title:{windowTitle}, class:{className}, comamnd:{commandLine}");
             }
             return true;
         }, 0);
