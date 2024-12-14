@@ -21,6 +21,7 @@ builder.Services
     .AddSingleton<IConfigStore, ConfigStore>()
     .AddSingleton<IContentDialogService, ContentDialogService>()
     .AddPresentation<MainWindow, MainViewModel>()
+    .AddPresentation<DesktopCatalog, DesktopCatalogViewModel>()
     .AddPresentation<OverlayWindow, OverlayViewModel>()
     .AddPresentation<TargetWindowOverlay, TargetWindowViewModel>();
 var app = builder.Build();

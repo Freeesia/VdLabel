@@ -7,6 +7,7 @@ using Wpf.Ui.Appearance;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using static Windows.Win32.PInvoke;
 using Wpf.Ui.Controls;
+using Wpf.Ui.Tray.Controls;
 
 namespace VdLabel;
 
@@ -17,13 +18,15 @@ public partial class MainWindow : FluentWindow
 {
     private readonly IContentDialogService contentDialogService;
     private readonly IVirualDesktopService virualDesktopService;
+    private readonly IPresentationService presentationService;
 
-    public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService)
+    public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService, IPresentationService presentationService)
     {
         SystemThemeWatcher.Watch(this);
         InitializeComponent();
         this.contentDialogService = contentDialogService;
         this.virualDesktopService = virualDesktopService;
+        this.presentationService = presentationService;
         this.contentDialogService.SetDialogHost(this.RootContentDialog);
     }
 
@@ -54,6 +57,7 @@ public partial class MainWindow : FluentWindow
             RegisterHotKey(new(window.Handle), i, mod, (uint)KeyInterop.VirtualKeyFromKey(key));
         }
         RegisterHotKey(new(window.Handle), 20, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Up));
+        RegisterHotKey(new(window.Handle), 21, HOT_KEY_MODIFIERS.MOD_WIN | HOT_KEY_MODIFIERS.MOD_CONTROL, (uint)KeyInterop.VirtualKeyFromKey(Key.Down));
         var source = HwndSource.FromHwnd(window.Handle);
         source.AddHook(WndProc);
 
@@ -70,9 +74,13 @@ public partial class MainWindow : FluentWindow
         {
             this.virualDesktopService.Swtich(i);
         }
-        else
+        else if(i == 20)
         {
             this.virualDesktopService.PopupOverlay();
+        }
+        else if (i == 21)
+        {
+            this.presentationService.OpenWindowAsync<DesktopCatalogViewModel>();
         }
         return 0;
     }
@@ -80,6 +88,15 @@ public partial class MainWindow : FluentWindow
     private void FluentWindow_Activated(object sender, EventArgs e)
         => this.Dispatcher.InvokeAsync(() =>
             this.virualDesktopService.Pin(this));
+
+    private void NotifyIcon_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        var notifyIcon = (NotifyIcon)sender;
+        if (notifyIcon.Menu is not null)
+        {
+            notifyIcon.Menu.DataContext = e.NewValue;
+        }
+    }
 }
 
 [ValueConversion(typeof(System.Drawing.Color), typeof(System.Windows.Media.Color))]

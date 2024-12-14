@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.Logging;
 using System.Drawing;
 using System.IO;
 using System.Text.Encodings.Web;
@@ -23,6 +24,7 @@ class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
     private static readonly string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "VdLabel");
     private static readonly string configPath = Path.Combine(baseDir, "config.json");
     private static readonly string updateInfoPath = Path.Combine(baseDir, "update.json");
+    private readonly AsyncNonKeyedLocker locker = new();
 
     private static readonly JsonSerializerOptions options = new()
     {
@@ -70,6 +72,7 @@ class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
 
     public async ValueTask Save(Config config)
     {
+        using var l = await this.locker.LockAsync().ConfigureAwait(false);
         Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
         using (var fs = File.Create(configPath))
         {

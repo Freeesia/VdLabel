@@ -159,6 +159,10 @@ partial class MainViewModel : ObservableObject
     public Task CheckUpdate(CancellationToken token)
         => this.updateChecker.Check(token);
 
+    [RelayCommand]
+    public Task ShowDesktopCagalog()
+        => this.presentationService.OpenWindowAsync<DesktopCatalogViewModel>();
+
     partial void OnIsStartupChanged(bool value)
     {
         var exe = Assembly.GetExecutingAssembly();
