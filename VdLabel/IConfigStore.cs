@@ -42,6 +42,7 @@ class ConfigStore(ILogger<ConfigStore> logger) : IConfigStore
         {
             if (File.Exists(configPath))
             {
+                using var l = await this.locker.LockAsync().ConfigureAwait(false);
                 using var fs = File.OpenRead(configPath);
                 config = await JsonSerializer.DeserializeAsync<Config>(fs, options).ConfigureAwait(false);
             }
