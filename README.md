@@ -52,6 +52,9 @@ Windowsの起動時に自動的に起動するように設定できます。
 #### 現在の仮想デスクトップの表示
 
 `Win + Ctrl + Up`キーで現在の仮想デスクトップのラベルを表示します。
+> [!IMPORTANT]
+> Windows 10 では`Win + Up`が優先されてしまうので、`Win + Alt + Up`に割り当てられます
+
 ![Win+Ctrl+Up](assets/win+ctrl+up.gif)
 
 #### 仮想デスクトップの切り替え
@@ -62,6 +65,16 @@ Windowsの起動時に自動的に起動するように設定できます。
 * `Win + Ctrl + Alt + テンキー(0-9)` キーで11-20個目までの仮想デスクトップに切り替えます。
 
 ![ショートカット切り替え](assets/switch_shortcut.gif)
+
+#### 一覧から切り替え
+
+`Win + Ctrl + Down`で仮想デスクトップ一覧を表示して、方向キーで仮想デスクトップを切り替えることができます。
+`Enter`か`Esc`で一覧を閉じます。
+> [!IMPORTANT]
+> Windows 10 では`Win + Down`が優先されてしまうので、`Win + Alt + Down`に割り当てられます
+
+
+![一覧から切り替え](https://github.com/user-attachments/assets/305336c0-d902-4f32-9471-a349a8abd965)
 
 ## 設定
 
