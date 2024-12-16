@@ -48,7 +48,8 @@
                         HorizontalAlignment="Center"
                         DockPanel.Dock="{Binding Position, Mode=OneWay}"
                         FontSize="28"
-                        Text="{Binding Label}" />
+                        Text="{Binding Label}"
+                        TextWrapping="Wrap" />
                     <ui:Image
                         CornerRadius="8"
                         Focusable="False"
