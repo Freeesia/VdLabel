@@ -1,4 +1,5 @@
-﻿using Kamishibai;
+﻿using System.IO;
+using Kamishibai;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VdLabel;
@@ -25,7 +26,14 @@ builder.Services
     .AddPresentation<OverlayWindow, OverlayViewModel>()
     .AddPresentation<TargetWindowOverlay, TargetWindowViewModel>();
 var app = builder.Build();
-app.Startup += static (s, e) => VirtualDesktop.Configure();
+app.Startup += static (s, e) => VirtualDesktop.Configure(new()
+{
+    CompiledAssemblySaveDirectory = new(Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "StudioFreesia",
+        "VdLabel",
+        "assemblies")),
+});
 
 using var mutex = new Mutex(false, "VdLael", out var createdNew);
 if (!createdNew)
