@@ -44,11 +44,13 @@
             <DataTemplate>
                 <DockPanel HorizontalAlignment="Center">
                     <emoji:TextBlock
+                        MaxHeight="120"
                         Margin="8"
                         HorizontalAlignment="Center"
                         DockPanel.Dock="{Binding Position, Mode=OneWay}"
                         FontSize="28"
                         Text="{Binding Label}"
+                        TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                     <ui:Image
                         CornerRadius="8"
