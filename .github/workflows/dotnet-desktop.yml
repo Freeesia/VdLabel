@@ -102,7 +102,7 @@ jobs:
             -override package-information.json \
             -i VdLabel/VdLabel.csproj \
             -d licenses \
-            -fo licenses/third-party-licenses.md
+            -fo licenses/third-party-licenses.txt
       - uses: actions/upload-artifact@v4
         with:
           name: licenses
