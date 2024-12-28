@@ -1,0 +1,6 @@
+[
+	"*Analyzers",
+	"Microsoft-WindowsAPICodePack-*",
+	"Microsoft.Windows.SDK.*",
+	"Microsoft.Windows.WDK.*"
+]

@@ -85,7 +85,7 @@ jobs:
           name: VdLabel${{ matrix.self && '-full' || '' }}-${{ steps.gitversion.outputs.fullSemVer }}
           path: publish\
   license:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,12 +97,12 @@ jobs:
             ${{ runner.os }}-licenses-
       - run: |
           dotnet tool restore
-          dotnet project-licenses -t -u -m -e \
-            --packages-filter /Analyzers$/ \
-            --include-project-file \
-            --manual-package-information manual-package-information.json \
-            -i VdLabel \
-            -f licenses
+          dotnet nuget-license -t \
+            -ignore ignore-packages.json \
+            -override package-information.json \
+            -i VdLabel/VdLabel.csproj \
+            -d licenses \
+            -fo licenses/third-party-licenses.md
       - uses: actions/upload-artifact@v4
         with:
           name: licenses

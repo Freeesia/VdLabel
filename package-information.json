@@ -1,0 +1,12 @@
+[
+  {
+    "Id": "JeremyAnsel.HLSL.Targets",
+    "Version": "1.0.13",
+    "License": "MIT"
+  },
+  {
+    "Id": "PixiEditor.ColorPicker",
+    "Version": "3.4.1",
+    "License": "MIT"
+  }
+]
