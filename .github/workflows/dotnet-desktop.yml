@@ -97,11 +97,11 @@ jobs:
             ${{ runner.os }}-licenses-
       - run: |
           dotnet tool restore
-          dotnet nuget-license -t ^
-            -ignore ignore-packages.json ^
-            -override package-information.json ^
-            -i VdLabel/VdLabel.csproj ^
-            -d licenses ^
+          dotnet nuget-license -t `
+            -ignore ignore-packages.json `
+            -override package-information.json `
+            -i VdLabel/VdLabel.csproj `
+            -d licenses `
             -fo licenses/third-party-licenses.txt
       - uses: actions/upload-artifact@v4
         with:
