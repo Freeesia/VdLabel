@@ -35,6 +35,7 @@
     </PackageReference>
     <PackageReference Include="ProcessX" Version="1.5.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Slions.VirtualDesktop.WPF" Version="6.9.2" />
     <PackageReference Include="System.Management" Version="9.0.1" />
     <PackageReference Include="WPF-UI" Version="4.0.3" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
@@ -43,10 +44,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Lib\VirtualDesktop\src\VirtualDesktop.WPF\VirtualDesktop.WPF.csproj" />
   </ItemGroup>
 
   <ItemGroup>
