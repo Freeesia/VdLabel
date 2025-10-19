@@ -31,7 +31,11 @@ app.Startup += static (s, e) => VirtualDesktop.Configure(new()
     CompiledAssemblySaveDirectory = new(Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "StudioFreesia",
+#if DEBUG
+        "VdLabel-debug",
+#else
         "VdLabel",
+#endif
         "assemblies")),
 });
 
