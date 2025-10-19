@@ -100,7 +100,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             var c = config.DesktopConfigs[i];
             if (this.windows.TryGetValue(c.Id, out var pair2))
             {
-                pair2.vm.Name = c.Name ?? $"Desktop {i}";
+                pair2.vm.Name = c.Name ?? string.Format(Properties.Resources.Desktop, i);
             }
         }
     }
@@ -111,7 +111,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
               var config = await this.configStore.Load();
               config.DesktopConfigs.Add(new() { Id = e.Id });
               await this.configStore.Save(config);
-              OpenOverlay(e, $"Desktop {config.DesktopConfigs.Count - 1}");
+              OpenOverlay(e, string.Format(Properties.Resources.Desktop, config.DesktopConfigs.Count - 1));
           });
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -171,7 +171,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             c.Name = name;
             if (string.IsNullOrEmpty(name))
             {
-                name = $"Desktop {i + 1}";
+                name = string.Format(Properties.Resources.Desktop, i + 1);
             }
             OpenOverlay(desktop, name);
         }
