@@ -200,4 +200,19 @@
   <data name="ImageFileFilter" xml:space="preserve">
     <value>Image files (*.bmp;*.jpg;*.jpeg;*.png)|*.bmp;*.jpg;*.jpeg;*.png|All files (*.*)|*.*</value>
   </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>VdLabel is already running</value>
+  </data>
+  <data name="NewVersionReleased" xml:space="preserve">
+    <value>New version {0} has been released</value>
+  </data>
+  <data name="InstallUpdatePrompt" xml:space="preserve">
+    <value>Would you like to install the update?</value>
+  </data>
+  <data name="Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="SkipThisVersion" xml:space="preserve">
+    <value>Skip this version</value>
+  </data>
 </root>

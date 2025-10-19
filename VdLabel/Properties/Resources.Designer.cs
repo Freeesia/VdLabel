@@ -455,5 +455,50 @@ namespace VdLabel.Properties {
                 return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to すでにVdLabelが起動中です.
+        /// </summary>
+        internal static string AlreadyRunning {
+            get {
+                return ResourceManager.GetString("AlreadyRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 新しいバージョン {0} がリリースされました.
+        /// </summary>
+        internal static string NewVersionReleased {
+            get {
+                return ResourceManager.GetString("NewVersionReleased", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 更新版をインストールしますか？.
+        /// </summary>
+        internal static string InstallUpdatePrompt {
+            get {
+                return ResourceManager.GetString("InstallUpdatePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to インストール.
+        /// </summary>
+        internal static string Install {
+            get {
+                return ResourceManager.GetString("Install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to このバージョンはスキップ.
+        /// </summary>
+        internal static string SkipThisVersion {
+            get {
+                return ResourceManager.GetString("SkipThisVersion", resourceCulture);
+            }
+        }
     }
 }

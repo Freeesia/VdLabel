@@ -134,16 +134,16 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
     private static void ShowUpdateNotification(string version, string url, string path, bool supress)
     {
         var builder = new ToastContentBuilder()
-            .AddText($"新しいバージョン {version} がリリースされました", AdaptiveTextStyle.Title)
-            .AddText($"更新版をインストールしますか？")
+            .AddText(string.Format(Properties.Resources.NewVersionReleased, version), AdaptiveTextStyle.Title)
+            .AddText(Properties.Resources.InstallUpdatePrompt)
             .AddArgument(nameof(url), url)
             .AddArgument(nameof(path), path)
             .AddArgument(nameof(version), version)
             .AddButton(new ToastButton()
                 .AddArgument("action", ToastActions.Install)
-                .SetContent("インストール"))
+                .SetContent(Properties.Resources.Install))
             .AddButton(new ToastButton()
-                .SetContent("更新内容の確認")
+                .SetContent(Properties.Resources.CheckReleaseNotes)
                 .AddArgument("action", ToastActions.OpenBrowser)
                 .SetBackgroundActivation());
 
@@ -153,7 +153,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
             args.Add(nameof(url), url);
             args.Add(nameof(path), path);
             args.Add(nameof(version), version);
-            builder.Content.Actions.ContextMenuItems.Add(new("このバージョンをスキップ", args.ToString()));
+            builder.Content.Actions.ContextMenuItems.Add(new(Properties.Resources.SkipThisVersion, args.ToString()));
         }
 
         builder.Show(t =>
