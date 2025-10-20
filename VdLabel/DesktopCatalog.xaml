@@ -69,6 +69,7 @@
                 <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                 <Setter Property="AllowDrop" Value="{Binding DataContext.IsSupportedMoveDesktop, RelativeSource={RelativeSource AncestorType=ListBox}}" />
                 <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown" />
+                <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListBoxItem_PreviewMouseLeftButtonUp" />
                 <EventSetter Event="Drop" Handler="ListBoxItem_Drop" />
                 <Setter Property="Template">
                     <Setter.Value>

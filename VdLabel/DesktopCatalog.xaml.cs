@@ -78,7 +78,18 @@ public partial class DesktopCatalog : FluentWindow
         if (sender is ListBoxItem item)
         {
             item.PreviewMouseMove += ListBoxItem_PreviewMouseMove;
+            item.PreviewMouseLeftButtonUp += ListBoxItem_PreviewMouseLeftButtonUp;
         }
+    }
+
+    private void ListBoxItem_PreviewMouseLeftButtonUp(object? sender, MouseButtonEventArgs e)
+    {
+        if (sender is ListBoxItem item)
+        {
+            item.PreviewMouseMove -= ListBoxItem_PreviewMouseMove;
+            item.PreviewMouseLeftButtonUp -= ListBoxItem_PreviewMouseLeftButtonUp;
+        }
+        isDragging = false;
     }
 
     private void ListBoxItem_PreviewMouseMove(object? sender, MouseEventArgs e)
@@ -100,6 +111,7 @@ public partial class DesktopCatalog : FluentWindow
                 {
                     isDragging = true;
                     item.PreviewMouseMove -= ListBoxItem_PreviewMouseMove;
+                    item.PreviewMouseLeftButtonUp -= ListBoxItem_PreviewMouseLeftButtonUp;
                     
                     DragDrop.DoDragDrop(item, desktop, DragDropEffects.Move);
                     
