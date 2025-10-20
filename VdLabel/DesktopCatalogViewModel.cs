@@ -10,6 +10,9 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private readonly ICommandLabelService commandLabelService;
     private readonly IConfigStore configStore;
     private readonly int maxColumns;
+
+    public bool IsSupportedMoveDesktop => this.virualDesktopService.IsSupportedMoveDesktop;
+
     [ObservableProperty]
     private IReadOnlyList<DesktopViewModel> desktops = [];
     [ObservableProperty]

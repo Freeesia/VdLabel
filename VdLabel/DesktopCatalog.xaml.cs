@@ -5,6 +5,7 @@ using Windows.Win32.UI.Input.KeyboardAndMouse;
 using static Windows.Win32.PInvoke;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace VdLabel;
 
@@ -14,6 +15,8 @@ namespace VdLabel;
 public partial class DesktopCatalog : FluentWindow
 {
     private readonly IVirualDesktopService virualDesktopService;
+    private Point startPoint;
+    private bool isDragging = false;
 
     public DesktopCatalog(IVirualDesktopService virualDesktopService)
     {
@@ -59,6 +62,74 @@ public partial class DesktopCatalog : FluentWindow
         if (this.IsVisible)
         {
             Close();
+        }
+    }
+
+    private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        startPoint = e.GetPosition(null);
+        isDragging = false;
+
+        if (sender is ListBoxItem item)
+        {
+            item.PreviewMouseMove += ListBoxItem_PreviewMouseMove;
+        }
+    }
+
+    private void ListBoxItem_PreviewMouseMove(object? sender, MouseEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        if (e.LeftButton == MouseButtonState.Pressed && !isDragging)
+        {
+            Point currentPosition = e.GetPosition(null);
+            Vector diff = startPoint - currentPosition;
+
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (sender is ListBoxItem item && item.Content is DesktopViewModel desktop)
+                {
+                    isDragging = true;
+                    item.PreviewMouseMove -= ListBoxItem_PreviewMouseMove;
+                    
+                    DragDrop.DoDragDrop(item, desktop, DragDropEffects.Move);
+                    
+                    isDragging = false;
+                }
+            }
+        }
+    }
+
+    private void ListBoxItem_Drop(object sender, DragEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        if (e.Data.GetData(typeof(DesktopViewModel)) is DesktopViewModel sourceDesktop &&
+            sender is ListBoxItem targetItem &&
+            targetItem.Content is DesktopViewModel targetDesktop &&
+            sourceDesktop.Id != targetDesktop.Id &&
+            this.DataContext is DesktopCatalogViewModel viewModel)
+        {
+            var sourceIndex = viewModel.Desktops.ToList().FindIndex(d => d.Id == sourceDesktop.Id);
+            var targetIndex = viewModel.Desktops.ToList().FindIndex(d => d.Id == targetDesktop.Id);
+
+            if (sourceIndex >= 0 && targetIndex >= 0)
+            {
+                // VirtualDesktop API uses 0-based index
+                this.virualDesktopService.MoveDesktop(sourceDesktop.Id, targetIndex);
+            }
         }
     }
 }
