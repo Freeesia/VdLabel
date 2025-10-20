@@ -172,12 +172,12 @@ partial class MainViewModel : ObservableObject
         if (value)
         {
             key.SetValue(name, path);
-            this.dialogService.ShowAlertAsync("自動起動", $"{name}を自動起動に登録しました。", "OK");
+            this.dialogService.ShowAlertAsync(Properties.Resources.AutoStartup, string.Format(Properties.Resources.AutoStartupRegistered, name), Properties.Resources.OK);
         }
         else
         {
             key.DeleteValue(name, false);
-            this.dialogService.ShowAlertAsync("自動起動", $"{name}の自動起動を解除しました。", "OK");
+            this.dialogService.ShowAlertAsync(Properties.Resources.AutoStartup, string.Format(Properties.Resources.AutoStartupUnregistered, name), Properties.Resources.OK);
         }
     }
 
@@ -208,7 +208,7 @@ partial class DesktopConfigViewModel(
     public bool IsPin => this.Id == Guid.Empty;
     public bool IsNotPin => !this.IsPin;
 
-    public string Title => this.IsPin ? "全デスクトップ" : string.IsNullOrEmpty(this.Name) ? this.Id.ToString() : this.Name;
+    public string Title => this.IsPin ? Properties.Resources.AllDesktops : string.IsNullOrEmpty(this.Name) ? this.Id.ToString() : this.Name;
 
     [ObservableProperty]
     private bool isVisibleName = desktopConfig.IsVisibleName;
@@ -248,7 +248,7 @@ partial class DesktopConfigViewModel(
             AddToRecent = true,
             CheckFileExists = true,
             ForcePreviewPane = true,
-            Filter = "Image files (*.bmp;*.jpg;*.jpeg;*.png)|*.bmp;*.jpg;*.jpeg;*.png|All files (*.*)|*.*"
+            Filter = Properties.Resources.ImageFileFilter
         };
 
         if (openFileDialog.ShowDialog() != true)
@@ -273,11 +273,11 @@ partial class DesktopConfigViewModel(
         try
         {
             var result = await this.commandLabelService.ExecuteCommand(command, this.Utf8Command);
-            await this.dialogService.ShowAlertAsync("コマンド成功", result, "OK");
+            await this.dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
         }
         catch (Exception e)
         {
-            await this.dialogService.ShowAlertAsync("コマンド失敗", e.Message, "OK");
+            await this.dialogService.ShowAlertAsync(Properties.Resources.CommandFailed, e.Message, Properties.Resources.OK);
         }
     }
 

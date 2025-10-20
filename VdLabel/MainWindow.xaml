@@ -7,6 +7,7 @@
     xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
     xmlns:local="clr-namespace:VdLabel"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="clr-namespace:VdLabel.Properties"
     xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="VdLabel"
@@ -38,12 +39,13 @@
         <DockPanel>
             <ui:TitleBar
                 Title="{Binding Title}"
+                Height="32"
                 DockPanel.Dock="Top"
                 ShowMinimize="False">
                 <ui:TitleBar.Icon>
                     <ui:ImageIcon Source="/app.ico" />
                 </ui:TitleBar.Icon>
-                <ui:TitleBar.Header>
+                <ui:TitleBar.TrailingContent>
                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsUpdatable, Converter={StaticResource b2vConv}}">
                         <ui:DropDownButton
                             Width="44"
@@ -58,13 +60,13 @@
                             Style="{StaticResource DefaultUiButtonStyle}"
                             Visibility="{Binding HasUpdate, Converter={StaticResource b2vConv}}">
                             <ui:DropDownButton.ToolTip>
-                                <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} がリリースされました}" />
+                                <ui:TextBlock Text="{Binding NewVersion, StringFormat={x:Static p:Resources.NewVersionAvailable}}" />
                             </ui:DropDownButton.ToolTip>
                             <ui:DropDownButton.Flyout>
                                 <ContextMenu>
                                     <ui:MenuItem Command="{Binding InstallUpdateCommand}">
                                         <ui:MenuItem.Header>
-                                            <ui:TextBlock Text="{Binding NewVersion, StringFormat=新しいバージョン: {0} のインストール}" />
+                                            <ui:TextBlock Text="{Binding NewVersion, StringFormat={x:Static p:Resources.InstallNewVersion}}" />
                                         </ui:MenuItem.Header>
                                         <ui:MenuItem.Icon>
                                             <ui:SymbolIcon
@@ -75,7 +77,7 @@
                                     </ui:MenuItem>
                                     <ui:MenuItem
                                         Command="{Binding OpenReleaseNotesCommand}"
-                                        Header="更新内容の確認"
+                                        Header="{x:Static p:Resources.CheckReleaseNotes}"
                                         Icon="{ui:SymbolIcon Globe24}" />
                                 </ContextMenu>
                             </ui:DropDownButton.Flyout>
@@ -90,17 +92,17 @@
                             Command="{Binding CheckUpdateCommand}"
                             CornerRadius="0"
                             Icon="{ui:SymbolIcon ArrowSync24}"
-                            ToolTip="新しいバージョンのチェック"
+                            ToolTip="{x:Static p:Resources.CheckNewVersion}"
                             Visibility="{Binding HasUpdate, Converter={x:Static local:FalseToVisibilityConverter.Default}}" />
                     </StackPanel>
-                </ui:TitleBar.Header>
+                </ui:TitleBar.TrailingContent>
             </ui:TitleBar>
             <tray:NotifyIcon DataContextChanged="NotifyIcon_DataContextChanged">
                 <tray:NotifyIcon.Menu>
                     <ContextMenu>
-                        <MenuItem Click="MenuItem_Click" Header="設定" />
-                        <MenuItem Command="{Binding ShowDesktopCagalogCommand}" Header="デスクトップ一覧" />
-                        <MenuItem Click="MenuItem_Click_1" Header="終了" />
+                        <MenuItem Click="MenuItem_Click" Header="{x:Static p:Resources.Settings}" />
+                        <MenuItem Command="{Binding ShowDesktopCagalogCommand}" Header="{x:Static p:Resources.DesktopList}" />
+                        <MenuItem Click="MenuItem_Click_1" Header="{x:Static p:Resources.Exit}" />
                     </ContextMenu>
                 </tray:NotifyIcon.Menu>
             </tray:NotifyIcon>
@@ -111,20 +113,20 @@
             <DockPanel Margin="4,0" DockPanel.Dock="Bottom">
                 <Button
                     Command="{Binding SaveCommand}"
-                    Content="適用"
+                    Content="{x:Static p:Resources.Apply}"
                     DockPanel.Dock="Right" />
                 <ui:Button
                     Command="{Binding ReloadDesktopsCommand}"
                     DockPanel.Dock="Left"
                     Icon="{ui:SymbolIcon ArrowCounterclockwise32}"
-                    ToolTip="デスクトップ一覧の更新" />
+                    ToolTip="{x:Static p:Resources.RefreshDesktopList}" />
                 <ui:ToggleSwitch
                     Margin="4"
-                    Content="PC起動時に自動起動"
+                    Content="{x:Static p:Resources.AutoStartOnBoot}"
                     IsChecked="{Binding IsStartup, Mode=TwoWay}" />
             </DockPanel>
             <TabControl>
-                <TabItem Header="全般設定">
+                <TabItem Header="{x:Static p:Resources.GeneralSettings}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200" />
@@ -143,7 +145,7 @@
                         <Label
                             Grid.Row="0"
                             Grid.Column="0"
-                            Content="表示位置" />
+                            Content="{x:Static p:Resources.DisplayPosition}" />
                         <ComboBox
                             Grid.Row="0"
                             Grid.Column="1"
@@ -153,7 +155,7 @@
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
-                            Content="フォントサイズ" />
+                            Content="{x:Static p:Resources.FontSize}" />
                         <ui:NumberBox
                             Grid.Row="1"
                             Grid.Column="1"
@@ -162,7 +164,7 @@
                         <Label
                             Grid.Row="2"
                             Grid.Column="0"
-                            Content="表示サイズ" />
+                            Content="{x:Static p:Resources.DisplaySize}" />
                         <ui:NumberBox
                             Grid.Row="2"
                             Grid.Column="1"
@@ -171,7 +173,7 @@
                         <Label
                             Grid.Row="3"
                             Grid.Column="0"
-                            Content="背景色" />
+                            Content="{x:Static p:Resources.BackgroundColor}" />
                         <cp:PortableColorPicker
                             Grid.Row="3"
                             Grid.Column="1"
@@ -181,7 +183,7 @@
                         <Label
                             Grid.Row="4"
                             Grid.Column="0"
-                            Content="文字色" />
+                            Content="{x:Static p:Resources.TextColor}" />
                         <cp:PortableColorPicker
                             Grid.Row="4"
                             Grid.Column="1"
@@ -191,7 +193,7 @@
                         <Label
                             Grid.Row="5"
                             Grid.Column="0"
-                            Content="表示時間" />
+                            Content="{x:Static p:Resources.DisplayDuration}" />
                         <DockPanel
                             Grid.Row="5"
                             Grid.Column="1"
@@ -200,13 +202,13 @@
                                 Margin="4"
                                 VerticalAlignment="Center"
                                 DockPanel.Dock="Right"
-                                Text="秒" />
+                                Text="{x:Static p:Resources.Seconds}" />
                             <ui:NumberBox Value="{Binding Config.Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </DockPanel>
                         <Label
                             Grid.Row="6"
                             Grid.Column="0"
-                            Content="名前表示位置" />
+                            Content="{x:Static p:Resources.NameDisplayPosition}" />
                         <ComboBox
                             Grid.Row="6"
                             Grid.Column="1"
@@ -216,7 +218,7 @@
                         <Label
                             Grid.Row="7"
                             Grid.Column="0"
-                            Content="コマンド間隔" />
+                            Content="{x:Static p:Resources.CommandInterval}" />
                         <DockPanel
                             Grid.Row="7"
                             Grid.Column="1"
@@ -225,12 +227,12 @@
                                 Margin="4"
                                 VerticalAlignment="Center"
                                 DockPanel.Dock="Right"
-                                Text="秒" />
+                                Text="{x:Static p:Resources.Seconds}" />
                             <ui:NumberBox Value="{Binding Config.CommandInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </DockPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="デスクトップ設定">
+                <TabItem Header="{x:Static p:Resources.DesktopSettings}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200" />
@@ -279,7 +281,7 @@
                                 <Label
                                     Grid.Row="0"
                                     Grid.Column="0"
-                                    Content="ID"
+                                    Content="{x:Static p:Resources.ID}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <TextBox
                                     Grid.Row="0"
@@ -291,7 +293,7 @@
                                 <Label
                                     Grid.Row="1"
                                     Grid.Column="0"
-                                    Content="名前"
+                                    Content="{x:Static p:Resources.Name}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <ui:TextBox
                                     Grid.Row="1"
@@ -303,8 +305,8 @@
                                 <Label
                                     Grid.Row="2"
                                     Grid.Column="0"
-                                    Content="名前コマンド"
-                                    ToolTip="コマンドの出力結果を名前に反映させます"
+                                    Content="{x:Static p:Resources.NameCommand}"
+                                    ToolTip="{x:Static p:Resources.NameCommandTooltip}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <DockPanel
                                     Grid.Row="2"
@@ -313,7 +315,7 @@
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}">
                                     <Button
                                         Command="{Binding TestCommandCommand}"
-                                        Content="テスト"
+                                        Content="{x:Static p:Resources.Test}"
                                         DockPanel.Dock="Right" />
                                     <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" />
                                 </DockPanel>
@@ -321,29 +323,29 @@
                                     Grid.Row="3"
                                     Grid.Column="1"
                                     Margin="4"
-                                    Content="コマンドの結果をUTF-8として受け取る"
+                                    Content="{x:Static p:Resources.ReceiveCommandAsUtf8}"
                                     IsChecked="{Binding Utf8Command, Mode=TwoWay}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <ui:InfoBar
-                                    Title="注意"
+                                    Title="{x:Static p:Resources.Warning}"
                                     Grid.Row="4"
                                     Grid.Column="1"
                                     IsClosable="False"
                                     IsOpen="{Binding ShowNameWarning}"
-                                    Message="現在のWindowsバージョンでは仮想デスクトップの名前同期はサポートされません"
+                                    Message="{x:Static p:Resources.NameSyncNotSupported}"
                                     Severity="Warning"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <CheckBox
                                     Grid.Row="5"
                                     Grid.Column="1"
                                     Margin="4"
-                                    Content="画像が設定されているときに名前を表示するかどうか"
+                                    Content="{x:Static p:Resources.ShowNameWhenImageSet}"
                                     IsChecked="{Binding IsVisibleName}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <Label
                                     Grid.Row="6"
                                     Grid.Column="0"
-                                    Content="切り替え通知画像"
+                                    Content="{x:Static p:Resources.SwitchNotificationImage}"
                                     Visibility="{Binding IsNotPin, Converter={StaticResource b2vConv}}" />
                                 <DockPanel
                                     Grid.Row="6"
@@ -357,11 +359,11 @@
                                     <Button
                                         Margin="4,0"
                                         Command="{Binding PickImageCommand}"
-                                        Content="選択"
+                                        Content="{x:Static p:Resources.Select}"
                                         DockPanel.Dock="Right" />
                                     <ui:TextBox
                                         IsReadOnly="True"
-                                        PlaceholderText="画像パス"
+                                        PlaceholderText="{x:Static p:Resources.ImagePath}"
                                         Text="{Binding ImagePath}" />
                                 </DockPanel>
                                 <ui:Image
@@ -374,14 +376,14 @@
                                 <Label
                                     Grid.Row="8"
                                     Grid.Column="0"
-                                    Content="対象ウィンドウ" />
+                                    Content="{x:Static p:Resources.TargetWindow}" />
                                 <Button
                                     Grid.Row="9"
                                     Grid.Column="0"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
                                     Command="{Binding AddTargetWindowCommand}"
-                                    Content="追加" />
+                                    Content="{x:Static p:Resources.Add}" />
                                 <ItemsControl
                                     Grid.Row="8"
                                     Grid.RowSpan="2"

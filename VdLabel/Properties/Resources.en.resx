@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" use="preserve" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- MainWindow strings -->
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="AutoStartOnBoot" xml:space="preserve">
+    <value>Auto-start on PC boot</value>
+  </data>
+  <data name="RefreshDesktopList" xml:space="preserve">
+    <value>Refresh desktop list</value>
+  </data>
+  <data name="CheckNewVersion" xml:space="preserve">
+    <value>Check for new version</value>
+  </data>
+  <data name="NewVersionAvailable" xml:space="preserve">
+    <value>New version: {0} has been released</value>
+  </data>
+  <data name="InstallNewVersion" xml:space="preserve">
+    <value>Install new version: {0}</value>
+  </data>
+  <data name="CheckReleaseNotes" xml:space="preserve">
+    <value>View release notes</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="DesktopList" xml:space="preserve">
+    <value>Desktop List</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  
+  <!-- Tab headers -->
+  <data name="GeneralSettings" xml:space="preserve">
+    <value>General Settings</value>
+  </data>
+  <data name="DesktopSettings" xml:space="preserve">
+    <value>Desktop Settings</value>
+  </data>
+  
+  <!-- General settings labels -->
+  <data name="DisplayPosition" xml:space="preserve">
+    <value>Display Position</value>
+  </data>
+  <data name="FontSize" xml:space="preserve">
+    <value>Font Size</value>
+  </data>
+  <data name="DisplaySize" xml:space="preserve">
+    <value>Display Size</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Background Color</value>
+  </data>
+  <data name="TextColor" xml:space="preserve">
+    <value>Text Color</value>
+  </data>
+  <data name="DisplayDuration" xml:space="preserve">
+    <value>Display Duration</value>
+  </data>
+  <data name="NameDisplayPosition" xml:space="preserve">
+    <value>Name Display Position</value>
+  </data>
+  <data name="CommandInterval" xml:space="preserve">
+    <value>Command Interval</value>
+  </data>
+  <data name="Seconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  
+  <!-- Desktop settings labels -->
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NameCommand" xml:space="preserve">
+    <value>Name Command</value>
+  </data>
+  <data name="NameCommandTooltip" xml:space="preserve">
+    <value>Reflects the command output in the name</value>
+  </data>
+  <data name="Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="ReceiveCommandAsUtf8" xml:space="preserve">
+    <value>Receive command result as UTF-8</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="NameSyncNotSupported" xml:space="preserve">
+    <value>Virtual desktop name synchronization is not supported on the current Windows version</value>
+  </data>
+  <data name="ShowNameWhenImageSet" xml:space="preserve">
+    <value>Show name when image is set</value>
+  </data>
+  <data name="SwitchNotificationImage" xml:space="preserve">
+    <value>Switch Notification Image</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="ImagePath" xml:space="preserve">
+    <value>Image Path</value>
+  </data>
+  <data name="TargetWindow" xml:space="preserve">
+    <value>Target Window</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  
+  <!-- Dialog messages -->
+  <data name="AutoStartup" xml:space="preserve">
+    <value>Auto Startup</value>
+  </data>
+  <data name="AutoStartupRegistered" xml:space="preserve">
+    <value>{0} has been registered for auto-startup.</value>
+  </data>
+  <data name="AutoStartupUnregistered" xml:space="preserve">
+    <value>Auto-startup for {0} has been unregistered.</value>
+  </data>
+  <data name="CommandSuccess" xml:space="preserve">
+    <value>Command Succeeded</value>
+  </data>
+  <data name="CommandFailed" xml:space="preserve">
+    <value>Command Failed</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="AllDesktops" xml:space="preserve">
+    <value>All Desktops</value>
+  </data>
+  <data name="Desktop" xml:space="preserve">
+    <value>Desktop {0}</value>
+  </data>
+  <data name="ImageFileFilter" xml:space="preserve">
+    <value>Image files (*.bmp;*.jpg;*.jpeg;*.png)|*.bmp;*.jpg;*.jpeg;*.png|All files (*.*)|*.*</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>VdLabel is already running</value>
+  </data>
+  <data name="NewVersionReleased" xml:space="preserve">
+    <value>New version {0} has been released</value>
+  </data>
+  <data name="InstallUpdatePrompt" xml:space="preserve">
+    <value>Would you like to install the update?</value>
+  </data>
+  <data name="Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="SkipThisVersion" xml:space="preserve">
+    <value>Skip this version</value>
+  </data>
+</root>
