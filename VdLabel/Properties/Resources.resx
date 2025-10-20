@@ -58,7 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  
   <!-- MainWindow strings -->
   <data name="Apply" xml:space="preserve">
     <value>適用</value>
@@ -90,7 +89,6 @@
   <data name="Exit" xml:space="preserve">
     <value>終了</value>
   </data>
-  
   <!-- Tab headers -->
   <data name="GeneralSettings" xml:space="preserve">
     <value>全般設定</value>
@@ -98,7 +96,6 @@
   <data name="DesktopSettings" xml:space="preserve">
     <value>デスクトップ設定</value>
   </data>
-  
   <!-- General settings labels -->
   <data name="DisplayPosition" xml:space="preserve">
     <value>表示位置</value>
@@ -127,7 +124,6 @@
   <data name="Seconds" xml:space="preserve">
     <value>秒</value>
   </data>
-  
   <!-- Desktop settings labels -->
   <data name="ID" xml:space="preserve">
     <value>ID</value>
@@ -171,7 +167,6 @@
   <data name="Add" xml:space="preserve">
     <value>追加</value>
   </data>
-  
   <!-- Dialog messages -->
   <data name="AutoStartup" xml:space="preserve">
     <value>自動起動</value>
@@ -214,5 +209,8 @@
   </data>
   <data name="SkipThisVersion" xml:space="preserve">
     <value>このバージョンはスキップ</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>削除</value>
   </data>
 </root>

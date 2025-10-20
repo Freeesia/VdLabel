@@ -270,12 +270,12 @@
                                 Orientation="Horizontal">
                                 <ui:Button
                                     Command="{Binding CreateDesktopCommand}"
-                                    Content="追加"
+                                    Content="{x:Static p:Resources.Add}"
                                     Icon="{ui:SymbolIcon Add24}" />
                                 <ui:Button
                                     Margin="4,0,0,0"
                                     Command="{Binding RemoveDesktopCommand}"
-                                    Content="削除"
+                                    Content="{x:Static p:Resources.Remove}"
                                     Icon="{ui:SymbolIcon Delete24}" />
                             </StackPanel>
                         </Grid>
