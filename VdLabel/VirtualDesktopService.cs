@@ -228,6 +228,15 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public Guid GetCurrent()
         => VirtualDesktop.Current.Id;
+
+    public void CreateDesktop()
+        => VirtualDesktop.Create();
+
+    public void RemoveDesktop(Guid id)
+    {
+        var desktop = VirtualDesktop.FromId(id);
+        desktop?.Remove();
+    }
 }
 
 public interface IVirualDesktopService
@@ -244,6 +253,8 @@ public interface IVirualDesktopService
     void Switch(Guid id);
     string? GetWallpaperPath(Guid id);
     Guid GetCurrent();
+    void CreateDesktop();
+    void RemoveDesktop(Guid id);
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs

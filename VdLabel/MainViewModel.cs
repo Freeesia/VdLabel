@@ -26,6 +26,7 @@ partial class MainViewModel : ObservableObject
     private Config? config;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemoveDesktopCommand))]
     private DesktopConfigViewModel? selectedDesktopConfig;
 
     [ObservableProperty]
@@ -162,6 +163,23 @@ partial class MainViewModel : ObservableObject
     [RelayCommand]
     public Task ShowDesktopCagalog()
         => this.presentationService.OpenWindowAsync<DesktopCatalogViewModel>();
+
+    [RelayCommand]
+    public void CreateDesktop()
+        => this.virualDesktopService.CreateDesktop();
+
+    [RelayCommand(CanExecute = nameof(CanRemoveDesktop))]
+    public void RemoveDesktop()
+    {
+        if (this.SelectedDesktopConfig is null || this.SelectedDesktopConfig.IsPin)
+        {
+            return;
+        }
+        this.virualDesktopService.RemoveDesktop(this.SelectedDesktopConfig.Id);
+    }
+
+    private bool CanRemoveDesktop()
+        => this.SelectedDesktopConfig is not null && this.SelectedDesktopConfig.IsNotPin;
 
     partial void OnIsStartupChanged(bool value)
     {
