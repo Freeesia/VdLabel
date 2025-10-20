@@ -412,6 +412,15 @@ namespace VdLabel.Properties {
         }
         
         /// <summary>
+        ///   削除 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   秒 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Seconds {

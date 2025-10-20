@@ -239,26 +239,46 @@
                             <ColumnDefinition Width="6" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ui:ListView
-                            Grid.Column="0"
-                            Margin="4"
-                            ItemsSource="{Binding DesktopConfigs}"
-                            SelectedItem="{Binding SelectedDesktopConfig}">
-                            <ui:ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <DockPanel>
-                                        <Image
-                                            Height="16"
-                                            DockPanel.Dock="Left"
-                                            Source="{Binding ImagePath}" />
-                                        <emoji:TextBlock
-                                            Margin="4,0"
-                                            Text="{Binding Title}"
-                                            TextTrimming="CharacterEllipsis" />
-                                    </DockPanel>
-                                </DataTemplate>
-                            </ui:ListView.ItemTemplate>
-                        </ui:ListView>
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ui:ListView
+                                Grid.Row="0"
+                                Margin="4"
+                                ItemsSource="{Binding DesktopConfigs}"
+                                SelectedItem="{Binding SelectedDesktopConfig}">
+                                <ui:ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <Image
+                                                Height="16"
+                                                DockPanel.Dock="Left"
+                                                Source="{Binding ImagePath}" />
+                                            <emoji:TextBlock
+                                                Margin="4,0"
+                                                Text="{Binding Title}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ui:ListView.ItemTemplate>
+                            </ui:ListView>
+                            <StackPanel
+                                Grid.Row="1"
+                                Margin="4"
+                                Orientation="Horizontal">
+                                <ui:Button
+                                    Command="{Binding CreateDesktopCommand}"
+                                    Content="{x:Static p:Resources.Add}"
+                                    Icon="{ui:SymbolIcon Add24}" />
+                                <ui:Button
+                                    Margin="4,0,0,0"
+                                    Command="{Binding RemoveDesktopCommand}"
+                                    Content="{x:Static p:Resources.Remove}"
+                                    Icon="{ui:SymbolIcon Delete24}" />
+                            </StackPanel>
+                        </Grid>
                         <GridSplitter Grid.Column="1" ResizeBehavior="PreviousAndNext" />
                         <ui:DynamicScrollViewer Grid.Column="2" DataContext="{Binding SelectedDesktopConfig}">
                             <Grid Margin="4">
