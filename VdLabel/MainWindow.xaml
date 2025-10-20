@@ -39,12 +39,13 @@
         <DockPanel>
             <ui:TitleBar
                 Title="{Binding Title}"
+                Height="32"
                 DockPanel.Dock="Top"
                 ShowMinimize="False">
                 <ui:TitleBar.Icon>
                     <ui:ImageIcon Source="/app.ico" />
                 </ui:TitleBar.Icon>
-                <ui:TitleBar.Header>
+                <ui:TitleBar.TrailingContent>
                     <StackPanel Orientation="Horizontal" Visibility="{Binding IsUpdatable, Converter={StaticResource b2vConv}}">
                         <ui:DropDownButton
                             Width="44"
@@ -94,7 +95,7 @@
                             ToolTip="{x:Static p:Resources.CheckNewVersion}"
                             Visibility="{Binding HasUpdate, Converter={x:Static local:FalseToVisibilityConverter.Default}}" />
                     </StackPanel>
-                </ui:TitleBar.Header>
+                </ui:TitleBar.TrailingContent>
             </ui:TitleBar>
             <tray:NotifyIcon DataContextChanged="NotifyIcon_DataContextChanged">
                 <tray:NotifyIcon.Menu>
