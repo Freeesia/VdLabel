@@ -262,19 +262,19 @@
                                     </DataTemplate>
                                 </ui:ListView.ItemTemplate>
                             </ui:ListView>
-                            <StackPanel Grid.Row="1" Margin="4">
+                            <StackPanel
+                                Grid.Row="1"
+                                Margin="4"
+                                Orientation="Horizontal">
                                 <ui:Button
                                     Command="{Binding CreateDesktopCommand}"
                                     Content="追加"
                                     Icon="{ui:SymbolIcon Add24}" />
                                 <ui:Button
-                                    Margin="0,4,0,0"
+                                    Margin="4,0,0,0"
                                     Command="{Binding RemoveDesktopCommand}"
-                                    Icon="{ui:SymbolIcon Delete24}">
-                                    <ui:Button.Content>
-                                        <TextBlock Text="削除" />
-                                    </ui:Button.Content>
-                                </ui:Button>
+                                    Content="削除"
+                                    Icon="{ui:SymbolIcon Delete24}" />
                             </StackPanel>
                         </Grid>
                         <GridSplitter Grid.Column="1" ResizeBehavior="PreviousAndNext" />
