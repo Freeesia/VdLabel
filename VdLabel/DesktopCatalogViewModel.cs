@@ -99,7 +99,7 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
 
     public Dock Position { get; } = pos;
 
-    public string Label => this.commandLabel ?? this.desktopConfig.Name ?? $"Desktop {this.index}";
+    public string Label => this.commandLabel ?? this.desktopConfig.Name ?? string.Format(VdLabel.Properties.Resources.Desktop, this.index);
 
     public string? ImagePath => this.desktopConfig.ImagePath ?? this.wallpaperPath;
 }

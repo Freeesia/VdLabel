@@ -46,7 +46,7 @@ if (!createdNew)
     {
         Caption = "VdLabel",
         Icon = MessageBoxImage.Error,
-        Text = "すでにVdLabelが起動中です",
+        Text = VdLabel.Properties.Resources.AlreadyRunning,
     }.Show();
     return;
 }
