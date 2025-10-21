@@ -8,6 +8,7 @@ using Windows.Win32.UI.Input.KeyboardAndMouse;
 using static Windows.Win32.PInvoke;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Tray.Controls;
+using System.Windows.Controls;
 
 namespace VdLabel;
 
@@ -19,6 +20,8 @@ public partial class MainWindow : FluentWindow
     private readonly IContentDialogService contentDialogService;
     private readonly IVirualDesktopService virualDesktopService;
     private readonly IPresentationService presentationService;
+    private Point startPoint;
+    private bool isDragging = false;
 
     public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService, IPresentationService presentationService)
     {
@@ -104,6 +107,86 @@ public partial class MainWindow : FluentWindow
         if (notifyIcon.Menu is not null)
         {
             notifyIcon.Menu.DataContext = e.NewValue;
+        }
+    }
+
+    private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        startPoint = e.GetPosition(null);
+        isDragging = false;
+
+        if (sender is ListViewItem item)
+        {
+            item.PreviewMouseMove += ListViewItem_PreviewMouseMove;
+            item.PreviewMouseLeftButtonUp += ListViewItem_PreviewMouseLeftButtonUp;
+        }
+    }
+
+    private void ListViewItem_PreviewMouseLeftButtonUp(object? sender, MouseButtonEventArgs e)
+    {
+        if (sender is ListViewItem item)
+        {
+            item.PreviewMouseMove -= ListViewItem_PreviewMouseMove;
+            item.PreviewMouseLeftButtonUp -= ListViewItem_PreviewMouseLeftButtonUp;
+        }
+        isDragging = false;
+    }
+
+    private void ListViewItem_PreviewMouseMove(object? sender, MouseEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        if (e.LeftButton == MouseButtonState.Pressed && !isDragging)
+        {
+            Point currentPosition = e.GetPosition(null);
+            Vector diff = startPoint - currentPosition;
+
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (sender is ListViewItem item && item.Content is DesktopConfigViewModel desktop)
+                {
+                    isDragging = true;
+                    item.PreviewMouseMove -= ListViewItem_PreviewMouseMove;
+                    item.PreviewMouseLeftButtonUp -= ListViewItem_PreviewMouseLeftButtonUp;
+                    
+                    DragDrop.DoDragDrop(item, desktop, DragDropEffects.Move);
+                    
+                    isDragging = false;
+                }
+            }
+        }
+    }
+
+    private void ListViewItem_Drop(object sender, DragEventArgs e)
+    {
+        if (!this.virualDesktopService.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+
+        if (e.Data.GetData(typeof(DesktopConfigViewModel)) is DesktopConfigViewModel sourceDesktop &&
+            sender is ListViewItem targetItem &&
+            targetItem.Content is DesktopConfigViewModel targetDesktop &&
+            sourceDesktop.Id != targetDesktop.Id &&
+            this.DataContext is MainViewModel viewModel)
+        {
+            var sourceIndex = viewModel.DesktopConfigs.ToList().FindIndex(d => d.Id == sourceDesktop.Id);
+            var targetIndex = viewModel.DesktopConfigs.ToList().FindIndex(d => d.Id == targetDesktop.Id);
+
+            if (sourceIndex >= 0 && targetIndex >= 0)
+            {
+                // VirtualDesktop API uses 0-based index
+                this.virualDesktopService.MoveDesktop(sourceDesktop.Id, targetIndex);
+            }
         }
     }
 }

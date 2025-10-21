@@ -45,6 +45,8 @@ partial class MainViewModel : ObservableObject
 
     public bool IsUpdatable => this.updateChecker.IsUpdatable;
 
+    public bool IsSupportedMoveDesktop => this.virualDesktopService.IsSupportedMoveDesktop;
+
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();

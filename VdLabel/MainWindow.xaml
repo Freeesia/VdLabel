@@ -245,10 +245,20 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <ui:ListView
+                                x:Name="desktopListView"
                                 Grid.Row="0"
                                 Margin="4"
+                                AllowDrop="{Binding IsSupportedMoveDesktop}"
                                 ItemsSource="{Binding DesktopConfigs}"
                                 SelectedItem="{Binding SelectedDesktopConfig}">
+                                <ui:ListView.ItemContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+                                        <Setter Property="AllowDrop" Value="{Binding DataContext.IsSupportedMoveDesktop, RelativeSource={RelativeSource AncestorType=ui:ListView}}" />
+                                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />
+                                        <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListViewItem_PreviewMouseLeftButtonUp" />
+                                        <EventSetter Event="Drop" Handler="ListViewItem_Drop" />
+                                    </Style>
+                                </ui:ListView.ItemContainerStyle>
                                 <ui:ListView.ItemTemplate>
                                     <DataTemplate>
                                         <DockPanel>
