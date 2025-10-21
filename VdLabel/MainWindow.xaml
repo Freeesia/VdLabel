@@ -252,7 +252,7 @@
                                 ItemsSource="{Binding DesktopConfigs}"
                                 SelectedItem="{Binding SelectedDesktopConfig}">
                                 <ui:ListView.ItemContainerStyle>
-                                    <Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+                                    <Style BasedOn="{StaticResource {x:Type ui:ListViewItem}}" TargetType="ui:ListViewItem">
                                         <Setter Property="AllowDrop" Value="{Binding DataContext.IsSupportedMoveDesktop, RelativeSource={RelativeSource AncestorType=ui:ListView}}" />
                                         <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />
                                         <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ListViewItem_PreviewMouseLeftButtonUp" />

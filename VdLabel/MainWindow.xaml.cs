@@ -9,6 +9,7 @@ using static Windows.Win32.PInvoke;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Tray.Controls;
 using System.Windows.Controls;
+using ListViewItem = Wpf.Ui.Controls.ListViewItem;
 
 namespace VdLabel;
 

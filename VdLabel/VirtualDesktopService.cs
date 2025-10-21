@@ -247,11 +247,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
             return;
         }
         var desktop = VirtualDesktop.FromId(id);
-        if (desktop is null)
-        {
-            return;
-        }
-        VirtualDesktop.MoveDesktop(desktop, index);
+        desktop?.Move(index);
     }
 }
 
