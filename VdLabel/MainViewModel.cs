@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Data;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
@@ -113,7 +114,7 @@ partial class MainViewModel : ObservableObject
     }
 
     private void ConfigStore_Saved(object? sender, EventArgs e)
-        => Load();
+        => Application.Current.Dispatcher.BeginInvoke(Load);
 
     [RelayCommand]
     public async Task Save()
