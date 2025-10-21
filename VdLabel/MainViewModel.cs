@@ -99,12 +99,13 @@ partial class MainViewModel : ObservableObject
         try
         {
             this.Config = await this.configStore.Load();
+            var selectedId = this.SelectedDesktopConfig?.Id;
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
                 this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandLabelService));
             }
-            this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
+            this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == selectedId) ?? this.DesktopConfigs.FirstOrDefault();
         }
         finally
         {
