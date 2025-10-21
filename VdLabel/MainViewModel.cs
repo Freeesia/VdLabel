@@ -48,6 +48,8 @@ partial class MainViewModel : ObservableObject
 
     public bool IsSupportedMoveDesktop => this.virualDesktopService.IsSupportedMoveDesktop;
 
+    public DesktopListDragDropHandler DesktopDragDropHandler { get; }
+
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
@@ -68,6 +70,7 @@ partial class MainViewModel : ObservableObject
         this.virualDesktopService = virualDesktopService;
         this.commandLabelService = commandLabelService;
         this.updateChecker = updateChecker;
+        this.DesktopDragDropHandler = new DesktopListDragDropHandler(virualDesktopService);
         this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
         this.updateChecker.UpdateAvailable += UpdateChecker_UpdateAvailable;
         this.isStartup = GetIsStartup();
