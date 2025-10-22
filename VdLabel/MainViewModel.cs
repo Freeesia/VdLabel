@@ -189,7 +189,7 @@ partial class MainViewModel : ObservableObject
         var path = Environment.ProcessPath ?? throw new InvalidOperationException();
         if (value)
         {
-            key.SetValue(name, path);
+            key.SetValue(name, $"\"{path}\" --autostart");
             this.dialogService.ShowAlertAsync(Properties.Resources.AutoStartup, string.Format(Properties.Resources.AutoStartupRegistered, name), Properties.Resources.OK);
         }
         else
@@ -204,7 +204,8 @@ partial class MainViewModel : ObservableObject
         var exe = Assembly.GetExecutingAssembly();
         using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
         string? name = exe.GetName().Name;
-        return key?.GetValue(name) is { };
+        var value = key?.GetValue(name) as string;
+        return !string.IsNullOrEmpty(value);
     }
 }
 
