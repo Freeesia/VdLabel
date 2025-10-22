@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Data;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
@@ -45,6 +46,10 @@ partial class MainViewModel : ObservableObject
 
     public bool IsUpdatable => this.updateChecker.IsUpdatable;
 
+    public bool IsSupportedMoveDesktop => this.virualDesktopService.IsSupportedMoveDesktop;
+
+    public DesktopListDragDropHandler DesktopDragDropHandler { get; }
+
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
@@ -65,6 +70,7 @@ partial class MainViewModel : ObservableObject
         this.virualDesktopService = virualDesktopService;
         this.commandLabelService = commandLabelService;
         this.updateChecker = updateChecker;
+        this.DesktopDragDropHandler = new DesktopListDragDropHandler(virualDesktopService);
         this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
         this.updateChecker.UpdateAvailable += UpdateChecker_UpdateAvailable;
         this.isStartup = GetIsStartup();
@@ -96,12 +102,13 @@ partial class MainViewModel : ObservableObject
         try
         {
             this.Config = await this.configStore.Load();
+            var selectedId = this.SelectedDesktopConfig?.Id;
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
                 this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandLabelService));
             }
-            this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault();
+            this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == selectedId) ?? this.DesktopConfigs.FirstOrDefault();
         }
         finally
         {
@@ -111,7 +118,7 @@ partial class MainViewModel : ObservableObject
     }
 
     private void ConfigStore_Saved(object? sender, EventArgs e)
-        => Load();
+        => Application.Current.Dispatcher.BeginInvoke(Load);
 
     [RelayCommand]
     public async Task Save()

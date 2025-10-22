@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.4" />
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="3.2.1" />
     <PackageReference Include="Kamishibai.Hosting" Version="3.0.1" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
     <PackageReference Include="ObservableCollections" Version="3.3.3" />

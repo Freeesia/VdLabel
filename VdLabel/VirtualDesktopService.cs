@@ -22,6 +22,8 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public bool IsSupportedName { get; } = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 20348, 0);
 
+    public bool IsSupportedMoveDesktop { get; } = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000, 0);
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
         this.app.Startup += async (_, _) =>
@@ -237,12 +239,23 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         var desktop = VirtualDesktop.FromId(id);
         desktop?.Remove();
     }
+
+    public void MoveDesktop(Guid id, int index)
+    {
+        if (!this.IsSupportedMoveDesktop)
+        {
+            return;
+        }
+        var desktop = VirtualDesktop.FromId(id);
+        desktop?.Move(index);
+    }
 }
 
 public interface IVirualDesktopService
 {
     event EventHandler<DesktopChangedEventArgs>? DesktopChanged;
     bool IsSupportedName { get; }
+    bool IsSupportedMoveDesktop { get; }
     bool IsEnableOverlay { get; set; }
 
     void Pin(Window window);
@@ -255,6 +268,7 @@ public interface IVirualDesktopService
     Guid GetCurrent();
     void CreateDesktop();
     void RemoveDesktop(Guid id);
+    void MoveDesktop(Guid id, int index);
 }
 
 public class DesktopChangedEventArgs(Guid desktopId) : EventArgs
