@@ -3,6 +3,7 @@
 [![.NET Desktop](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/Freeesia/VdLabel/actions/workflows/dotnet-desktop.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Freeesia/VdLabel)](https://github.com/Freeesia/VdLabel/releases/latest)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Freeesia/VdLabel/total)](https://github.com/Freeesia/VdLabel/releases/latest)
+[![Microsoft Store](https://get.microsoft.com/images/ja%20dark.svg)](https://apps.microsoft.com/detail/9NR0WT1C5MZ2?referrer=appbadge&mode=direct)
 
 VdLabelは仮想デスクトップを便利に利用するためのアプリケーションです。
 
@@ -10,16 +11,19 @@ VdLabelは仮想デスクトップを便利に利用するためのアプリケ�
 
 ## インストール
 
-[GitHubのリリースページ](https://github.com/Freeesia/VdLabel/releases/latest)からダウンロード
+### Microsoft Store版 ![オススメ](https://img.shields.io/badge/%E3%82%AA%E3%82%B9%E3%82%B9%E3%83%A1-brightgreen)
 
-### インストーラー版 ![オススメ](https://img.shields.io/badge/%E3%82%AA%E3%82%B9%E3%82%B9%E3%83%A1-brightgreen)
+[Microsoft Store](https://apps.microsoft.com/detail/9NR0WT1C5MZ2?referrer=appbadge&mode=direct)からインストールします。
+.NETがインストールされていない環境でも動作します。
 
-`VdLabel-(バージョン).msi`をダウンロードして実行します。    
+### インストーラー版
+
+[GitHubのリリースページ](https://github.com/Freeesia/VdLabel/releases/latest)から`VdLabel-(バージョン).msi`をダウンロードして実行します。    
 .NETがインストールされていない環境でも動作します。
 
 ### ポータブル版
 
-`VdLabel-(バージョン).zip`または`VdLabel-full-(バージョン).zip`をダウンロードして任意のディレクトリに解凍し、`VdLabel.exe`を実行します。
+[GitHubのリリースページ](https://github.com/Freeesia/VdLabel/releases/latest)から`VdLabel-(バージョン).zip`または`VdLabel-full-(バージョン).zip`をダウンロードして任意のディレクトリに解凍し、`VdLabel.exe`を実行します。
 
 * `VdLabel-(バージョン).zip`は.NETがインストールされている環境で動作します
 * `VdLabel-full-(バージョン).zip`は.NETがインストールされていない環境でも動作します
