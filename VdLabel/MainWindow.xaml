@@ -249,12 +249,14 @@
                                 x:Name="desktopListView"
                                 Grid.Row="0"
                                 Margin="4"
-                                dd:DragDrop.DropHandler="{Binding DesktopDragDropHandler}"
                                 dd:DragDrop.DragHandler="{Binding DesktopDragDropHandler}"
+                                dd:DragDrop.DropHandler="{Binding DesktopDragDropHandler}"
                                 dd:DragDrop.IsDragSource="True"
                                 dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.UseDefaultDragAdorner="True"
                                 ItemsSource="{Binding DesktopConfigs}"
-                                SelectedItem="{Binding SelectedDesktopConfig}">
+                                SelectedItem="{Binding SelectedDesktopConfig}"
+                                SelectionMode="Single">
                                 <ui:ListView.ItemTemplate>
                                     <DataTemplate>
                                         <DockPanel>
