@@ -6,6 +6,9 @@ using VdLabel;
 using WindowsDesktop;
 using Wpf.Ui;
 
+// Check if started with auto-start argument
+var isAutoStarted = args.Contains("--autostart", StringComparer.OrdinalIgnoreCase);
+
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 builder.Services
     .Configure<HostOptions>(op => op.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore)
@@ -21,6 +24,7 @@ builder.Services
     .AddSingleton<IUpdateChecker>(sp => sp.GetRequiredService<UpdateChecker>())
     .AddSingleton<IConfigStore, ConfigStore>()
     .AddSingleton<IContentDialogService, ContentDialogService>()
+    .AddSingleton(_ => new StartupOptions { IsAutoStarted = isAutoStarted })
     .AddPresentation<MainWindow, MainViewModel>()
     .AddPresentation<DesktopCatalog, DesktopCatalogViewModel>()
     .AddPresentation<OverlayWindow, OverlayViewModel>()

@@ -19,14 +19,16 @@ public partial class MainWindow : FluentWindow
     private readonly IContentDialogService contentDialogService;
     private readonly IVirualDesktopService virualDesktopService;
     private readonly IPresentationService presentationService;
+    private readonly StartupOptions startupOptions;
 
-    public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService, IPresentationService presentationService)
+    public MainWindow(IContentDialogService contentDialogService, IVirualDesktopService virualDesktopService, IPresentationService presentationService, StartupOptions startupOptions)
     {
         SystemThemeWatcher.Watch(this);
         InitializeComponent();
         this.contentDialogService = contentDialogService;
         this.virualDesktopService = virualDesktopService;
         this.presentationService = presentationService;
+        this.startupOptions = startupOptions;
         this.contentDialogService.SetDialogHost(this.RootContentDialog);
     }
 
@@ -47,7 +49,10 @@ public partial class MainWindow : FluentWindow
 
     private void FluentWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        this.Dispatcher.InvokeAsync(Hide);
+        if (this.startupOptions.IsAutoStarted)
+        {
+            this.Dispatcher.InvokeAsync(Hide);
+        }
         var window = new WindowInteropHelper(this);
         for (var i = 0; i < 20; i++)
         {
