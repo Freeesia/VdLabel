@@ -53,20 +53,45 @@ internal class DesktopListDragDropHandler : IDropTarget, IDragSource
             dropInfo.TargetItem is DesktopConfigViewModel targetItem &&
             sourceItem.Id != targetItem.Id &&
             sourceItem.Id != Guid.Empty &&
-            targetItem.Id != Guid.Empty)
+            targetItem.Id != Guid.Empty &&
+            dropInfo.TargetCollection is System.Collections.IList collection)
         {
-            // Calculate the target index in the list
-            var targetIndex = dropInfo.InsertIndex;
+            // Find the current positions
+            var sourceIndex = -1;
+            var targetInsertIndex = dropInfo.InsertIndex;
+            
+            for (int i = 0; i < collection.Count; i++)
+            {
+                if (collection[i] is DesktopConfigViewModel item && item.Id == sourceItem.Id)
+                {
+                    sourceIndex = i;
+                    break;
+                }
+            }
+
+            if (sourceIndex < 0)
+            {
+                return;
+            }
+
+            // Calculate the actual desktop index
+            // When moving down (sourceIndex < targetInsertIndex), we need to adjust by -1
+            // because after removing the source, all indices shift up
+            var actualTargetIndex = targetInsertIndex;
+            if (sourceIndex < targetInsertIndex)
+            {
+                actualTargetIndex -= 1;
+            }
 
             // Adjust for "All Desktops" being the first item (index 0)
             // The actual desktop index should be -1 from the list index
-            if (targetIndex > 0)
+            if (actualTargetIndex > 0)
             {
-                targetIndex -= 1;
+                actualTargetIndex -= 1;
             }
 
             // Move the desktop
-            this.virualDesktopService.MoveDesktop(sourceItem.Id, targetIndex);
+            this.virualDesktopService.MoveDesktop(sourceItem.Id, actualTargetIndex);
         }
     }
 
