@@ -430,6 +430,7 @@
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
                                                 <ComboBox
                                                     Grid.Row="0"
@@ -460,6 +461,25 @@
                                                     Grid.ColumnSpan="4"
                                                     Margin="0,4"
                                                     Text="{Binding Pattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <DockPanel
+                                                    Grid.Row="2"
+                                                    Grid.ColumnSpan="4"
+                                                    Margin="0,2"
+                                                    Visibility="{Binding IsTitlePatternVisible, Converter={StaticResource b2vConv}}">
+                                                    <Label
+                                                        Content="{x:Static p:Resources.TitlePattern}"
+                                                        DockPanel.Dock="Left"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center" />
+                                                    <ComboBox
+                                                        DockPanel.Dock="Right"
+                                                        Margin="4,0"
+                                                        ItemsSource="{Binding DataContext.PatternTypes, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        SelectedItem="{Binding TitlePatternType, Mode=TwoWay}" />
+                                                    <ui:TextBox
+                                                        PlaceholderText="{x:Static p:Resources.TitlePattern}"
+                                                        Text="{Binding TitlePattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </DockPanel>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

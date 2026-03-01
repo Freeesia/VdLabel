@@ -164,6 +164,9 @@
   <data name="TargetWindow" xml:space="preserve">
     <value>対象ウィンドウ</value>
   </data>
+  <data name="TitlePattern" xml:space="preserve">
+    <value>タイトルパターン</value>
+  </data>
   <data name="Add" xml:space="preserve">
     <value>追加</value>
   </data>

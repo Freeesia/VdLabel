@@ -484,6 +484,15 @@ namespace VdLabel.Properties {
         }
         
         /// <summary>
+        ///   タイトルパターン に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TitlePattern {
+            get {
+                return ResourceManager.GetString("TitlePattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   テスト に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Test {

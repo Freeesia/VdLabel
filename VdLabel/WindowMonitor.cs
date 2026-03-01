@@ -15,7 +15,7 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
     private bool needReload = true;
     private TargetWindow[] targetWindows = [];
 
-    private record TargetWindow(Guid DesktopId, WindowMatchType MatchType, Regex Regex);
+    private record TargetWindow(Guid DesktopId, WindowMatchType MatchType, Regex Regex, Regex? TitleRegex);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -54,7 +54,8 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
         var config = await this.configStore.Load().ConfigureAwait(false);
         this.targetWindows = config.DesktopConfigs
             .SelectMany(c => c.TargetWindows.Select(p => (c.Id, p)))
-            .Select(c => new TargetWindow(c.Id, c.p.MatchType, ToRegex(c.p.PatternType, c.p.Pattern)))
+            .Select(c => new TargetWindow(c.Id, c.p.MatchType, ToRegex(c.p.PatternType, c.p.Pattern),
+                c.p.TitlePattern is { } tp ? ToRegex(c.p.TitlePatternType, tp) : null))
             .ToArray();
         this.checkedWindows.Clear();
         this.logger.LogDebug("ターゲットプロセス再読み込み");
@@ -119,7 +120,8 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
                 return true;
             }
 
-            if (this.targetWindows.FirstOrDefault(t => t.Regex.IsMatch(GetCheckText(t.MatchType, path, commandLine, windowTitle))) is not { } target)
+            if (this.targetWindows.FirstOrDefault(t => t.Regex.IsMatch(GetCheckText(t.MatchType, path, commandLine, windowTitle))
+                && (t.TitleRegex is null || t.TitleRegex.IsMatch(windowTitle))) is not { } target)
             {
                 // ウィンドウがターゲットでない場合はチェック済みとする
                 this.checkedWindows[hWnd] = windowTitle;
