@@ -333,6 +333,10 @@ partial class DesktopConfigViewModel(
             WindowMatchType.Path => info.Path,
             _ => throw new NotSupportedException(),
         };
+        if (config.MatchType != WindowMatchType.Title && string.IsNullOrEmpty(config.TitlePattern))
+        {
+            config.TitlePattern = info.Title;
+        }
     }
 
     public DesktopConfig GetSaveConfig()
@@ -344,16 +348,27 @@ partial class DesktopConfigViewModel(
             Utf8Command = this.Utf8Command,
             Command = this.Command,
             ImagePath = this.ImagePath,
-            TargetWindows = this.TargetWindows.Select(c => new WindowConfig(c.MatchType, c.PatternType, c.Pattern)).ToArray(),
+            TargetWindows = this.TargetWindows.Select(c => new WindowConfig(c.MatchType, c.PatternType, c.Pattern)
+            {
+                TitlePattern = c.TitlePattern,
+                TitlePatternType = c.TitlePatternType,
+            }).ToArray(),
         };
 }
 
 partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObject
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsTitlePatternVisible))]
     private WindowMatchType matchType = config?.MatchType ?? default;
     [ObservableProperty]
     private WindowPatternType patternType = config?.PatternType ?? default;
     [ObservableProperty]
     private string pattern = config?.Pattern ?? string.Empty;
+    [ObservableProperty]
+    private WindowPatternType titlePatternType = config?.TitlePatternType ?? WindowPatternType.Wildcard;
+    [ObservableProperty]
+    private string? titlePattern = config?.TitlePattern;
+
+    public bool IsTitlePatternVisible => this.MatchType != WindowMatchType.Title;
 }

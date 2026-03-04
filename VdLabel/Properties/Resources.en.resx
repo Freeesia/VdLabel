@@ -168,6 +168,9 @@
   <data name="TargetWindow" xml:space="preserve">
     <value>Target Window</value>
   </data>
+  <data name="TitlePattern" xml:space="preserve">
+    <value>Title Pattern</value>
+  </data>
   <data name="Add" xml:space="preserve">
     <value>Add</value>
   </data>
