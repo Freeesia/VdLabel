@@ -71,3 +71,24 @@ public sealed class SystemColorToSolidBrushConverter : IValueConverter
         return converted;
     }
 }
+
+[ValueConversion(typeof(System.Drawing.Color), typeof(SolidColorBrush))]
+public sealed class BadgeColorToForegroundConverter : IValueConverter
+{
+    public static BadgeColorToForegroundConverter Default { get; } = new BadgeColorToForegroundConverter();
+
+    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    {
+        if (value is System.Drawing.Color bgColor)
+        {
+            // WCAG relative luminance approximation: choose black or white for best contrast
+            double luminance = (0.299 * bgColor.R + 0.587 * bgColor.G + 0.114 * bgColor.B) / 255.0;
+            var textColor = luminance > 0.5 ? System.Windows.Media.Colors.Black : System.Windows.Media.Colors.White;
+            return new SolidColorBrush(textColor);
+        }
+        return new SolidColorBrush(System.Windows.Media.Colors.Black);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        => throw new NotSupportedException();
+}

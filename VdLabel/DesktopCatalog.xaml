@@ -42,22 +42,62 @@
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemTemplate>
-            <DataTemplate>
-                <DockPanel HorizontalAlignment="Center">
-                    <emoji:TextBlock
-                        MaxHeight="120"
-                        Margin="8"
-                        HorizontalAlignment="Center"
-                        DockPanel.Dock="{Binding Position, Mode=OneWay}"
-                        FontSize="28"
-                        Text="{Binding Label}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="Wrap" />
-                    <ui:Image
-                        CornerRadius="8"
-                        Focusable="False"
-                        Source="{Binding ImagePath}" />
-                </DockPanel>
+            <DataTemplate DataType="{x:Type local:DesktopViewModel}">
+                <Grid>
+                    <DockPanel HorizontalAlignment="Center">
+                        <emoji:TextBlock
+                            MaxHeight="120"
+                            Margin="8"
+                            HorizontalAlignment="Center"
+                            DockPanel.Dock="{Binding Position, Mode=OneWay}"
+                            FontSize="28"
+                            Text="{Binding Label}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+                        <ui:Image
+                            CornerRadius="8"
+                            Focusable="False"
+                            Source="{Binding ImagePath}" />
+                    </DockPanel>
+                    <ItemsControl
+                        Margin="6"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        ItemsSource="{Binding AssignedBadges}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:BadgeConfig}">
+                                <Border
+                                    Margin="2,0"
+                                    Padding="5,2"
+                                    Background="{Binding Color, Converter={x:Static local:SystemColorToSolidBrushConverter.Default}}"
+                                    CornerRadius="4">
+                                    <TextBlock
+                                        FontSize="11"
+                                        FontWeight="Bold"
+                                        Foreground="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"
+                                        Text="{Binding Label}" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid.ContextMenu>
+                        <ContextMenu ItemsSource="{Binding BadgeMenuItems}">
+                            <ContextMenu.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Label}" />
+                                    <Setter Property="IsCheckable" Value="True" />
+                                    <Setter Property="IsChecked" Value="{Binding IsAssigned}" />
+                                    <Setter Property="Command" Value="{Binding ToggleCommand}" />
+                                </Style>
+                            </ContextMenu.ItemContainerStyle>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
+                </Grid>
             </DataTemplate>
         </ListBox.ItemTemplate>
         <ListBox.ItemContainerStyle>

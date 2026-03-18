@@ -76,5 +76,31 @@
                     Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
             </DockPanel>
         </Border>
+        <ItemsControl
+            Margin="60"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            ItemsSource="{Binding Badges}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel HorizontalAlignment="Right" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:BadgeConfig}">
+                    <Border
+                        Margin="2,0"
+                        Padding="8,4"
+                        Background="{Binding Color, Converter={x:Static local:SystemColorToSolidBrushConverter.Default}}"
+                        CornerRadius="6">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Foreground="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"
+                            Text="{Binding Label}" />
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>

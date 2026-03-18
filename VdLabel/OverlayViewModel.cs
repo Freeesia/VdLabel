@@ -38,6 +38,9 @@ partial class OverlayViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(IsVisibleName))]
     private string? imagePath;
 
+    [ObservableProperty]
+    private IReadOnlyList<BadgeConfig> badges = [];
+
     public bool IsVisibleImage => this.ImagePath is not null;
 
     public bool IsVisibleName => this.ImagePath is null || this.isVisibleName;
@@ -62,7 +65,19 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
         this.imagePath = c?.ImagePath;
         this.isVisibleName = c?.IsVisibleName ?? true;
+        this.badges = ResolveBadges(config, c);
         this.configStore.Saved += ConfigStore_Saved;
+    }
+
+    private static IReadOnlyList<BadgeConfig> ResolveBadges(Config config, DesktopConfig? desktopConfig)
+    {
+        if (desktopConfig is null || desktopConfig.BadgeIds.Count == 0)
+        {
+            return [];
+        }
+        return config.Badges
+            .Where(b => desktopConfig.BadgeIds.Contains(b.Id))
+            .ToArray();
     }
 
     private async void ConfigStore_Saved(object? sender, EventArgs e)
@@ -86,6 +101,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         }
         this.isVisibleName = c?.IsVisibleName ?? true;
         this.ImagePath = c?.ImagePath;
+        this.Badges = ResolveBadges(config, c);
     }
 
     public void Dispose()

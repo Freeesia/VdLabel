@@ -13,7 +13,15 @@ class Config
     public NamePosition NamePosition { get; set; } = NamePosition.Bottom;
     public double CommandInterval { get; set; } = 30;
 
+    public List<BadgeConfig> Badges { get; init; } = [];
     public List<DesktopConfig> DesktopConfigs { get; init; } = [];
+}
+
+record BadgeConfig
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Label { get; set; } = string.Empty;
+    public Color Color { get; set; } = Color.FromArgb(255, 0, 120, 212);
 }
 
 enum OverlayPosition
@@ -31,6 +39,7 @@ record DesktopConfig
     public bool Utf8Command { get; set; }
     public string? ImagePath { get; set; }
     public IReadOnlyList<WindowConfig> TargetWindows { get; init; } = [];
+    public IReadOnlyList<Guid> BadgeIds { get; init; } = [];
 }
 
 record WindowConfig(WindowMatchType MatchType, WindowPatternType PatternType, string Pattern);

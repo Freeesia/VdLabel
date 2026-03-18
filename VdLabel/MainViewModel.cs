@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
@@ -39,6 +40,10 @@ partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string? newVersion;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemoveBadgeCommand))]
+    private BadgeConfigViewModel? selectedBadge;
+
     private string? newVersionUrl;
     private string? installPath;
 
@@ -52,6 +57,8 @@ partial class MainViewModel : ObservableObject
 
     public ObservableCollection<DesktopConfigViewModel> DesktopConfigs { get; } = [];
 
+    public ObservableCollection<BadgeConfigViewModel> Badges { get; } = [];
+
     public IReadOnlyList<OverlayPosition> OverlayPositions { get; } = Enum.GetValues<OverlayPosition>();
     public IReadOnlyList<NamePosition> NamePositions { get; } = Enum.GetValues<NamePosition>();
 
@@ -64,6 +71,7 @@ partial class MainViewModel : ObservableObject
         IUpdateChecker updateChecker)
     {
         BindingOperations.EnableCollectionSynchronization(this.DesktopConfigs, new());
+        BindingOperations.EnableCollectionSynchronization(this.Badges, new());
         this.configStore = configStore;
         this.presentationService = presentationService;
         this.dialogService = dialogService;
@@ -109,6 +117,14 @@ partial class MainViewModel : ObservableObject
                 this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandLabelService));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == selectedId) ?? this.DesktopConfigs.FirstOrDefault();
+
+            var selectedBadgeId = this.SelectedBadge?.Id;
+            this.Badges.Clear();
+            foreach (var badge in this.Config.Badges)
+            {
+                this.Badges.Add(new(badge));
+            }
+            this.SelectedBadge = this.Badges.FirstOrDefault(b => b.Id == selectedBadgeId) ?? this.Badges.FirstOrDefault();
         }
         finally
         {
@@ -131,6 +147,11 @@ partial class MainViewModel : ObservableObject
             foreach (var desktopConfig in this.DesktopConfigs)
             {
                 this.Config.DesktopConfigs.Add(desktopConfig.GetSaveConfig());
+            }
+            this.Config!.Badges.Clear();
+            foreach (var badge in this.Badges)
+            {
+                this.Config.Badges.Add(badge.GetSaveConfig());
             }
             await this.configStore.Save(this.Config);
         }
@@ -187,6 +208,28 @@ partial class MainViewModel : ObservableObject
 
     private bool CanRemoveDesktop()
         => this.SelectedDesktopConfig is not null && this.SelectedDesktopConfig.IsNotPin;
+
+    [RelayCommand]
+    public void AddBadge()
+    {
+        var badge = new BadgeConfigViewModel(new BadgeConfig());
+        this.Badges.Add(badge);
+        this.SelectedBadge = badge;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveBadge))]
+    public void RemoveBadge()
+    {
+        if (this.SelectedBadge is null)
+        {
+            return;
+        }
+        this.Badges.Remove(this.SelectedBadge);
+        this.SelectedBadge = this.Badges.FirstOrDefault();
+    }
+
+    private bool CanRemoveBadge()
+        => this.SelectedBadge is not null;
 
     partial void OnIsStartupChanged(bool value)
     {
@@ -345,6 +388,7 @@ partial class DesktopConfigViewModel(
             Command = this.Command,
             ImagePath = this.ImagePath,
             TargetWindows = this.TargetWindows.Select(c => new WindowConfig(c.MatchType, c.PatternType, c.Pattern)).ToArray(),
+            BadgeIds = desktopConfig.BadgeIds,
         };
 }
 
@@ -356,4 +400,23 @@ partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObj
     private WindowPatternType patternType = config?.PatternType ?? default;
     [ObservableProperty]
     private string pattern = config?.Pattern ?? string.Empty;
+}
+
+partial class BadgeConfigViewModel(BadgeConfig badgeConfig) : ObservableObject
+{
+    public Guid Id { get; } = badgeConfig.Id;
+
+    [ObservableProperty]
+    private string label = badgeConfig.Label;
+
+    [ObservableProperty]
+    private System.Drawing.Color color = badgeConfig.Color;
+
+    public BadgeConfig GetSaveConfig()
+        => new()
+        {
+            Id = this.Id,
+            Label = this.Label,
+            Color = this.Color,
+        };
 }

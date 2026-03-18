@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace VdLabel;
 
@@ -48,7 +49,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         };
         this.Desktops = config.DesktopConfigs
             .Where(c => c.Id != Guid.Empty)
-            .Select((c, i) => new DesktopViewModel(i + 1, c, this.commandLabelService.GetCacheResult(c.Id), this.virualDesktopService.GetWallpaperPath(c.Id), pos))
+            .Select((c, i) => new DesktopViewModel(i + 1, c, this.commandLabelService.GetCacheResult(c.Id), this.virualDesktopService.GetWallpaperPath(c.Id), pos, config.Badges, ToggleBadgeAsync))
             .ToArray();
         var currentDesktop = this.virualDesktopService.GetCurrent();
         this.SelectedDesktop = this.Desktops.FirstOrDefault(d => d.Id == currentDesktop);
@@ -58,6 +59,22 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows);
         this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
         this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
+    }
+
+    private async Task ToggleBadgeAsync(Guid desktopId, Guid badgeId)
+    {
+        var config = await this.configStore.Load().ConfigureAwait(false);
+        var desktopConfig = config.DesktopConfigs.FirstOrDefault(c => c.Id == desktopId);
+        if (desktopConfig is null)
+        {
+            return;
+        }
+        var newBadgeIds = desktopConfig.BadgeIds.Contains(badgeId)
+            ? desktopConfig.BadgeIds.Where(id => id != badgeId).ToArray()
+            : [.. desktopConfig.BadgeIds, badgeId];
+        var idx = config.DesktopConfigs.IndexOf(desktopConfig);
+        config.DesktopConfigs[idx] = desktopConfig with { BadgeIds = newBadgeIds };
+        await this.configStore.Save(config).ConfigureAwait(false);
     }
 
     public void Loaded() => Setup();
@@ -88,7 +105,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         => this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
 }
 
-internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos)
+internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyList<BadgeConfig> allBadges, Func<Guid, Guid, Task> toggleBadge)
 {
     private readonly int index = index;
     private DesktopConfig desktopConfig = desktopConfig;
@@ -102,4 +119,46 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
     public string Label => this.commandLabel ?? this.desktopConfig.Name ?? string.Format(VdLabel.Properties.Resources.Desktop, this.index);
 
     public string? ImagePath => this.desktopConfig.ImagePath ?? this.wallpaperPath;
+
+    public IReadOnlyList<BadgeConfig> AssignedBadges { get; } = allBadges
+        .Where(b => desktopConfig.BadgeIds.Contains(b.Id))
+        .ToArray();
+
+    public IReadOnlyList<BadgeMenuItem> BadgeMenuItems { get; } = allBadges
+        .Select(b => new BadgeMenuItem(b, desktopConfig.Id, desktopConfig.BadgeIds.Contains(b.Id), toggleBadge))
+        .ToArray();
+}
+
+internal class BadgeMenuItem : ObservableObject
+{
+    private readonly BadgeConfig badge;
+    private readonly Guid desktopId;
+    private readonly Func<Guid, Guid, Task> toggleAction;
+    private bool isAssigned;
+
+    public BadgeMenuItem(BadgeConfig badge, Guid desktopId, bool isAssigned, Func<Guid, Guid, Task> toggleAction)
+    {
+        this.badge = badge;
+        this.desktopId = desktopId;
+        this.isAssigned = isAssigned;
+        this.toggleAction = toggleAction;
+        this.ToggleCommand = new AsyncRelayCommand(Toggle);
+    }
+
+    public string Label => this.badge.Label;
+    public System.Drawing.Color Color => this.badge.Color;
+
+    public bool IsAssigned
+    {
+        get => this.isAssigned;
+        private set => SetProperty(ref this.isAssigned, value);
+    }
+
+    public AsyncRelayCommand ToggleCommand { get; }
+
+    private async Task Toggle()
+    {
+        await this.toggleAction(this.desktopId, this.badge.Id);
+        IsAssigned = !IsAssigned;
+    }
 }

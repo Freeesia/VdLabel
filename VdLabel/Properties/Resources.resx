@@ -213,4 +213,20 @@
   <data name="Remove" xml:space="preserve">
     <value>削除</value>
   </data>
+  <!-- Badge settings labels -->
+  <data name="BadgeSettings" xml:space="preserve">
+    <value>バッジ設定</value>
+  </data>
+  <data name="BadgeLabel" xml:space="preserve">
+    <value>ラベル</value>
+  </data>
+  <data name="BadgeColor" xml:space="preserve">
+    <value>バッジ色</value>
+  </data>
+  <data name="AddBadge" xml:space="preserve">
+    <value>バッジを追加</value>
+  </data>
+  <data name="RemoveBadge" xml:space="preserve">
+    <value>バッジを削除</value>
+  </data>
 </root>
