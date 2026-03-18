@@ -127,7 +127,8 @@
                     IsChecked="{Binding IsStartup, Mode=TwoWay}" />
             </DockPanel>
             <TabControl>
-                <TabItem Header="{x:Static p:Resources.GeneralSettings}">                    <Grid>
+                <TabItem Header="{x:Static p:Resources.GeneralSettings}">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200" />
                             <ColumnDefinition Width="*" />

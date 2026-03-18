@@ -129,18 +129,17 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
         .ToArray();
 }
 
-internal class BadgeMenuItem : ObservableObject
+internal class BadgeMenuItem
 {
     private readonly BadgeConfig badge;
     private readonly Guid desktopId;
     private readonly Func<Guid, Guid, Task> toggleAction;
-    private bool isAssigned;
 
     public BadgeMenuItem(BadgeConfig badge, Guid desktopId, bool isAssigned, Func<Guid, Guid, Task> toggleAction)
     {
         this.badge = badge;
         this.desktopId = desktopId;
-        this.isAssigned = isAssigned;
+        IsAssigned = isAssigned;
         this.toggleAction = toggleAction;
         this.ToggleCommand = new AsyncRelayCommand(Toggle);
     }
@@ -148,17 +147,10 @@ internal class BadgeMenuItem : ObservableObject
     public string Label => this.badge.Label;
     public System.Drawing.Color Color => this.badge.Color;
 
-    public bool IsAssigned
-    {
-        get => this.isAssigned;
-        private set => SetProperty(ref this.isAssigned, value);
-    }
+    public bool IsAssigned { get; }
 
     public AsyncRelayCommand ToggleCommand { get; }
 
-    private async Task Toggle()
-    {
-        await this.toggleAction(this.desktopId, this.badge.Id);
-        IsAssigned = !IsAssigned;
-    }
+    private Task Toggle()
+        => this.toggleAction(this.desktopId, this.badge.Id);
 }
