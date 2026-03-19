@@ -531,6 +531,8 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label
                                 Grid.Row="0"
@@ -551,6 +553,27 @@
                                 Margin="4"
                                 SelectedColor="{Binding Color, Mode=TwoWay, Converter={x:Static local:SystemColorToMediaColorConverter.Default}}"
                                 Style="{StaticResource DefaultColorPickerStyle}" />
+                            <Label
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Content="{x:Static p:Resources.BadgeCommand}"
+                                ToolTip="{x:Static p:Resources.BadgeCommandTooltip}" />
+                            <DockPanel
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Margin="4">
+                                <Button
+                                    Command="{Binding TestBadgeCommandCommand}"
+                                    Content="{x:Static p:Resources.Test}"
+                                    DockPanel.Dock="Right" />
+                                <ui:TextBox Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" />
+                            </DockPanel>
+                            <CheckBox
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Margin="4"
+                                Content="{x:Static p:Resources.ReceiveCommandAsUtf8}"
+                                IsChecked="{Binding Utf8Command, Mode=TwoWay}" />
                         </Grid>
                     </Grid>
                 </TabItem>

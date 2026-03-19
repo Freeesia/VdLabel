@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace VdLabel;
 
@@ -22,7 +23,28 @@ record BadgeConfig
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Label { get; set; } = string.Empty;
     public Color Color { get; set; } = Color.FromArgb(255, 0, 120, 212);
+    public string? Command { get; set; }
+    public bool Utf8Command { get; set; }
 }
+
+/// <summary>
+/// JSON output format for badge commands.
+/// </summary>
+record BadgeCommandResult
+{
+    [JsonPropertyName("label")]
+    public string Label { get; init; } = string.Empty;
+
+    /// <summary>HTML color string, e.g. "#ff6600".</summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; init; }
+}
+
+/// <summary>
+/// Runtime-resolved badge values (from command output or static config).
+/// Used for display in catalog and overlay.
+/// </summary>
+record ResolvedBadge(string Label, Color Color);
 
 enum OverlayPosition
 {

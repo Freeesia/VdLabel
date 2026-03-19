@@ -223,6 +223,12 @@
   <data name="BadgeColor" xml:space="preserve">
     <value>バッジ色</value>
   </data>
+  <data name="BadgeCommand" xml:space="preserve">
+    <value>バッジコマンド</value>
+  </data>
+  <data name="BadgeCommandTooltip" xml:space="preserve">
+    <value>コマンドの標準出力(JSON)からラベルと色を取得します。形式: {"label":"...","color":"#RRGGBB"}</value>
+  </data>
   <data name="AddBadge" xml:space="preserve">
     <value>バッジを追加</value>
   </data>

@@ -122,7 +122,7 @@ partial class MainViewModel : ObservableObject
             this.Badges.Clear();
             foreach (var badge in this.Config.Badges)
             {
-                this.Badges.Add(new(badge));
+                this.Badges.Add(new(badge, this.commandLabelService, this.dialogService));
             }
             this.SelectedBadge = this.Badges.FirstOrDefault(b => b.Id == selectedBadgeId) ?? this.Badges.FirstOrDefault();
         }
@@ -212,7 +212,7 @@ partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void AddBadge()
     {
-        var badge = new BadgeConfigViewModel(new BadgeConfig());
+        var badge = new BadgeConfigViewModel(new BadgeConfig(), this.commandLabelService, this.dialogService);
         this.Badges.Add(badge);
         this.SelectedBadge = badge;
     }
@@ -402,7 +402,7 @@ partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObj
     private string pattern = config?.Pattern ?? string.Empty;
 }
 
-partial class BadgeConfigViewModel(BadgeConfig badgeConfig) : ObservableObject
+partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandLabelService commandLabelService, IContentDialogService dialogService) : ObservableObject
 {
     public Guid Id { get; } = badgeConfig.Id;
 
@@ -412,11 +412,37 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig) : ObservableObject
     [ObservableProperty]
     private System.Drawing.Color color = badgeConfig.Color;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(TestBadgeCommandCommand))]
+    private string? command = badgeConfig.Command;
+
+    [ObservableProperty]
+    private bool utf8Command = badgeConfig.Utf8Command;
+
+    [RelayCommand(CanExecute = nameof(CanTestBadgeCommand))]
+    public async Task TestBadgeCommand()
+    {
+        var cmd = this.Command ?? throw new InvalidOperationException();
+        try
+        {
+            var result = await commandLabelService.ExecuteCommand(cmd, this.Utf8Command);
+            await dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
+        }
+        catch (Exception e)
+        {
+            await dialogService.ShowAlertAsync(Properties.Resources.CommandFailed, e.Message, Properties.Resources.OK);
+        }
+    }
+
+    private bool CanTestBadgeCommand => !string.IsNullOrEmpty(this.Command);
+
     public BadgeConfig GetSaveConfig()
         => new()
         {
             Id = this.Id,
             Label = this.Label,
             Color = this.Color,
+            Command = this.Command,
+            Utf8Command = this.Utf8Command,
         };
 }

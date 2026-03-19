@@ -87,7 +87,7 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:BadgeConfig}">
+                <DataTemplate DataType="{x:Type local:ResolvedBadge}">
                     <Border
                         Margin="2,0"
                         Padding="8,4"

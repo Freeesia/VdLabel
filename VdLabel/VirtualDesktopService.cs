@@ -8,11 +8,12 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IHostedService, IVirualDesktopService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, Lazy<ICommandLabelService> commandLabelService) : IHostedService, IVirualDesktopService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
+    private readonly Lazy<ICommandLabelService> commandLabelService = commandLabelService;
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
 
@@ -68,7 +69,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
     private void OpenOverlay(VirtualDesktop desktop, string name)
         => this.app.Dispatcher.Invoke(async () =>
         {
-            var vm = new OverlayViewModel(desktop.Id, name, configStore);
+            var vm = new OverlayViewModel(desktop.Id, name, configStore, this.commandLabelService.Value);
             var window = await this.windowService.OpenWindowAsync(vm, null, this.options);
             this.windows[desktop.Id] = (window, vm);
             var w = GetWindow((WindowHandle)window);

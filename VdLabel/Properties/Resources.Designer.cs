@@ -538,6 +538,24 @@ namespace VdLabel.Properties {
         }
         
         /// <summary>
+        ///   バッジコマンド に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BadgeCommand {
+            get {
+                return ResourceManager.GetString("BadgeCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   コマンドの標準出力(JSON)からラベルと色を取得することを説明するツールチップ文字列を検索します。
+        /// </summary>
+        public static string BadgeCommandTooltip {
+            get {
+                return ResourceManager.GetString("BadgeCommandTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   バッジを追加 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string AddBadge {

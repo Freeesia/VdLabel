@@ -34,6 +34,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         this.commandLabelService = commandLabelService;
         this.configStore = configStore;
         this.configStore.Saved += ConfigStore_Saved;
+        this.commandLabelService.BadgeResultsUpdated += CommandLabelService_BadgeResultsUpdated;
         this.maxColumns = (int)(SystemParameters.PrimaryScreenWidth * 0.8 / 280);
         Setup();
     }
@@ -47,9 +48,23 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
             NamePosition.Bottom => Dock.Bottom,
             _ => throw new NotImplementedException(),
         };
+        var resolvedBadges = config.Badges.ToDictionary(
+            b => b.Id,
+            b =>
+            {
+                var cached = this.commandLabelService.GetBadgeResult(b.Id);
+                return cached.HasValue
+                    ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
+                    : new ResolvedBadge(b.Label, b.Color);
+            });
         this.Desktops = config.DesktopConfigs
             .Where(c => c.Id != Guid.Empty)
-            .Select((c, i) => new DesktopViewModel(i + 1, c, this.commandLabelService.GetCacheResult(c.Id), this.virualDesktopService.GetWallpaperPath(c.Id), pos, config.Badges, ToggleBadgeAsync))
+            .Select((c, i) =>
+            {
+                var commandLabel = this.commandLabelService.GetCacheResult(c.Id);
+                var wallpaperPath = this.virualDesktopService.GetWallpaperPath(c.Id);
+                return new DesktopViewModel(i + 1, c, commandLabel, wallpaperPath, pos, resolvedBadges, ToggleBadgeAsync);
+            })
             .ToArray();
         var currentDesktop = this.virualDesktopService.GetCurrent();
         this.SelectedDesktop = this.Desktops.FirstOrDefault(d => d.Id == currentDesktop);
@@ -81,7 +96,13 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     private void ConfigStore_Saved(object? sender, EventArgs e) => Setup();
 
-    public void Dispose() => this.configStore.Saved -= ConfigStore_Saved;
+    private void CommandLabelService_BadgeResultsUpdated(object? sender, EventArgs e) => Setup();
+
+    public void Dispose()
+    {
+        this.configStore.Saved -= ConfigStore_Saved;
+        this.commandLabelService.BadgeResultsUpdated -= CommandLabelService_BadgeResultsUpdated;
+    }
 
     partial void OnSelectedDesktopChanged(DesktopViewModel? value)
     {
@@ -105,7 +126,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         => this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
 }
 
-internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyList<BadgeConfig> allBadges, Func<Guid, Guid, Task> toggleBadge)
+internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyDictionary<Guid, ResolvedBadge> resolvedBadges, Func<Guid, Guid, Task> toggleBadge)
 {
     private readonly int index = index;
     private DesktopConfig desktopConfig = desktopConfig;
@@ -120,37 +141,22 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
 
     public string? ImagePath => this.desktopConfig.ImagePath ?? this.wallpaperPath;
 
-    public IReadOnlyList<BadgeConfig> AssignedBadges { get; } = allBadges
-        .Where(b => desktopConfig.BadgeIds.Contains(b.Id))
+    public IReadOnlyList<ResolvedBadge> AssignedBadges { get; } = desktopConfig.BadgeIds
+        .Where(id => resolvedBadges.ContainsKey(id))
+        .Select(id => resolvedBadges[id])
         .ToArray();
 
-    public IReadOnlyList<BadgeMenuItem> BadgeMenuItems { get; } = allBadges
-        .Select(b => new BadgeMenuItem(b, desktopConfig.Id, desktopConfig.BadgeIds.Contains(b.Id), toggleBadge))
+    public IReadOnlyList<BadgeMenuItem> BadgeMenuItems { get; } = resolvedBadges
+        .Select(kvp => new BadgeMenuItem(kvp.Key, kvp.Value, desktopConfig.Id, desktopConfig.BadgeIds.Contains(kvp.Key), toggleBadge))
         .ToArray();
 }
 
-internal class BadgeMenuItem
+internal class BadgeMenuItem(Guid badgeId, ResolvedBadge resolved, Guid desktopId, bool isAssigned, Func<Guid, Guid, Task> toggleAction)
 {
-    private readonly BadgeConfig badge;
-    private readonly Guid desktopId;
-    private readonly Func<Guid, Guid, Task> toggleAction;
+    public string Label => resolved.Label;
+    public System.Drawing.Color Color => resolved.Color;
 
-    public BadgeMenuItem(BadgeConfig badge, Guid desktopId, bool isAssigned, Func<Guid, Guid, Task> toggleAction)
-    {
-        this.badge = badge;
-        this.desktopId = desktopId;
-        IsAssigned = isAssigned;
-        this.toggleAction = toggleAction;
-        this.ToggleCommand = new AsyncRelayCommand(Toggle);
-    }
+    public bool IsAssigned { get; } = isAssigned;
 
-    public string Label => this.badge.Label;
-    public System.Drawing.Color Color => this.badge.Color;
-
-    public bool IsAssigned { get; }
-
-    public AsyncRelayCommand ToggleCommand { get; }
-
-    private Task Toggle()
-        => this.toggleAction(this.desktopId, this.badge.Id);
+    public AsyncRelayCommand ToggleCommand { get; } = new AsyncRelayCommand(() => toggleAction(desktopId, badgeId));
 }

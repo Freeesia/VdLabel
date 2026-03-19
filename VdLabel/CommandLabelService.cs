@@ -1,7 +1,9 @@
 ﻿using Cysharp.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Drawing;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace VdLabel;
@@ -13,6 +15,9 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
     private readonly ILogger<CommandLabelService> logger = logger;
     private readonly Dictionary<Guid, string> commandCache = new();
+    private readonly Dictionary<Guid, (string Label, Color Color)> badgeCommandCache = new();
+
+    public event EventHandler? BadgeResultsUpdated;
 
     [GeneratedRegex(@"^(""[^""]+""|\S+)", RegexOptions.Compiled)]
     private static partial Regex FilePathRegex();
@@ -34,6 +39,9 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
 
     public string? GetCacheResult(Guid desktopId)
         => this.commandCache.TryGetValue(desktopId, out var result) ? result : null;
+
+    public (string Label, Color Color)? GetBadgeResult(Guid badgeId)
+        => this.badgeCommandCache.TryGetValue(badgeId, out var result) ? result : null;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -67,9 +75,57 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
                 }
                 stoppingToken.ThrowIfCancellationRequested();
             }
+
+            var badgeResultsChanged = false;
+            foreach (var badgeConfig in config.Badges)
+            {
+                if (badgeConfig.Command is not { Length: > 0 })
+                {
+                    continue;
+                }
+                try
+                {
+                    var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                    var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output);
+                    if (parsed is not null)
+                    {
+                        var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
+                        var color = TryParseColor(parsed.Color, badgeConfig.Color);
+                        this.badgeCommandCache[badgeConfig.Id] = (label, color);
+                        badgeResultsChanged = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Command: {Command})", badgeConfig.Id, badgeConfig.Command);
+                }
+                stoppingToken.ThrowIfCancellationRequested();
+            }
+
+            if (badgeResultsChanged)
+            {
+                BadgeResultsUpdated?.Invoke(this, EventArgs.Empty);
+            }
+
             await timer.WaitForNextTickAsync(stoppingToken);
         }
         timer?.Dispose();
+    }
+
+    private static Color TryParseColor(string? htmlColor, Color fallback)
+    {
+        if (htmlColor is null)
+        {
+            return fallback;
+        }
+        try
+        {
+            return ColorTranslator.FromHtml(htmlColor);
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 }
 
@@ -78,4 +134,6 @@ interface ICommandLabelService
 {
     ValueTask<string> ExecuteCommand(string command, bool utf8, CancellationToken token = default);
     string? GetCacheResult(Guid desktopId);
+    (string Label, Color Color)? GetBadgeResult(Guid badgeId);
+    event EventHandler? BadgeResultsUpdated;
 }
