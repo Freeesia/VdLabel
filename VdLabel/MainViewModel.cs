@@ -93,7 +93,16 @@ partial class MainViewModel : ObservableObject
     }
 
     private void VirualDesktopService_DesktopChanged(object? sender, DesktopChangedEventArgs e)
-         => this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == e.DesktopId) ?? this.DesktopConfigs.FirstOrDefault();
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+        {
+            this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == e.DesktopId) ?? this.DesktopConfigs.FirstOrDefault();
+        }
+        else
+        {
+            Application.Current.Dispatcher.BeginInvoke(() => VirualDesktopService_DesktopChanged(sender, e));
+        }
+    }
 
     private async void Load()
     {
