@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -36,7 +36,7 @@
     <PackageReference Include="ProcessX" Version="1.5.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Slions.VirtualDesktop.WPF" Version="6.9.2" />
-    <PackageReference Include="System.Management" Version="9.0.1" />
+    <PackageReference Include="System.Management" Version="10.0.0" />
     <PackageReference Include="Wacton.Unicolour" Version="6.4.0" />
     <PackageReference Include="WPF-UI" Version="4.0.3" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
