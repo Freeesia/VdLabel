@@ -77,48 +77,17 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
             }
 
             var badgeResultsChanged = false;
-            // Badges without {desktopId} placeholder run once; track per-badge results to copy to all desktops.
-            var sharedBadgeResults = new Dictionary<Guid, (string Label, Color Color)>();
-            foreach (var desktopConfig in config.DesktopConfigs)
+            foreach (var badgeConfig in config.Badges)
             {
-                foreach (var badgeId in desktopConfig.BadgeIds)
+                if (badgeConfig.Command is not { Length: > 0 })
                 {
-                    var badgeConfig = config.Badges.FirstOrDefault(b => b.Id == badgeId);
-                    if (badgeConfig is null || badgeConfig.Command is not { Length: > 0 })
-                    {
-                        continue;
-                    }
-                    var hasPlaceholder = badgeConfig.Command.Contains("{desktopId}", StringComparison.OrdinalIgnoreCase);
-                    if (!hasPlaceholder)
-                    {
-                        if (!sharedBadgeResults.TryGetValue(badgeId, out var shared))
-                        {
-                            try
-                            {
-                                var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                                var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                                if (parsed is not null)
-                                {
-                                    shared = (string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label, TryParseColor(parsed.Color, badgeConfig.Color));
-                                    sharedBadgeResults[badgeId] = shared;
-                                }
-                                else
-                                {
-                                    stoppingToken.ThrowIfCancellationRequested();
-                                    continue;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Command: {Command})", badgeId, badgeConfig.Command);
-                                stoppingToken.ThrowIfCancellationRequested();
-                                continue;
-                            }
-                        }
-                        this.badgeCommandCache[(badgeId, desktopConfig.Id)] = shared;
-                        badgeResultsChanged = true;
-                    }
-                    else
+                    continue;
+                }
+                var hasPlaceholder = badgeConfig.Command.Contains("{desktopId}", StringComparison.OrdinalIgnoreCase);
+                if (hasPlaceholder)
+                {
+                    // Execute per desktop that has this badge assigned
+                    foreach (var desktopConfig in config.DesktopConfigs.Where(d => d.BadgeIds.Contains(badgeConfig.Id)))
                     {
                         try
                         {
@@ -129,16 +98,39 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                             {
                                 var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
                                 var color = TryParseColor(parsed.Color, badgeConfig.Color);
-                                this.badgeCommandCache[(badgeId, desktopConfig.Id)] = (label, color);
+                                this.badgeCommandCache[(badgeConfig.Id, desktopConfig.Id)] = (label, color);
                                 badgeResultsChanged = true;
                             }
                         }
                         catch (Exception e)
                         {
-                            this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Desktop ID: {DesktopId}, Command: {Command})", badgeId, desktopConfig.Id, badgeConfig.Command);
+                            this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Desktop ID: {DesktopId}, Command: {Command})", badgeConfig.Id, desktopConfig.Id, badgeConfig.Command);
                         }
                         stoppingToken.ThrowIfCancellationRequested();
                     }
+                }
+                else
+                {
+                    // No placeholder — run once and copy result to all assigned desktops
+                    try
+                    {
+                        var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                        var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (parsed is not null)
+                        {
+                            var shared = (string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label, TryParseColor(parsed.Color, badgeConfig.Color));
+                            foreach (var desktopConfig in config.DesktopConfigs.Where(d => d.BadgeIds.Contains(badgeConfig.Id)))
+                            {
+                                this.badgeCommandCache[(badgeConfig.Id, desktopConfig.Id)] = shared;
+                                badgeResultsChanged = true;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Command: {Command})", badgeConfig.Id, badgeConfig.Command);
+                    }
+                    stoppingToken.ThrowIfCancellationRequested();
                 }
             }
 
