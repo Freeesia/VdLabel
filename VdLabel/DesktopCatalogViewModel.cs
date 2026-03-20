@@ -8,7 +8,7 @@ namespace VdLabel;
 internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDisposable
 {
     private readonly IVirualDesktopService virualDesktopService;
-    private readonly ICommandService commandLabelService;
+    private readonly ICommandService commandService;
     private readonly IConfigStore configStore;
     private readonly int maxColumns;
     [ObservableProperty]
@@ -28,13 +28,13 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     [ObservableProperty]
     private double height;
 
-    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandService commandLabelService, IConfigStore configStore)
+    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandService commandService, IConfigStore configStore)
     {
         this.virualDesktopService = virualDesktopService;
-        this.commandLabelService = commandLabelService;
+        this.commandService = commandService;
         this.configStore = configStore;
         this.configStore.Saved += ConfigStore_Saved;
-        this.commandLabelService.BadgeResultsUpdated += CommandLabelService_BadgeResultsUpdated;
+        this.commandService.BadgeResultsUpdated += CommandService_BadgeResultsUpdated;
         this.maxColumns = (int)(SystemParameters.PrimaryScreenWidth * 0.8 / 280);
         Setup();
     }
@@ -52,13 +52,13 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
             .Where(c => c.Id != Guid.Empty)
             .Select((c, i) =>
             {
-                var commandLabel = this.commandLabelService.GetCacheResult(c.Id);
+                var commandLabel = this.commandService.GetCacheResult(c.Id);
                 var wallpaperPath = this.virualDesktopService.GetWallpaperPath(c.Id);
                 var resolvedBadges = config.Badges.ToDictionary(
                     b => b.Id,
                     b =>
                     {
-                        var cached = this.commandLabelService.GetBadgeResult(b.Id, c.Id);
+                        var cached = this.commandService.GetBadgeResult(b.Id, c.Id);
                         return cached.HasValue
                             ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
                             : new ResolvedBadge(b.Label, b.Color);
@@ -96,12 +96,12 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     private void ConfigStore_Saved(object? sender, EventArgs e) => Setup();
 
-    private void CommandLabelService_BadgeResultsUpdated(object? sender, EventArgs e) => Setup();
+    private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e) => Setup();
 
     public void Dispose()
     {
         this.configStore.Saved -= ConfigStore_Saved;
-        this.commandLabelService.BadgeResultsUpdated -= CommandLabelService_BadgeResultsUpdated;
+        this.commandService.BadgeResultsUpdated -= CommandService_BadgeResultsUpdated;
     }
 
     partial void OnSelectedDesktopChanged(DesktopViewModel? value)

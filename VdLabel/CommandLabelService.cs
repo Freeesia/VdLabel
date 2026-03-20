@@ -8,16 +8,16 @@ using System.Text.RegularExpressions;
 
 namespace VdLabel;
 
-partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandService
+partial class CommandService(App app, IConfigStore configStore, ILogger<CommandService> logger) : BackgroundService, ICommandService
 {
     private readonly App app = app;
     private readonly IConfigStore configStore = configStore;
-    private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
-    private readonly ILogger<CommandLabelService> logger = logger;
+    private readonly ILogger<CommandService> logger = logger;
     private readonly Dictionary<Guid, string> commandCache = new();
     private readonly Dictionary<(Guid BadgeId, Guid DesktopId), (string Label, Color Color)> badgeCommandCache = new();
 
     public event EventHandler? BadgeResultsUpdated;
+    public event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
 
     [GeneratedRegex(@"^(""[^""]+""|\S+)", RegexOptions.Compiled)]
     private static partial Regex FilePathRegex();
@@ -67,7 +67,7 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
                 {
                     var result = await ExecuteCommand(desktopConfig.Command, desktopConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
                     this.commandCache[desktopConfig.Id] = result;
-                    this.virualDesktopService.SetName(desktopConfig.Id, result);
+                    LabelResultUpdated?.Invoke(this, new LabelResultUpdatedEventArgs(desktopConfig.Id, result));
                 }
                 catch (Exception e)
                 {
@@ -77,6 +77,8 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
             }
 
             var badgeResultsChanged = false;
+            // Badges without {desktopId} placeholder run once; track per-badge results to copy to all desktops.
+            var sharedBadgeResults = new Dictionary<Guid, (string Label, Color Color)>();
             foreach (var desktopConfig in config.DesktopConfigs)
             {
                 foreach (var badgeId in desktopConfig.BadgeIds)
@@ -86,24 +88,57 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
                     {
                         continue;
                     }
-                    try
+                    var hasPlaceholder = badgeConfig.Command.Contains("{desktopId}", StringComparison.OrdinalIgnoreCase);
+                    if (!hasPlaceholder)
                     {
-                        var command = badgeConfig.Command.Replace("{desktopId}", desktopConfig.Id.ToString(), StringComparison.OrdinalIgnoreCase);
-                        var output = await ExecuteCommand(command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                        var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        if (parsed is not null)
+                        if (!sharedBadgeResults.TryGetValue(badgeId, out var shared))
                         {
-                            var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
-                            var color = TryParseColor(parsed.Color, badgeConfig.Color);
-                            this.badgeCommandCache[(badgeId, desktopConfig.Id)] = (label, color);
-                            badgeResultsChanged = true;
+                            try
+                            {
+                                var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                                var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                                if (parsed is not null)
+                                {
+                                    shared = (string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label, TryParseColor(parsed.Color, badgeConfig.Color));
+                                    sharedBadgeResults[badgeId] = shared;
+                                }
+                                else
+                                {
+                                    stoppingToken.ThrowIfCancellationRequested();
+                                    continue;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Command: {Command})", badgeId, badgeConfig.Command);
+                                stoppingToken.ThrowIfCancellationRequested();
+                                continue;
+                            }
                         }
+                        this.badgeCommandCache[(badgeId, desktopConfig.Id)] = shared;
+                        badgeResultsChanged = true;
                     }
-                    catch (Exception e)
+                    else
                     {
-                        this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Desktop ID: {DesktopId}, Command: {Command})", badgeId, desktopConfig.Id, badgeConfig.Command);
+                        try
+                        {
+                            var command = badgeConfig.Command.Replace("{desktopId}", desktopConfig.Id.ToString(), StringComparison.OrdinalIgnoreCase);
+                            var output = await ExecuteCommand(command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                            var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            if (parsed is not null)
+                            {
+                                var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
+                                var color = TryParseColor(parsed.Color, badgeConfig.Color);
+                                this.badgeCommandCache[(badgeId, desktopConfig.Id)] = (label, color);
+                                badgeResultsChanged = true;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Desktop ID: {DesktopId}, Command: {Command})", badgeId, desktopConfig.Id, badgeConfig.Command);
+                        }
+                        stoppingToken.ThrowIfCancellationRequested();
                     }
-                    stoppingToken.ThrowIfCancellationRequested();
                 }
             }
 
@@ -141,6 +176,13 @@ interface ICommandService
     string? GetCacheResult(Guid desktopId);
     (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId);
     event EventHandler? BadgeResultsUpdated;
+    event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
+}
+
+class LabelResultUpdatedEventArgs(Guid desktopId, string label) : EventArgs
+{
+    public Guid DesktopId { get; } = desktopId;
+    public string Label { get; } = label;
 }
 
 /// <summary>

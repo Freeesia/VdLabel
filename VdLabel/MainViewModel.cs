@@ -17,7 +17,7 @@ partial class MainViewModel : ObservableObject
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
-    private readonly ICommandService commandLabelService;
+    private readonly ICommandService commandService;
     private readonly IPresentationService presentationService;
     private readonly IUpdateChecker updateChecker;
 
@@ -67,7 +67,7 @@ partial class MainViewModel : ObservableObject
         IPresentationService presentationService,
         IContentDialogService dialogService,
         IVirualDesktopService virualDesktopService,
-        ICommandService commandLabelService,
+        ICommandService commandService,
         IUpdateChecker updateChecker)
     {
         BindingOperations.EnableCollectionSynchronization(this.DesktopConfigs, new());
@@ -76,7 +76,7 @@ partial class MainViewModel : ObservableObject
         this.presentationService = presentationService;
         this.dialogService = dialogService;
         this.virualDesktopService = virualDesktopService;
-        this.commandLabelService = commandLabelService;
+        this.commandService = commandService;
         this.updateChecker = updateChecker;
         this.DesktopDragDropHandler = new DesktopListDragDropHandler(virualDesktopService);
         this.virualDesktopService.DesktopChanged += VirualDesktopService_DesktopChanged;
@@ -114,7 +114,7 @@ partial class MainViewModel : ObservableObject
             this.DesktopConfigs.Clear();
             foreach (var desktopConfig in this.Config.DesktopConfigs)
             {
-                this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandLabelService));
+                this.DesktopConfigs.Add(new(desktopConfig, this.presentationService, this.dialogService, this.virualDesktopService, this.commandService));
             }
             this.SelectedDesktopConfig = this.DesktopConfigs.FirstOrDefault(c => c.Id == selectedId) ?? this.DesktopConfigs.FirstOrDefault();
 
@@ -122,7 +122,7 @@ partial class MainViewModel : ObservableObject
             this.Badges.Clear();
             foreach (var badge in this.Config.Badges)
             {
-                this.Badges.Add(new(badge, this.commandLabelService, this.dialogService));
+                this.Badges.Add(new(badge, this.commandService, this.dialogService));
             }
             this.SelectedBadge = this.Badges.FirstOrDefault(b => b.Id == selectedBadgeId) ?? this.Badges.FirstOrDefault();
         }
@@ -212,7 +212,7 @@ partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void AddBadge()
     {
-        var badge = new BadgeConfigViewModel(new BadgeConfig(), this.commandLabelService, this.dialogService);
+        var badge = new BadgeConfigViewModel(new BadgeConfig(), this.commandService, this.dialogService);
         this.Badges.Add(badge);
         this.SelectedBadge = badge;
     }
@@ -264,13 +264,13 @@ partial class DesktopConfigViewModel(
     IPresentationService presentationService,
     IContentDialogService dialogService,
     IVirualDesktopService virualDesktopService,
-    ICommandService commandLabelService)
+    ICommandService commandService)
     : ObservableObject
 {
     private readonly IPresentationService presentationService = presentationService;
     private readonly IContentDialogService dialogService = dialogService;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
-    private readonly ICommandService commandLabelService = commandLabelService;
+    private readonly ICommandService commandService = commandService;
 
     public Guid Id { get; } = desktopConfig.Id;
 
@@ -341,7 +341,7 @@ partial class DesktopConfigViewModel(
         var command = this.Command ?? throw new InvalidOperationException();
         try
         {
-            var result = await this.commandLabelService.ExecuteCommand(command, this.Utf8Command);
+            var result = await this.commandService.ExecuteCommand(command, this.Utf8Command);
             await this.dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
         }
         catch (Exception e)
@@ -402,7 +402,7 @@ partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObj
     private string pattern = config?.Pattern ?? string.Empty;
 }
 
-partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService commandLabelService, IContentDialogService dialogService) : ObservableObject
+partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService commandService, IContentDialogService dialogService) : ObservableObject
 {
     public Guid Id { get; } = badgeConfig.Id;
 
@@ -425,8 +425,24 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService comm
         var cmd = this.Command ?? throw new InvalidOperationException();
         try
         {
-            var result = await commandLabelService.ExecuteCommand(cmd, this.Utf8Command);
-            await dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
+            var result = await commandService.ExecuteCommand(cmd, this.Utf8Command);
+            var parsed = System.Text.Json.JsonSerializer.Deserialize<BadgeCommandResult>(result, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (parsed is not null)
+            {
+                var resolvedLabel = string.IsNullOrEmpty(parsed.Label) ? this.Label : parsed.Label;
+                var resolvedColor = TryParseColor(parsed.Color, this.Color);
+                var badge = new ResolvedBadge(resolvedLabel, resolvedColor);
+                await dialogService.ShowSimpleDialogAsync(new SimpleContentDialogCreateOptions
+                {
+                    Title = Properties.Resources.CommandSuccess,
+                    Content = badge,
+                    CloseButtonText = Properties.Resources.OK,
+                });
+            }
+            else
+            {
+                await dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
+            }
         }
         catch (Exception e)
         {
@@ -445,4 +461,11 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService comm
             Command = this.Command,
             Utf8Command = this.Utf8Command,
         };
+
+    private static System.Drawing.Color TryParseColor(string? htmlColor, System.Drawing.Color fallback)
+    {
+        if (htmlColor is null) return fallback;
+        try { return System.Drawing.ColorTranslator.FromHtml(htmlColor); }
+        catch { return fallback; }
+    }
 }

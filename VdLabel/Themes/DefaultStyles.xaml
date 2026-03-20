@@ -42,7 +42,7 @@
             BorderThickness="1.5"
             CornerRadius="4">
             <TextBlock
-                FontSize="14"
+                FontSize="20"
                 FontWeight="SemiBold"
                 Foreground="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"
                 Text="{Binding Label}" />

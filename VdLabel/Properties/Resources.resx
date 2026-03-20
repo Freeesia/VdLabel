@@ -229,10 +229,4 @@
   <data name="BadgeCommandTooltip" xml:space="preserve">
     <value>コマンドの標準出力(JSON)からラベルと色を取得します。形式: {"label":"...","color":"#RRGGBB"}</value>
   </data>
-  <data name="AddBadge" xml:space="preserve">
-    <value>バッジを追加</value>
-  </data>
-  <data name="RemoveBadge" xml:space="preserve">
-    <value>バッジを削除</value>
-  </data>
 </root>

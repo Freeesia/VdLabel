@@ -8,7 +8,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 {
     private readonly Guid id;
     private readonly IConfigStore configStore;
-    private readonly ICommandService commandLabelService;
+    private readonly ICommandService commandService;
     private DateTime requestTime;
     private double duration;
     private bool isVisibleName;
@@ -46,11 +46,11 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 
     public bool IsVisibleName => this.ImagePath is null || this.isVisibleName;
 
-    public OverlayViewModel(Guid id, string name, IConfigStore configStore, ICommandService commandLabelService)
+    public OverlayViewModel(Guid id, string name, IConfigStore configStore, ICommandService commandService)
     {
         this.id = id;
         this.configStore = configStore;
-        this.commandLabelService = commandLabelService;
+        this.commandService = commandService;
         this.name = name;
         var config = this.configStore.Load().AsTask().Result;
         this.fontSize = config.FontSize;
@@ -67,12 +67,12 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
         this.imagePath = c?.ImagePath;
         this.isVisibleName = c?.IsVisibleName ?? true;
-        this.badges = ResolveBadges(config, c, commandLabelService);
+        this.badges = ResolveBadges(config, c, commandService);
         this.configStore.Saved += ConfigStore_Saved;
-        this.commandLabelService.BadgeResultsUpdated += CommandLabelService_BadgeResultsUpdated;
+        this.commandService.BadgeResultsUpdated += CommandService_BadgeResultsUpdated;
     }
 
-    private static IReadOnlyList<ResolvedBadge> ResolveBadges(Config config, DesktopConfig? desktopConfig, ICommandService commandLabelService)
+    private static IReadOnlyList<ResolvedBadge> ResolveBadges(Config config, DesktopConfig? desktopConfig, ICommandService commandService)
     {
         if (desktopConfig is null || desktopConfig.BadgeIds.Count == 0)
         {
@@ -82,7 +82,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
             .Where(b => desktopConfig.BadgeIds.Contains(b.Id))
             .Select(b =>
             {
-                var cached = commandLabelService.GetBadgeResult(b.Id, desktopConfig.Id);
+                var cached = commandService.GetBadgeResult(b.Id, desktopConfig.Id);
                 return cached.HasValue
                     ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
                     : new ResolvedBadge(b.Label, b.Color);
@@ -111,20 +111,20 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         }
         this.isVisibleName = c?.IsVisibleName ?? true;
         this.ImagePath = c?.ImagePath;
-        this.Badges = ResolveBadges(config, c, this.commandLabelService);
+        this.Badges = ResolveBadges(config, c, this.commandService);
     }
 
-    private async void CommandLabelService_BadgeResultsUpdated(object? sender, EventArgs e)
+    private async void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
     {
         var config = await this.configStore.Load();
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
-        this.Badges = ResolveBadges(config, c, this.commandLabelService);
+        this.Badges = ResolveBadges(config, c, this.commandService);
     }
 
     public void Dispose()
     {
         this.configStore.Saved -= ConfigStore_Saved;
-        this.commandLabelService.BadgeResultsUpdated -= CommandLabelService_BadgeResultsUpdated;
+        this.commandService.BadgeResultsUpdated -= CommandService_BadgeResultsUpdated;
     }
 
 
