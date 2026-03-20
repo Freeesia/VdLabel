@@ -8,12 +8,12 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, Lazy<ICommandLabelService> commandLabelService) : IHostedService, IVirualDesktopService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, Lazy<ICommandService> commandLabelService) : IHostedService, IVirualDesktopService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
-    private readonly Lazy<ICommandLabelService> commandLabelService = commandLabelService;
+    private readonly Lazy<ICommandService> commandLabelService = commandLabelService;
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
 

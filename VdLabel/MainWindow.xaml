@@ -510,12 +510,12 @@
                                 Orientation="Horizontal">
                                 <ui:Button
                                     Command="{Binding AddBadgeCommand}"
-                                    Content="{x:Static p:Resources.AddBadge}"
+                                    Content="{x:Static p:Resources.Add}"
                                     Icon="{ui:SymbolIcon Add24}" />
                                 <ui:Button
                                     Margin="4,0,0,0"
                                     Command="{Binding RemoveBadgeCommand}"
-                                    Content="{x:Static p:Resources.RemoveBadge}"
+                                    Content="{x:Static p:Resources.Remove}"
                                     Icon="{ui:SymbolIcon Delete24}" />
                             </StackPanel>
                         </Grid>
@@ -524,6 +524,16 @@
                             Grid.Column="2"
                             Margin="4"
                             DataContext="{Binding SelectedBadge}">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="IsEnabled" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />

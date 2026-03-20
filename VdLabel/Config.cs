@@ -26,7 +26,6 @@ record BadgeConfig
     public bool Utf8Command { get; set; }
 }
 
-
 enum OverlayPosition
 {
     Center,

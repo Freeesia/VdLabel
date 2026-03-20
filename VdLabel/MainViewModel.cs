@@ -17,7 +17,7 @@ partial class MainViewModel : ObservableObject
     private readonly IConfigStore configStore;
     private readonly IContentDialogService dialogService;
     private readonly IVirualDesktopService virualDesktopService;
-    private readonly ICommandLabelService commandLabelService;
+    private readonly ICommandService commandLabelService;
     private readonly IPresentationService presentationService;
     private readonly IUpdateChecker updateChecker;
 
@@ -67,7 +67,7 @@ partial class MainViewModel : ObservableObject
         IPresentationService presentationService,
         IContentDialogService dialogService,
         IVirualDesktopService virualDesktopService,
-        ICommandLabelService commandLabelService,
+        ICommandService commandLabelService,
         IUpdateChecker updateChecker)
     {
         BindingOperations.EnableCollectionSynchronization(this.DesktopConfigs, new());
@@ -264,13 +264,13 @@ partial class DesktopConfigViewModel(
     IPresentationService presentationService,
     IContentDialogService dialogService,
     IVirualDesktopService virualDesktopService,
-    ICommandLabelService commandLabelService)
+    ICommandService commandLabelService)
     : ObservableObject
 {
     private readonly IPresentationService presentationService = presentationService;
     private readonly IContentDialogService dialogService = dialogService;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
-    private readonly ICommandLabelService commandLabelService = commandLabelService;
+    private readonly ICommandService commandLabelService = commandLabelService;
 
     public Guid Id { get; } = desktopConfig.Id;
 
@@ -402,7 +402,7 @@ partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObj
     private string pattern = config?.Pattern ?? string.Empty;
 }
 
-partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandLabelService commandLabelService, IContentDialogService dialogService) : ObservableObject
+partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService commandLabelService, IContentDialogService dialogService) : ObservableObject
 {
     public Guid Id { get; } = badgeConfig.Id;
 

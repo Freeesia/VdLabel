@@ -8,14 +8,14 @@ using System.Text.RegularExpressions;
 
 namespace VdLabel;
 
-partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandLabelService
+partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesktopService virualDesktopService, ILogger<CommandLabelService> logger) : BackgroundService, ICommandService
 {
     private readonly App app = app;
     private readonly IConfigStore configStore = configStore;
     private readonly IVirualDesktopService virualDesktopService = virualDesktopService;
     private readonly ILogger<CommandLabelService> logger = logger;
     private readonly Dictionary<Guid, string> commandCache = new();
-    private readonly Dictionary<Guid, (string Label, Color Color)> badgeCommandCache = new();
+    private readonly Dictionary<(Guid BadgeId, Guid DesktopId), (string Label, Color Color)> badgeCommandCache = new();
 
     public event EventHandler? BadgeResultsUpdated;
 
@@ -40,8 +40,8 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
     public string? GetCacheResult(Guid desktopId)
         => this.commandCache.TryGetValue(desktopId, out var result) ? result : null;
 
-    public (string Label, Color Color)? GetBadgeResult(Guid badgeId)
-        => this.badgeCommandCache.TryGetValue(badgeId, out var result) ? result : null;
+    public (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId)
+        => this.badgeCommandCache.TryGetValue((badgeId, desktopId), out var result) ? result : null;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -77,29 +77,34 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
             }
 
             var badgeResultsChanged = false;
-            foreach (var badgeConfig in config.Badges)
+            foreach (var desktopConfig in config.DesktopConfigs)
             {
-                if (badgeConfig.Command is not { Length: > 0 })
+                foreach (var badgeId in desktopConfig.BadgeIds)
                 {
-                    continue;
-                }
-                try
-                {
-                    var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                    var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    if (parsed is not null)
+                    var badgeConfig = config.Badges.FirstOrDefault(b => b.Id == badgeId);
+                    if (badgeConfig is null || badgeConfig.Command is not { Length: > 0 })
                     {
-                        var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
-                        var color = TryParseColor(parsed.Color, badgeConfig.Color);
-                        this.badgeCommandCache[badgeConfig.Id] = (label, color);
-                        badgeResultsChanged = true;
+                        continue;
                     }
+                    try
+                    {
+                        var command = badgeConfig.Command.Replace("{desktopId}", desktopConfig.Id.ToString(), StringComparison.OrdinalIgnoreCase);
+                        var output = await ExecuteCommand(command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
+                        var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (parsed is not null)
+                        {
+                            var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
+                            var color = TryParseColor(parsed.Color, badgeConfig.Color);
+                            this.badgeCommandCache[(badgeId, desktopConfig.Id)] = (label, color);
+                            badgeResultsChanged = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Desktop ID: {DesktopId}, Command: {Command})", badgeId, desktopConfig.Id, badgeConfig.Command);
+                    }
+                    stoppingToken.ThrowIfCancellationRequested();
                 }
-                catch (Exception e)
-                {
-                    this.logger.LogError(e, "バッジコマンド実行エラー (Badge ID: {BadgeId}, Command: {Command})", badgeConfig.Id, badgeConfig.Command);
-                }
-                stoppingToken.ThrowIfCancellationRequested();
             }
 
             if (badgeResultsChanged)
@@ -130,11 +135,11 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
 }
 
 
-interface ICommandLabelService
+interface ICommandService
 {
     ValueTask<string> ExecuteCommand(string command, bool utf8, CancellationToken token = default);
     string? GetCacheResult(Guid desktopId);
-    (string Label, Color Color)? GetBadgeResult(Guid badgeId);
+    (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId);
     event EventHandler? BadgeResultsUpdated;
 }
 

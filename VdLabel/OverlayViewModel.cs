@@ -8,7 +8,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 {
     private readonly Guid id;
     private readonly IConfigStore configStore;
-    private readonly ICommandLabelService commandLabelService;
+    private readonly ICommandService commandLabelService;
     private DateTime requestTime;
     private double duration;
     private bool isVisibleName;
@@ -46,7 +46,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 
     public bool IsVisibleName => this.ImagePath is null || this.isVisibleName;
 
-    public OverlayViewModel(Guid id, string name, IConfigStore configStore, ICommandLabelService commandLabelService)
+    public OverlayViewModel(Guid id, string name, IConfigStore configStore, ICommandService commandLabelService)
     {
         this.id = id;
         this.configStore = configStore;
@@ -72,7 +72,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
         this.commandLabelService.BadgeResultsUpdated += CommandLabelService_BadgeResultsUpdated;
     }
 
-    private static IReadOnlyList<ResolvedBadge> ResolveBadges(Config config, DesktopConfig? desktopConfig, ICommandLabelService commandLabelService)
+    private static IReadOnlyList<ResolvedBadge> ResolveBadges(Config config, DesktopConfig? desktopConfig, ICommandService commandLabelService)
     {
         if (desktopConfig is null || desktopConfig.BadgeIds.Count == 0)
         {
@@ -82,7 +82,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
             .Where(b => desktopConfig.BadgeIds.Contains(b.Id))
             .Select(b =>
             {
-                var cached = commandLabelService.GetBadgeResult(b.Id);
+                var cached = commandLabelService.GetBadgeResult(b.Id, desktopConfig.Id);
                 return cached.HasValue
                     ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
                     : new ResolvedBadge(b.Label, b.Color);
