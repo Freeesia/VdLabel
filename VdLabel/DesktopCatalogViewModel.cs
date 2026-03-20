@@ -39,7 +39,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     private async void Setup()
     {
-        var config = await this.configStore.Load().ConfigureAwait(false);
+        var config = await this.configStore.Load();
         var pos = config.NamePosition switch
         {
             NamePosition.Top => Dock.Top,
