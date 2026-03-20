@@ -26,22 +26,6 @@ record BadgeConfig
     public bool Utf8Command { get; set; }
 }
 
-/// <summary>
-/// JSON output format for badge commands.
-/// </summary>
-record BadgeCommandResult
-{
-    public string Label { get; init; } = string.Empty;
-
-    /// <summary>HTML color string, e.g. "#ff6600".</summary>
-    public string? Color { get; init; }
-}
-
-/// <summary>
-/// Runtime-resolved badge values (from command output or static config).
-/// Used for display in catalog and overlay.
-/// </summary>
-record ResolvedBadge(string Label, Color Color);
 
 enum OverlayPosition
 {

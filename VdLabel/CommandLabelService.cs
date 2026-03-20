@@ -137,3 +137,14 @@ interface ICommandLabelService
     (string Label, Color Color)? GetBadgeResult(Guid badgeId);
     event EventHandler? BadgeResultsUpdated;
 }
+
+/// <summary>
+/// JSON output format for badge commands.
+/// </summary>
+record BadgeCommandResult
+{
+    public string Label { get; init; } = string.Empty;
+
+    /// <summary>HTML color string, e.g. "#ff6600".</summary>
+    public string? Color { get; init; }
+}
