@@ -1,6 +1,7 @@
 ﻿using Cysharp.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Text;
 using System.Text.Json;
@@ -13,8 +14,8 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
     private readonly App app = app;
     private readonly IConfigStore configStore = configStore;
     private readonly ILogger<CommandService> logger = logger;
-    private readonly Dictionary<Guid, string> commandCache = new();
-    private readonly Dictionary<(Guid BadgeId, Guid? DesktopId), (string Label, Color Color)> badgeCommandCache = new();
+    private readonly ConcurrentDictionary<Guid, string> commandCache = new();
+    private readonly ConcurrentDictionary<(Guid BadgeId, Guid? DesktopId), (string Label, Color Color)> badgeCommandCache = new();
 
     public event EventHandler? BadgeResultsUpdated;
     public event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
