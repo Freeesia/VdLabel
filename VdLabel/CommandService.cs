@@ -14,7 +14,7 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
     private readonly IConfigStore configStore = configStore;
     private readonly ILogger<CommandService> logger = logger;
     private readonly Dictionary<Guid, string> commandCache = new();
-    private readonly Dictionary<(Guid BadgeId, Guid DesktopId), (string Label, Color Color)> badgeCommandCache = new();
+    private readonly Dictionary<(Guid BadgeId, Guid? DesktopId), (string Label, Color Color)> badgeCommandCache = new();
 
     public event EventHandler? BadgeResultsUpdated;
     public event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
@@ -41,7 +41,13 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
         => this.commandCache.TryGetValue(desktopId, out var result) ? result : null;
 
     public (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId)
-        => this.badgeCommandCache.TryGetValue((badgeId, desktopId), out var result) ? result : null;
+    {
+        if (this.badgeCommandCache.TryGetValue((badgeId, desktopId), out var result))
+        {
+            return result;
+        }
+        return this.badgeCommandCache.TryGetValue((badgeId, null), out var shared) ? shared : null;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -111,7 +117,7 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                 }
                 else
                 {
-                    // No placeholder — run once and copy result to all assigned desktops
+                    // No placeholder — run once and store under null desktop ID
                     try
                     {
                         var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
@@ -119,11 +125,8 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                         if (parsed is not null)
                         {
                             var shared = (string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label, TryParseColor(parsed.Color, badgeConfig.Color));
-                            foreach (var desktopConfig in config.DesktopConfigs.Where(d => d.BadgeIds.Contains(badgeConfig.Id)))
-                            {
-                                this.badgeCommandCache[(badgeConfig.Id, desktopConfig.Id)] = shared;
-                                badgeResultsChanged = true;
-                            }
+                            this.badgeCommandCache[(badgeConfig.Id, null)] = shared;
+                            badgeResultsChanged = true;
                         }
                     }
                     catch (Exception e)
