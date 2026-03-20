@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Text.Json.Serialization;
 
 namespace VdLabel;
 
@@ -32,11 +31,9 @@ record BadgeConfig
 /// </summary>
 record BadgeCommandResult
 {
-    [JsonPropertyName("label")]
     public string Label { get; init; } = string.Empty;
 
     /// <summary>HTML color string, e.g. "#ff6600".</summary>
-    [JsonPropertyName("color")]
     public string? Color { get; init; }
 }
 

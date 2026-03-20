@@ -86,7 +86,7 @@ partial class CommandLabelService(App app, IConfigStore configStore, IVirualDesk
                 try
                 {
                     var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                    var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output);
+                    var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (parsed is not null)
                     {
                         var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
