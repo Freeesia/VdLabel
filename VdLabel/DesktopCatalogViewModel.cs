@@ -41,7 +41,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     private async void Setup()
     {
-        var config = await this.configStore.Load().ConfigureAwait(false);
+        var config = await this.configStore.Load();
         var pos = config.NamePosition switch
         {
             NamePosition.Top => Dock.Top,
@@ -94,9 +94,12 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     public void Loaded() => Setup();
 
-    private void ConfigStore_Saved(object? sender, EventArgs e) => Setup();
+    // バックグラウンドスレッドから発火する可能性があるため UI スレッドへディスパッチ
+    private void ConfigStore_Saved(object? sender, EventArgs e)
+        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
 
-    private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e) => Setup();
+    private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
+        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
 
     public void Dispose()
     {

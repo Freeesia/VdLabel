@@ -554,23 +554,5 @@ namespace VdLabel.Properties {
                 return ResourceManager.GetString("BadgeCommandTooltip", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   バッジを追加 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string AddBadge {
-            get {
-                return ResourceManager.GetString("AddBadge", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   バッジを削除 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string RemoveBadge {
-            get {
-                return ResourceManager.GetString("RemoveBadge", resourceCulture);
-            }
-        }
     }
 }

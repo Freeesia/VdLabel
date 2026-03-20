@@ -83,6 +83,27 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                 stoppingToken.ThrowIfCancellationRequested();
             }
 
+            // バッジキャッシュの失効処理：設定に存在しないバッジ、コマンド未設定のバッジ、
+            // または割り当てが外れたデスクトップのキャッシュエントリを削除する
+            foreach (var key in this.badgeCommandCache.Keys.ToList())
+            {
+                var badge = config.Badges.FirstOrDefault(b => b.Id == key.BadgeId);
+                if (badge is null || badge.Command is not { Length: > 0 })
+                {
+                    // バッジが削除されたかコマンドが未設定になったためキャッシュを削除
+                    this.badgeCommandCache.TryRemove(key, out _);
+                }
+                else if (key.DesktopId.HasValue)
+                {
+                    // デスクトップへのバッジ割り当てが外れた場合はキャッシュを削除
+                    var desktopHasBadge = config.DesktopConfigs.Any(d => d.Id == key.DesktopId.Value && d.BadgeIds.Contains(key.BadgeId));
+                    if (!desktopHasBadge)
+                    {
+                        this.badgeCommandCache.TryRemove(key, out _);
+                    }
+                }
+            }
+
             var badgeResultsChanged = false;
             foreach (var badgeConfig in config.Badges)
             {
@@ -182,12 +203,12 @@ class LabelResultUpdatedEventArgs(Guid desktopId, string label) : EventArgs
 }
 
 /// <summary>
-/// JSON output format for badge commands.
+/// バッジ用コマンドの JSON 出力形式を表します。
 /// </summary>
 record BadgeCommandResult
 {
     public string Label { get; init; } = string.Empty;
 
-    /// <summary>HTML color string, e.g. "#ff6600".</summary>
+    /// <summary>HTML カラー文字列（例: "#ff6600"）。</summary>
     public string? Color { get; init; }
 }

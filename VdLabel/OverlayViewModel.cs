@@ -116,9 +116,11 @@ partial class OverlayViewModel : ObservableObject, IDisposable
 
     private async void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
     {
-        var config = await this.configStore.Load();
+        var config = await this.configStore.Load().ConfigureAwait(false);
         var c = config.DesktopConfigs.FirstOrDefault(c => c.Id == this.id);
-        this.Badges = ResolveBadges(config, c, this.commandService);
+        var badges = ResolveBadges(config, c, this.commandService);
+        // バックグラウンドスレッドから発火するため UI スレッドへディスパッチ
+        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => this.Badges = badges);
     }
 
     public void Dispose()
