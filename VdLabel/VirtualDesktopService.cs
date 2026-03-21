@@ -8,11 +8,12 @@ using WindowStartupLocation = Kamishibai.WindowStartupLocation;
 
 namespace VdLabel;
 
-class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore) : IHostedService, IVirualDesktopService
+class VirtualDesktopService(App app, IWindowService windowService, IConfigStore configStore, ICommandService commandService) : IHostedService, IVirualDesktopService
 {
     private readonly App app = app;
     private readonly IWindowService windowService = windowService;
     private readonly IConfigStore configStore = configStore;
+    private readonly ICommandService commandService = commandService;
     private readonly ConcurrentDictionary<Guid, (IWindow window, OverlayViewModel vm)> windows = [];
     private OpenWindowOptions options = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
 
@@ -29,6 +30,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         this.app.Startup += async (_, _) =>
         {
             await ReloadDesktops();
+            this.commandService.LabelResultUpdated += CommandService_LabelResultUpdated;
             VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
             VirtualDesktop.Destroyed += VirtualDesktop_Destroyed;
             VirtualDesktop.Created += VirtualDesktop_Created;
@@ -37,6 +39,9 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
         };
         return Task.CompletedTask;
     }
+
+    private void CommandService_LabelResultUpdated(object? sender, LabelResultUpdatedEventArgs e)
+        => SetName(e.DesktopId, e.Label);
 
     private async void VirtualDesktop_Renamed(object? sender, VirtualDesktopRenamedEventArgs e)
     {
@@ -68,7 +73,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
     private void OpenOverlay(VirtualDesktop desktop, string name)
         => this.app.Dispatcher.Invoke(async () =>
         {
-            var vm = new OverlayViewModel(desktop.Id, name, configStore);
+            var vm = new OverlayViewModel(desktop.Id, name, configStore, this.commandService);
             var window = await this.windowService.OpenWindowAsync(vm, null, this.options);
             this.windows[desktop.Id] = (window, vm);
             var w = GetWindow((WindowHandle)window);
@@ -118,6 +123,7 @@ class VirtualDesktopService(App app, IWindowService windowService, IConfigStore 
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        this.commandService.LabelResultUpdated -= CommandService_LabelResultUpdated;
         VirtualDesktop.CurrentChanged -= VirtualDesktop_CurrentChanged;
         VirtualDesktop.Destroyed -= VirtualDesktop_Destroyed;
         VirtualDesktop.Created -= VirtualDesktop_Created;

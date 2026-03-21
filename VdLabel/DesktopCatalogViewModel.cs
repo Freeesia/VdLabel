@@ -1,13 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace VdLabel;
 
 internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDisposable
 {
     private readonly IVirualDesktopService virualDesktopService;
-    private readonly ICommandLabelService commandLabelService;
+    private readonly ICommandService commandService;
     private readonly IConfigStore configStore;
     private readonly int maxColumns;
     [ObservableProperty]
@@ -16,7 +17,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private DesktopViewModel? selectedDesktop;
 
     [ObservableProperty]
-    private int columns = 0;
+    private int columns = 1;
 
     [ObservableProperty]
     private double top;
@@ -27,19 +28,20 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     [ObservableProperty]
     private double height;
 
-    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandLabelService commandLabelService, IConfigStore configStore)
+    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandService commandService, IConfigStore configStore)
     {
         this.virualDesktopService = virualDesktopService;
-        this.commandLabelService = commandLabelService;
+        this.commandService = commandService;
         this.configStore = configStore;
         this.configStore.Saved += ConfigStore_Saved;
+        this.commandService.BadgeResultsUpdated += CommandService_BadgeResultsUpdated;
         this.maxColumns = (int)(SystemParameters.PrimaryScreenWidth * 0.8 / 280);
         Setup();
     }
 
     private async void Setup()
     {
-        var config = await this.configStore.Load().ConfigureAwait(false);
+        var config = await this.configStore.Load();
         var pos = config.NamePosition switch
         {
             NamePosition.Top => Dock.Top,
@@ -48,7 +50,21 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         };
         this.Desktops = config.DesktopConfigs
             .Where(c => c.Id != Guid.Empty)
-            .Select((c, i) => new DesktopViewModel(i + 1, c, this.commandLabelService.GetCacheResult(c.Id), this.virualDesktopService.GetWallpaperPath(c.Id), pos))
+            .Select((c, i) =>
+            {
+                var commandLabel = this.commandService.GetCacheResult(c.Id);
+                var wallpaperPath = this.virualDesktopService.GetWallpaperPath(c.Id);
+                var resolvedBadges = config.Badges.ToDictionary(
+                    b => b.Id,
+                    b =>
+                    {
+                        var cached = this.commandService.GetBadgeResult(b.Id, c.Id);
+                        return cached.HasValue
+                            ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
+                            : new ResolvedBadge(b.Label, b.Color);
+                    });
+                return new DesktopViewModel(i + 1, c, commandLabel, wallpaperPath, pos, resolvedBadges, ToggleBadgeAsync);
+            })
             .ToArray();
         var currentDesktop = this.virualDesktopService.GetCurrent();
         this.SelectedDesktop = this.Desktops.FirstOrDefault(d => d.Id == currentDesktop);
@@ -60,11 +76,36 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
     }
 
+    private async Task ToggleBadgeAsync(Guid desktopId, Guid badgeId)
+    {
+        var config = await this.configStore.Load().ConfigureAwait(false);
+        var desktopConfig = config.DesktopConfigs.FirstOrDefault(c => c.Id == desktopId);
+        if (desktopConfig is null)
+        {
+            return;
+        }
+        var newBadgeIds = desktopConfig.BadgeIds.Contains(badgeId)
+            ? desktopConfig.BadgeIds.Where(id => id != badgeId).ToArray()
+            : [.. desktopConfig.BadgeIds, badgeId];
+        var idx = config.DesktopConfigs.IndexOf(desktopConfig);
+        config.DesktopConfigs[idx] = desktopConfig with { BadgeIds = newBadgeIds };
+        await this.configStore.Save(config).ConfigureAwait(false);
+    }
+
     public void Loaded() => Setup();
 
-    private void ConfigStore_Saved(object? sender, EventArgs e) => Setup();
+    // バックグラウンドスレッドから発火する可能性があるため UI スレッドへディスパッチ
+    private void ConfigStore_Saved(object? sender, EventArgs e)
+        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
 
-    public void Dispose() => this.configStore.Saved -= ConfigStore_Saved;
+    private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
+        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
+
+    public void Dispose()
+    {
+        this.configStore.Saved -= ConfigStore_Saved;
+        this.commandService.BadgeResultsUpdated -= CommandService_BadgeResultsUpdated;
+    }
 
     partial void OnSelectedDesktopChanged(DesktopViewModel? value)
     {
@@ -88,7 +129,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         => this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
 }
 
-internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos)
+internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyDictionary<Guid, ResolvedBadge> resolvedBadges, Func<Guid, Guid, Task> toggleBadge)
 {
     private readonly int index = index;
     private DesktopConfig desktopConfig = desktopConfig;
@@ -102,4 +143,23 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
     public string Label => this.commandLabel ?? this.desktopConfig.Name ?? string.Format(VdLabel.Properties.Resources.Desktop, this.index);
 
     public string? ImagePath => this.desktopConfig.ImagePath ?? this.wallpaperPath;
+
+    public IReadOnlyList<ResolvedBadge> AssignedBadges { get; } = desktopConfig.BadgeIds
+        .Where(id => resolvedBadges.ContainsKey(id))
+        .Select(id => resolvedBadges[id])
+        .ToArray();
+
+    public IReadOnlyList<BadgeMenuItem> BadgeMenuItems { get; } = resolvedBadges
+        .Select(kvp => new BadgeMenuItem(kvp.Key, kvp.Value, desktopConfig.Id, desktopConfig.BadgeIds.Contains(kvp.Key), toggleBadge))
+        .ToArray();
+}
+
+internal class BadgeMenuItem(Guid badgeId, ResolvedBadge resolved, Guid desktopId, bool isAssigned, Func<Guid, Guid, Task> toggleAction)
+{
+    public string Label => resolved.Label;
+    public System.Drawing.Color Color => resolved.Color;
+
+    public bool IsAssigned { get; } = isAssigned;
+
+    public AsyncRelayCommand ToggleCommand { get; } = new AsyncRelayCommand(() => toggleAction(desktopId, badgeId));
 }

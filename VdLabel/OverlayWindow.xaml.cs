@@ -4,6 +4,7 @@ using System.Windows.Data;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wacton.Unicolour;
 using static PInvoke.User32;
 
 namespace VdLabel;
@@ -70,4 +71,35 @@ public sealed class SystemColorToSolidBrushConverter : IValueConverter
         System.Drawing.Color converted = System.Drawing.Color.FromArgb(brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B);
         return converted;
     }
+}
+
+[ValueConversion(typeof(System.Drawing.Color), typeof(SolidColorBrush))]
+public sealed class BadgeColorToForegroundConverter : IValueConverter
+{
+    public static BadgeColorToForegroundConverter Default { get; } = new BadgeColorToForegroundConverter();
+
+    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    {
+        if (value is System.Drawing.Color bgColor)
+        {
+            // Use OKLCH luminance (L channel) via Unicolour to decide dark/light text
+            var uni = new Unicolour(ColourSpace.Rgb255, bgColor.R, bgColor.G, bgColor.B);
+            double luminance = uni.Oklch.L;
+            // Keep hue/chroma, flip lightness for contrast
+            double textLuminance = luminance > 0.5 ? 0.15 : 0.85;
+            var textUni = new Unicolour(ColourSpace.Oklch, textLuminance, uni.Oklch.C, uni.Oklch.H);
+            var rgb = textUni.Rgb;
+            var textColor = Color.FromArgb(255,
+                ClampToByte(rgb.Triplet.First * 255),
+                ClampToByte(rgb.Triplet.Second * 255),
+                ClampToByte(rgb.Triplet.Third * 255));
+            return new SolidColorBrush(textColor);
+        }
+        return new SolidColorBrush(Colors.Black);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        => throw new NotSupportedException();
+
+    private static byte ClampToByte(double value) => (byte)Math.Clamp(value, 0, 255);
 }

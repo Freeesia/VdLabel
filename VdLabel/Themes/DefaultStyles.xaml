@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:VdLabel"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Style x:Key="DefaultGroupBoxStyle" TargetType="{x:Type GroupBox}">
         <Setter Property="Template">
@@ -31,6 +32,24 @@
         </Setter>
     </Style>
     <Style BasedOn="{StaticResource DefaultGroupBoxStyle}" TargetType="{x:Type GroupBox}" />
+
+    <DataTemplate DataType="{x:Type local:ResolvedBadge}">
+        <Border
+            Margin="0,2"
+            Padding="8,3"
+            Background="{Binding Color, Converter={x:Static local:SystemColorToSolidBrushConverter.Default}}"
+            BorderBrush="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"
+            BorderThickness="1.5"
+            CornerRadius="4">
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="20"
+                FontWeight="SemiBold"
+                Foreground="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"
+                Text="{Binding Label}" />
+        </Border>
+    </DataTemplate>
     <Style BasedOn="{StaticResource {x:Type RadioButton}}" TargetType="{x:Type RadioButton}">
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>

@@ -42,22 +42,47 @@
             </ItemsPanelTemplate>
         </ListBox.ItemsPanel>
         <ListBox.ItemTemplate>
-            <DataTemplate>
-                <DockPanel HorizontalAlignment="Center">
-                    <emoji:TextBlock
-                        MaxHeight="120"
-                        Margin="8"
-                        HorizontalAlignment="Center"
-                        DockPanel.Dock="{Binding Position, Mode=OneWay}"
-                        FontSize="28"
-                        Text="{Binding Label}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="Wrap" />
-                    <ui:Image
-                        CornerRadius="8"
-                        Focusable="False"
-                        Source="{Binding ImagePath}" />
-                </DockPanel>
+            <DataTemplate DataType="{x:Type local:DesktopViewModel}">
+                <Grid>
+                    <DockPanel HorizontalAlignment="Center">
+                        <emoji:TextBlock
+                            MaxHeight="120"
+                            Margin="8"
+                            HorizontalAlignment="Center"
+                            DockPanel.Dock="{Binding Position, Mode=OneWay}"
+                            FontSize="28"
+                            Text="{Binding Label}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+                        <ui:Image
+                            CornerRadius="8"
+                            Focusable="False"
+                            Source="{Binding ImagePath}" />
+                    </DockPanel>
+                    <ItemsControl
+                        Margin="6"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        ItemsSource="{Binding AssignedBadges}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <Grid.ContextMenu>
+                        <ContextMenu ItemsSource="{Binding BadgeMenuItems}">
+                            <ContextMenu.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Label}" />
+                                    <Setter Property="IsCheckable" Value="True" />
+                                    <Setter Property="IsChecked" Value="{Binding IsAssigned, Mode=OneWay}" />
+                                    <Setter Property="Command" Value="{Binding ToggleCommand}" />
+                                </Style>
+                            </ContextMenu.ItemContainerStyle>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
+                </Grid>
             </DataTemplate>
         </ListBox.ItemTemplate>
         <ListBox.ItemContainerStyle>

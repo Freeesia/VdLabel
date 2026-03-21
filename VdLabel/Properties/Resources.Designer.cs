@@ -509,5 +509,50 @@ namespace VdLabel.Properties {
                 return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   バッジ設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BadgeSettings {
+            get {
+                return ResourceManager.GetString("BadgeSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ラベル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BadgeLabel {
+            get {
+                return ResourceManager.GetString("BadgeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   バッジ色 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BadgeColor {
+            get {
+                return ResourceManager.GetString("BadgeColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   バッジコマンド に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BadgeCommand {
+            get {
+                return ResourceManager.GetString("BadgeCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   コマンドの標準出力(JSON)からラベルと色を取得することを説明するツールチップ文字列を検索します。
+        /// </summary>
+        public static string BadgeCommandTooltip {
+            get {
+                return ResourceManager.GetString("BadgeCommandTooltip", resourceCulture);
+            }
+        }
     }
 }
