@@ -69,9 +69,9 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         var currentDesktop = this.virualDesktopService.GetCurrent();
         this.SelectedDesktop = this.Desktops.FirstOrDefault(d => d.Id == currentDesktop);
         this.Columns = Math.Min(this.maxColumns, this.Desktops.Count);
-        this.Width = this.Columns * 280;
+        this.Width = this.Columns * 280 + 2;
         var rows = (this.Desktops.Count / this.Columns) + (this.Desktops.Count % this.Columns == 0 ? 0 : 1);
-        this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows);
+        this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows) + 2;
         this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
         this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
     }
@@ -115,14 +115,6 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         }
     }
 
-    partial void OnHeightChanged(double value)
-    {
-        var rows = (this.Desktops.Count / this.Columns) + (this.Desktops.Count % this.Columns == 0 ? 0 : 1);
-        this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows) + 2;
-    }
-
-    partial void OnWidthChanged(double value)
-        => this.Width = this.Columns * 280 + 2;
     partial void OnTopChanged(double value)
         => this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
     partial void OnLeftChanged(double value)
