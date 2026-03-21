@@ -17,7 +17,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private DesktopViewModel? selectedDesktop;
 
     [ObservableProperty]
-    private int columns = 0;
+    private int columns = 1;
 
     [ObservableProperty]
     private double top;
