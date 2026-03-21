@@ -131,7 +131,7 @@ partial class MainViewModel : ObservableObject
             this.Badges.Clear();
             foreach (var badge in this.Config.Badges)
             {
-                this.Badges.Add(new(badge, this.commandService, this.dialogService));
+                this.Badges.Add(new(badge, this.commandService, this.dialogService, this.virualDesktopService));
             }
             this.SelectedBadge = this.Badges.FirstOrDefault(b => b.Id == selectedBadgeId) ?? this.Badges.FirstOrDefault();
         }
@@ -221,7 +221,7 @@ partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void AddBadge()
     {
-        var badge = new BadgeConfigViewModel(new BadgeConfig(), this.commandService, this.dialogService);
+        var badge = new BadgeConfigViewModel(new BadgeConfig(), this.commandService, this.dialogService, this.virualDesktopService);
         this.Badges.Add(badge);
         this.SelectedBadge = badge;
     }
@@ -411,7 +411,7 @@ partial class WindowConfigViewModel(WindowConfig? config = null) : ObservableObj
     private string pattern = config?.Pattern ?? string.Empty;
 }
 
-partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService commandService, IContentDialogService dialogService) : ObservableObject
+partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService commandService, IContentDialogService dialogService, IVirualDesktopService virualDesktopService) : ObservableObject
 {
     public Guid Id { get; } = badgeConfig.Id;
 
@@ -432,6 +432,9 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService comm
     public async Task TestBadgeCommand()
     {
         var cmd = this.Command ?? throw new InvalidOperationException();
+        // {desktopId} プレースホルダーを現在のデスクトップIDに置換する
+        var currentDesktopId = virualDesktopService.GetCurrent();
+        cmd = cmd.Replace("{desktopId}", currentDesktopId.ToString(), StringComparison.OrdinalIgnoreCase);
         try
         {
             var result = await commandService.ExecuteCommand(cmd, this.Utf8Command);
