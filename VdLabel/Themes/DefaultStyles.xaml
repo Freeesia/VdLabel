@@ -33,7 +33,7 @@
     </Style>
     <Style BasedOn="{StaticResource DefaultGroupBoxStyle}" TargetType="{x:Type GroupBox}" />
 
-    <DataTemplate x:Key="BadgeTemplate" DataType="{x:Type local:ResolvedBadge}">
+    <DataTemplate DataType="{x:Type local:ResolvedBadge}">
         <Border
             Margin="0,2"
             Padding="8,3"
@@ -42,6 +42,8 @@
             BorderThickness="1.5"
             CornerRadius="4">
             <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
                 FontSize="20"
                 FontWeight="SemiBold"
                 Foreground="{Binding Color, Converter={x:Static local:BadgeColorToForegroundConverter.Default}}"

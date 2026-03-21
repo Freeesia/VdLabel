@@ -63,8 +63,7 @@
                         Margin="6"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Bottom"
-                        ItemsSource="{Binding AssignedBadges}"
-                        ItemTemplate="{StaticResource BadgeTemplate}">
+                        ItemsSource="{Binding AssignedBadges}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Vertical" />
