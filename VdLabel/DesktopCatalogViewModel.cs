@@ -41,6 +41,14 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
 
     private async void Setup()
     {
+        var count = this.virualDesktopService.DesktopCount;
+        this.Columns = Math.Min(this.maxColumns, count);
+        this.Width = this.Columns * 280 + 2;
+        var rows = (count / this.Columns) + (count % this.Columns == 0 ? 0 : 1);
+        this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows) + 2;
+        this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
+        this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
+
         var config = await this.configStore.Load();
         var pos = config.NamePosition switch
         {
@@ -68,12 +76,6 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
             .ToArray();
         var currentDesktop = this.virualDesktopService.GetCurrent();
         this.SelectedDesktop = this.Desktops.FirstOrDefault(d => d.Id == currentDesktop);
-        this.Columns = Math.Min(this.maxColumns, this.Desktops.Count);
-        this.Width = this.Columns * 280 + 2;
-        var rows = (this.Desktops.Count / this.Columns) + (this.Desktops.Count % this.Columns == 0 ? 0 : 1);
-        this.Height = Math.Min(SystemParameters.PrimaryScreenHeight * 0.8, 280 * rows) + 2;
-        this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
-        this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
     }
 
     private async Task ToggleBadgeAsync(Guid desktopId, Guid badgeId)
