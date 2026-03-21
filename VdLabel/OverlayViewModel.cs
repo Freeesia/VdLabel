@@ -83,9 +83,7 @@ partial class OverlayViewModel : ObservableObject, IDisposable
             .Select(b =>
             {
                 var cached = commandService.GetBadgeResult(b.Id, desktopConfig.Id);
-                return cached.HasValue
-                    ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
-                    : new ResolvedBadge(b.Label, b.Color);
+                return cached ?? new ResolvedBadge(b.Label, b.Color);
             })
             .ToArray();
     }

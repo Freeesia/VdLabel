@@ -15,7 +15,7 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
     private readonly IConfigStore configStore = configStore;
     private readonly ILogger<CommandService> logger = logger;
     private readonly ConcurrentDictionary<Guid, string> commandCache = new();
-    private readonly ConcurrentDictionary<(Guid BadgeId, Guid? DesktopId), (string Label, Color Color)> badgeCommandCache = new();
+    private readonly ConcurrentDictionary<(Guid BadgeId, Guid? DesktopId), ResolvedBadge> badgeCommandCache = new();
 
     public event EventHandler? BadgeResultsUpdated;
     public event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
@@ -38,10 +38,18 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
         return string.Join(Environment.NewLine, lines);
     }
 
+    public async ValueTask<ResolvedBadge> ExecuteBadgeCommand(string command, bool utf8, Guid desktopId, string fallbackLabel, Color fallbackColor, CancellationToken token = default)
+    {
+        // {desktopId} プレースホルダーを指定されたデスクトップIDに置換する
+        var resolved = command.Replace("{desktopId}", desktopId.ToString(), StringComparison.OrdinalIgnoreCase);
+        var output = await ExecuteCommand(resolved, utf8, token).ConfigureAwait(false);
+        return ParseBadgeOutput(output, fallbackLabel, fallbackColor);
+    }
+
     public string? GetCacheResult(Guid desktopId)
         => this.commandCache.TryGetValue(desktopId, out var result) ? result : null;
 
-    public (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId)
+    public ResolvedBadge? GetBadgeResult(Guid badgeId, Guid desktopId)
     {
         if (this.badgeCommandCache.TryGetValue((badgeId, desktopId), out var result))
         {
@@ -119,16 +127,8 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                     {
                         try
                         {
-                            var command = badgeConfig.Command.Replace("{desktopId}", desktopConfig.Id.ToString(), StringComparison.OrdinalIgnoreCase);
-                            var output = await ExecuteCommand(command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                            var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                            if (parsed is not null)
-                            {
-                                var label = string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label;
-                                var color = TryParseColor(parsed.Color, badgeConfig.Color);
-                                this.badgeCommandCache[(badgeConfig.Id, desktopConfig.Id)] = (label, color);
-                                badgeResultsChanged = true;
-                            }
+                            this.badgeCommandCache[(badgeConfig.Id, desktopConfig.Id)] = await ExecuteBadgeCommand(badgeConfig.Command, badgeConfig.Utf8Command, desktopConfig.Id, badgeConfig.Label, badgeConfig.Color, stoppingToken).ConfigureAwait(false);
+                            badgeResultsChanged = true;
                         }
                         catch (Exception e)
                         {
@@ -139,17 +139,11 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
                 }
                 else
                 {
-                    // No placeholder — run once and store under null desktop ID
+                    // プレースホルダーなし — 一度だけ実行して null デスクトップIDのキャッシュに保存
                     try
                     {
-                        var output = await ExecuteCommand(badgeConfig.Command, badgeConfig.Utf8Command, stoppingToken).ConfigureAwait(false);
-                        var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        if (parsed is not null)
-                        {
-                            var shared = (string.IsNullOrEmpty(parsed.Label) ? badgeConfig.Label : parsed.Label, TryParseColor(parsed.Color, badgeConfig.Color));
-                            this.badgeCommandCache[(badgeConfig.Id, null)] = shared;
-                            badgeResultsChanged = true;
-                        }
+                        this.badgeCommandCache[(badgeConfig.Id, null)] = await ExecuteBadgeCommand(badgeConfig.Command, badgeConfig.Utf8Command, Guid.Empty, badgeConfig.Label, badgeConfig.Color, stoppingToken).ConfigureAwait(false);
+                        badgeResultsChanged = true;
                     }
                     catch (Exception e)
                     {
@@ -167,6 +161,23 @@ partial class CommandService(App app, IConfigStore configStore, ILogger<CommandS
             await timer.WaitForNextTickAsync(stoppingToken);
         }
         timer?.Dispose();
+    }
+
+    private static ResolvedBadge ParseBadgeOutput(string output, string fallbackLabel, Color fallbackColor)
+    {
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<BadgeCommandResult>(output, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (parsed is not null)
+            {
+                return new ResolvedBadge(string.IsNullOrEmpty(parsed.Label) ? fallbackLabel : parsed.Label, TryParseColor(parsed.Color, fallbackColor));
+            }
+        }
+        catch (JsonException)
+        {
+            // JSONデシリアライズ失敗時はそのままラベルとして使用
+        }
+        return new ResolvedBadge(output, fallbackColor);
     }
 
     private static Color TryParseColor(string? htmlColor, Color fallback)
@@ -191,7 +202,8 @@ interface ICommandService
 {
     ValueTask<string> ExecuteCommand(string command, bool utf8, CancellationToken token = default);
     string? GetCacheResult(Guid desktopId);
-    (string Label, Color Color)? GetBadgeResult(Guid badgeId, Guid desktopId);
+    ResolvedBadge? GetBadgeResult(Guid badgeId, Guid desktopId);
+    ValueTask<ResolvedBadge> ExecuteBadgeCommand(string command, bool utf8, Guid desktopId, string fallbackLabel, Color fallbackColor, CancellationToken token = default);
     event EventHandler? BadgeResultsUpdated;
     event EventHandler<LabelResultUpdatedEventArgs>? LabelResultUpdated;
 }

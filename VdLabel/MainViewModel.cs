@@ -432,29 +432,16 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService comm
     public async Task TestBadgeCommand()
     {
         var cmd = this.Command ?? throw new InvalidOperationException();
-        // {desktopId} プレースホルダーを現在のデスクトップIDに置換する
         var currentDesktopId = virualDesktopService.GetCurrent();
-        cmd = cmd.Replace("{desktopId}", currentDesktopId.ToString(), StringComparison.OrdinalIgnoreCase);
         try
         {
-            var result = await commandService.ExecuteCommand(cmd, this.Utf8Command);
-            var parsed = System.Text.Json.JsonSerializer.Deserialize<BadgeCommandResult>(result, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (parsed is not null)
+            var badge = await commandService.ExecuteBadgeCommand(cmd, this.Utf8Command, currentDesktopId, this.Label, this.Color);
+            await dialogService.ShowSimpleDialogAsync(new SimpleContentDialogCreateOptions
             {
-                var resolvedLabel = string.IsNullOrEmpty(parsed.Label) ? this.Label : parsed.Label;
-                var resolvedColor = TryParseColor(parsed.Color, this.Color);
-                var badge = new ResolvedBadge(resolvedLabel, resolvedColor);
-                await dialogService.ShowSimpleDialogAsync(new SimpleContentDialogCreateOptions
-                {
-                    Title = Properties.Resources.CommandSuccess,
-                    Content = badge,
-                    CloseButtonText = Properties.Resources.OK,
-                });
-            }
-            else
-            {
-                await dialogService.ShowAlertAsync(Properties.Resources.CommandSuccess, result, Properties.Resources.OK);
-            }
+                Title = Properties.Resources.CommandSuccess,
+                Content = badge,
+                CloseButtonText = Properties.Resources.OK,
+            });
         }
         catch (Exception e)
         {
@@ -473,11 +460,4 @@ partial class BadgeConfigViewModel(BadgeConfig badgeConfig, ICommandService comm
             Command = this.Command,
             Utf8Command = this.Utf8Command,
         };
-
-    private static System.Drawing.Color TryParseColor(string? htmlColor, System.Drawing.Color fallback)
-    {
-        if (htmlColor is null) return fallback;
-        try { return System.Drawing.ColorTranslator.FromHtml(htmlColor); }
-        catch { return fallback; }
-    }
 }

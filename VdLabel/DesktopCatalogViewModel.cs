@@ -67,9 +67,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
                     b =>
                     {
                         var cached = this.commandService.GetBadgeResult(b.Id, c.Id);
-                        return cached.HasValue
-                            ? new ResolvedBadge(cached.Value.Label, cached.Value.Color)
-                            : new ResolvedBadge(b.Label, b.Color);
+                        return cached ?? new ResolvedBadge(b.Label, b.Color);
                     });
                 return new DesktopViewModel(i + 1, c, commandLabel, wallpaperPath, pos, resolvedBadges, ToggleBadgeAsync);
             })
