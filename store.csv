@@ -20,7 +20,9 @@ What's unique is the ability to display arbitrary command execution results in l
 Switching operations are also comfortable. In addition to the standard Win + Ctrl + ←/→, you can instantly jump to specific numbered desktops with numpad shortcuts (selection switching from list display is also available).
 
 The more daily tasks you have, the greater the benefits of virtual desktop visualization and instant switching become. With VdLabel, make your ""optimal workspace for each task"" more intuitive and faster."
-ReleaseNotes,3,テキスト,,,
+ReleaseNotes,3,テキスト,,"・.NET 10 へ移行
+・仮想デスクトップへのバッジ表示サポートを追加","・Migrate to .NET 10
+・Add badge support for virtual desktops"
 Title,4,テキスト,,VdLabel,VdLabel
 ShortTitle,5,テキスト,,,
 SortTitle,6,テキスト,,,
