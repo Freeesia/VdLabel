@@ -76,6 +76,7 @@ jobs:
         uses: gittools/actions/gitversion/execute@v4.3.3
       - run: |
           dotnet publish VdLabel -c Release -o publish --sc ${{ matrix.self }} `
+            -p:PublishSingleFile=${{ matrix.self }} `
             -p:Version=${{ steps.gitversion.outputs.fullSemVer }} `
             -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} `
             -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} `
