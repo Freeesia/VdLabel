@@ -60,4 +60,4 @@ project.AfterInstall += static e =>
 };
 
 // WXS ファイルを生成する（MSI のビルドは VdLabel.Installer.wixproj で行う）
-Compiler.BuildWxs(project);
+Compiler.BuildWxs(project, $"{App}.wxs");
