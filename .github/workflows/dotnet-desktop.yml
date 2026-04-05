@@ -113,7 +113,7 @@ jobs:
           name: licenses
           path: licenses/
   installer:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    # if: ${{ startsWith(github.ref, 'refs/tags/') }}
     needs:
       - build
       - license
