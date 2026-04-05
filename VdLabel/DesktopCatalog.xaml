@@ -54,22 +54,24 @@
                             Text="{Binding Label}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
-                        <ui:Image
-                            CornerRadius="8"
-                            Focusable="False"
-                            Source="{Binding ImagePath}" />
+                        <Grid>
+                            <ui:Image
+                                CornerRadius="8"
+                                Focusable="False"
+                                Source="{Binding ImagePath}" />
+                            <ItemsControl
+                                Margin="6"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Bottom"
+                                ItemsSource="{Binding AssignedBadges}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
                     </DockPanel>
-                    <ItemsControl
-                        Margin="6"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Bottom"
-                        ItemsSource="{Binding AssignedBadges}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
                     <Grid.ContextMenu>
                         <ContextMenu ItemsSource="{Binding BadgeMenuItems}">
                             <ContextMenu.ItemContainerStyle>
