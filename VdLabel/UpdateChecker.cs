@@ -88,7 +88,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
             var release = await this.client.Repository.Release.GetLatest(owner, this.name);
             stoppingToken.ThrowIfCancellationRequested();
 
-            if (new Version(release.Name) <= this.version)
+            if (new Version(release.TagName.TrimStart('v')) <= this.version)
             {
                 this.logger.LogInformation("アプリケーションは最新のバージョンです。");
                 await this.configStore.SaveUpdateInfo(new(release.Name, release.HtmlUrl, null, DateTime.UtcNow, false)).ConfigureAwait(false);
@@ -124,7 +124,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
             this.HasUpdate = true;
         }
         // バージョンが新しい場合は通知
-        else if (new Version(updateInfo.Version) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
+        else if (new Version(updateInfo.Version.TrimStart('v')) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
         {
             ShowUpdateNotification(updateInfo.Version, updateInfo.Url, updateInfo.Path, false);
             this.HasUpdate = true;
@@ -196,7 +196,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         {
             await CheckAndDownload(token);
         }
-        else if (new Version(updateInfo.Version) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
+        else if (new Version(updateInfo.Version.TrimStart('v')) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
         {
             ShowUpdateNotification(updateInfo.Version, updateInfo.Url, updateInfo.Path, false);
             this.HasUpdate = true;
