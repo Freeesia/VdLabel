@@ -213,7 +213,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StudioFreesia", "VdLabel");
 
     // バージョン文字列の先頭に'v'が含まれる場合は除去してVersionオブジェクトを生成する
-    private static Version ParseVersion(string version) => new(version.TrimStart('v'));
+    private static Version ParseVersion(string version) => new(version.TrimStart('v', 'V'));
 
     private enum ToastActions
     {
