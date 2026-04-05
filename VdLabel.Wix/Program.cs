@@ -3,14 +3,9 @@ using System.Diagnostics;
 using WixSharp;
 using Path = System.IO.Path;
 
-// WiX v6 と互換性のある拡張機能バージョンを明示的に指定する
-WixExtension.Util.PreferredVersion = "6.0.2";
-WixExtension.UI.PreferredVersion = "6.0.2";
-
 const string Manufacturer = "StudioFreesia";
 const string App = "VdLabel";
 const string ArtifactsDir = @"..\artifacts";
-const string PublishDir = @"..\publish";
 const string Executable = $"{App}.exe";
 
 var exePath = Path.Combine(Environment.CurrentDirectory, ArtifactsDir, Executable);
@@ -64,4 +59,5 @@ project.AfterInstall += static e =>
     }
 };
 
-project.BuildMsi(Path.Combine(PublishDir, $"{App}-{version}.msi"));
+// WXS ファイルを生成する（MSI のビルドは VdLabel.Installer.wixproj で行う）
+Compiler.BuildWxs(project);

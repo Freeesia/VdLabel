@@ -63,7 +63,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.wixproj') }} #hash of project files
           restore-keys: |
             ${{ runner.os }}-nuget-
       - uses: actions/setup-dotnet@v5
@@ -123,7 +123,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }} #hash of project files
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.wixproj') }} #hash of project files
           restore-keys: |
             ${{ runner.os }}-nuget-
       - uses: actions/setup-dotnet@v5
@@ -140,9 +140,8 @@ jobs:
           name: licenses
       - run: |
           dotnet tool restore
-          dotnet wix extension add -g WixToolset.Util.wixext/6.0.2
-          dotnet wix extension add -g WixToolset.UI.wixext/6.0.2
           dotnet run -c Release
+          dotnet build VdLabel.Installer.wixproj -p:OutputName=VdLabel-${{ needs.build.outputs.version }}
         working-directory: VdLabel.Wix
       - uses: actions/upload-artifact@v7
         with:
