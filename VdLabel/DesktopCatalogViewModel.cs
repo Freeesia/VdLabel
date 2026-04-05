@@ -49,7 +49,6 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
         this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
 
-        // ConfigureAwait(false) を使わない：後続の GetWallpaperPath や GetCurrent は COM 呼び出しで STA スレッドが必要
         var config = await this.configStore.Load();
         var pos = config.NamePosition switch
         {
