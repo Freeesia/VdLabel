@@ -140,6 +140,8 @@ jobs:
           name: licenses
       - run: |
           dotnet tool restore
+          dotnet wix extension add -g WixToolset.Util.wixext/6.0.2
+          dotnet wix extension add -g WixToolset.UI.wixext/6.0.2
           dotnet run -c Release
         working-directory: VdLabel.Wix
       - uses: actions/upload-artifact@v7
