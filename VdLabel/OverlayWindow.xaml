@@ -70,10 +70,23 @@
                     Foreground="{Binding Foreground, Converter={x:Static local:SystemColorToSolidBrushConverter.Default}}"
                     Text="{Binding Name}"
                     Visibility="{Binding IsVisibleName, Converter={StaticResource b2vConv}}" />
-                <ui:Image
-                    CornerRadius="8"
-                    Source="{Binding ImagePath}"
-                    Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
+                <Grid>
+                    <ui:Image
+                        CornerRadius="8"
+                        Source="{Binding ImagePath}"
+                        Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
+                    <ItemsControl
+                        Margin="12"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        ItemsSource="{Binding Badges}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Grid>
             </DockPanel>
         </Border>
     </Grid>
