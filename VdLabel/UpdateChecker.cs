@@ -88,13 +88,13 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
             var release = await this.client.Repository.Release.GetLatest(owner, this.name);
             stoppingToken.ThrowIfCancellationRequested();
 
-            if (new Version(release.TagName.TrimStart('v')) <= this.version)
+            if (ParseVersion(release.TagName) <= this.version)
             {
                 this.logger.LogInformation("アプリケーションは最新のバージョンです。");
-                await this.configStore.SaveUpdateInfo(new(release.Name, release.HtmlUrl, null, DateTime.UtcNow, false)).ConfigureAwait(false);
+                await this.configStore.SaveUpdateInfo(new(release.TagName, release.HtmlUrl, null, DateTime.UtcNow, false)).ConfigureAwait(false);
                 return;
             }
-            this.logger.LogInformation($"新しいバージョン {release.Name} が利用可能です。");
+            this.logger.LogInformation($"新しいバージョン {release.TagName} が利用可能です。");
             var asset = release.Assets.FirstOrDefault(a => a.Name.EndsWith(".msi"));
             if (asset is null)
             {
@@ -119,12 +119,12 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
                 await stream.CopyToAsync(fs, stoppingToken);
                 this.logger.LogInformation("インストーラーをダウンロードしました。");
             }
-            await this.configStore.SaveUpdateInfo(new(release.Name, release.HtmlUrl, installerPath, DateTime.UtcNow, false)).ConfigureAwait(false);
-            ShowUpdateNotification(release.Name, release.HtmlUrl, installerPath, false);
+            await this.configStore.SaveUpdateInfo(new(release.TagName, release.HtmlUrl, installerPath, DateTime.UtcNow, false)).ConfigureAwait(false);
+            ShowUpdateNotification(release.TagName, release.HtmlUrl, installerPath, false);
             this.HasUpdate = true;
         }
         // バージョンが新しい場合は通知
-        else if (new Version(updateInfo.Version.TrimStart('v')) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
+        else if (ParseVersion(updateInfo.Version) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
         {
             ShowUpdateNotification(updateInfo.Version, updateInfo.Url, updateInfo.Path, false);
             this.HasUpdate = true;
@@ -196,7 +196,7 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
         {
             await CheckAndDownload(token);
         }
-        else if (new Version(updateInfo.Version.TrimStart('v')) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
+        else if (ParseVersion(updateInfo.Version) > this.version && !updateInfo.Skip && updateInfo.Path is not null && File.Exists(updateInfo.Path))
         {
             ShowUpdateNotification(updateInfo.Version, updateInfo.Url, updateInfo.Path, false);
             this.HasUpdate = true;
@@ -211,6 +211,9 @@ internal class UpdateChecker : BackgroundService, IUpdateChecker
     private static bool IsInstalled()
         => Path.GetDirectoryName(Environment.ProcessPath)
         == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StudioFreesia", "VdLabel");
+
+    // バージョン文字列の先頭に'v'が含まれる場合は除去してVersionオブジェクトを生成する
+    private static Version ParseVersion(string version) => new(version.TrimStart('v'));
 
     private enum ToastActions
     {
