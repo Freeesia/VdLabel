@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>VdLavel.Wix</RootNamespace>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>VdLabel.Wix</RootNamespace>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   
@@ -15,8 +15,10 @@
 
   <ItemGroup>
     <PackageReference Include="WixSharp_wix4" Version="2.12.3" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
 
 </Project>

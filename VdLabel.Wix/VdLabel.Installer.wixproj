@@ -2,11 +2,9 @@
 
   <PropertyGroup>
     <OutputPath>$(MSBuildProjectDirectory)\..\publish\</OutputPath>
+    <AcceptEula>wix7</AcceptEula>
+    <InstallerPlatform>x64</InstallerPlatform>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="VdLabel.wxs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
