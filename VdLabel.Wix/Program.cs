@@ -23,7 +23,6 @@ var project = new ManagedProject(App,
 project.RebootSupressing = RebootSupressing.Suppress;
 project.GUID = new("FE947636-81DB-4819-A5D9-939125903F4C");
 project.Platform = Platform.x64;
-project.Language = "ja-JP";
 project.Version = new(version);
 
 // コントロールパネルの情報を設定
@@ -35,9 +34,7 @@ project.ControlPanelInfo = new()
     UrlUpdateInfo = "https://github.com/Freeesia/VdLabel/releases",
 };
 
-// どっちか片方しか設定できない
-//project.MajorUpgrade = MajorUpgrade.Default;
-project.MajorUpgradeStrategy = MajorUpgradeStrategy.Default;
+project.MajorUpgrade = MajorUpgrade.Default;
 
 project.BackgroundImage = @"..\assets\installer_back.png";
 project.ValidateBackgroundImage = false;
@@ -59,6 +56,7 @@ project.AfterInstall += static e =>
     }
 };
 
-// WXS ファイルを生成する（MSI のビルドは VdLabel.Installer.wixproj で行う）
-// プロジェクト名 "VdLabel" がそのまま出力ファイル名 VdLabel.wxs になる
+// WXS ファイルを generated/ フォルダに生成する（MSI のビルドは VdLabel.Installer.wixproj で行う）
+// generated/ は .gitignore で除外されているため、生成物がリポジトリに混入しない
+project.OutDir = "generated";
 Compiler.BuildWxs(project);

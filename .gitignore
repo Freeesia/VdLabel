@@ -63,6 +63,9 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# WixSharp の自動生成 WXS ファイル
+VdLabel.Wix/generated/
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 

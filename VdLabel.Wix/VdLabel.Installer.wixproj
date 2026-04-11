@@ -1,14 +1,22 @@
-<Project Sdk="WixToolset.Sdk/6.0.2">
+<Project Sdk="WixToolset.Sdk/7.0.0">
 
   <PropertyGroup>
     <OutputPath>$(MSBuildProjectDirectory)\..\publish\</OutputPath>
     <AcceptEula>wix7</AcceptEula>
     <InstallerPlatform>x64</InstallerPlatform>
+    <!-- UI の表示言語を日本語に設定 -->
+    <Cultures>ja-JP</Cultures>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
-    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
+    <!-- WixSharp が generated/ フォルダに出力した WXS のみをコンパイル対象にする -->
+    <Compile Remove="**\*.wxs" />
+    <Compile Include="generated\*.wxs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
