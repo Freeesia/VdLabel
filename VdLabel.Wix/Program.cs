@@ -3,6 +3,10 @@ using System.Diagnostics;
 using WixSharp;
 using Path = System.IO.Path;
 
+// WiXの拡張機能バージョンを明示的に指定してプレリリース版を避ける
+WixExtension.UI.PreferredVersion = "6.0.2";
+WixExtension.Util.PreferredVersion = "6.0.2";
+
 const string Manufacturer = "StudioFreesia";
 const string App = "VdLabel";
 const string ArtifactsDir = @"..\artifacts";
