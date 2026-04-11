@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>VdLavel.Wix</RootNamespace>
-    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>VdLabel.Wix</RootNamespace>
+    <TargetFramework>net48</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixSharp_wix4" Version="2.12.3" />
+    <PackageReference Include="WixSharp_wix4.bin" Version="2.12.3" />
   </ItemGroup>
 
   <ItemGroup>
