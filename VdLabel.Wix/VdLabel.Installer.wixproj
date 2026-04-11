@@ -6,6 +6,8 @@
     <InstallerPlatform>x64</InstallerPlatform>
     <!-- UI の表示言語を日本語に設定 -->
     <Cultures>ja-JP</Cultures>
+    <!-- .wixpdb を出力しない -->
+    <SuppressPdbOutput>true</SuppressPdbOutput>
   </PropertyGroup>
 
   <ItemGroup>
