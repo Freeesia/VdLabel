@@ -25,6 +25,9 @@
     WindowBackdropType="Mica"
     WindowCornerPreference="Default"
     mc:Ignorable="d">
+    <ui:FluentWindow.Resources>
+        <local:FilePathToImageSourceConverter x:Key="filePathToImageConv" />
+    </ui:FluentWindow.Resources>
     <ui:FluentWindow.InputBindings>
         <KeyBinding Key="Esc" Command="ApplicationCommands.Close" />
         <KeyBinding Key="Enter" Command="ApplicationCommands.Close" />
@@ -58,7 +61,7 @@
                             <ui:Image
                                 CornerRadius="8"
                                 Focusable="False"
-                                Source="{Binding ImagePath}" />
+                                Source="{Binding ImagePath, Converter={StaticResource filePathToImageConv}}" />
                             <ItemsControl
                                 Margin="6"
                                 HorizontalAlignment="Left"

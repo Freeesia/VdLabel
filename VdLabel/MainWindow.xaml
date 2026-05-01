@@ -35,6 +35,7 @@
             <Setter Property="MinWidth" Value="80" />
         </Style>
         <BooleanToVisibilityConverter x:Key="b2vConv" />
+        <local:FilePathToImageSourceConverter x:Key="filePathToImageConv" />
     </ui:FluentWindow.Resources>
     <Grid>
         <DockPanel>
@@ -263,7 +264,7 @@
                                             <Image
                                                 Height="16"
                                                 DockPanel.Dock="Left"
-                                                Source="{Binding ImagePath}" />
+                                                Source="{Binding ImagePath, Converter={StaticResource filePathToImageConv}}" />
                                             <emoji:TextBlock
                                                 Margin="4,0"
                                                 Text="{Binding Title}"
@@ -399,7 +400,7 @@
                                     Grid.ColumnSpan="2"
                                     Height="120"
                                     CornerRadius="4"
-                                    Source="{Binding ImagePath}"
+                                    Source="{Binding ImagePath, Converter={StaticResource filePathToImageConv}}"
                                     Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
                                 <Label
                                     Grid.Row="8"
