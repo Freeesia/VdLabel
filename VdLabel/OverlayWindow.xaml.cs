@@ -53,6 +53,42 @@ public partial class OverlayWindow : Window
     }
 }
 
+/// <summary>
+/// ファイルパス文字列を ImageSource に変換するコンバーター。
+/// BitmapCacheOption.OnLoad を使用することで、読み込み後にファイルハンドルを解放する。
+/// </summary>
+[ValueConversion(typeof(string), typeof(System.Windows.Media.Imaging.BitmapImage))]
+public sealed class FilePathToImageSourceConverter : IValueConverter
+{
+    public static FilePathToImageSourceConverter Default { get; } = new FilePathToImageSourceConverter();
+
+    public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    {
+        if (value is not string path || string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(path, UriKind.Absolute);
+            bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 [ValueConversion(typeof(System.Drawing.Color), typeof(SolidColorBrush))]
 public sealed class SystemColorToSolidBrushConverter : IValueConverter
 {

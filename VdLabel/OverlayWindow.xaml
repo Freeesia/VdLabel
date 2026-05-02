@@ -22,6 +22,7 @@
     mc:Ignorable="d">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="b2vConv" />
+        <local:FilePathToImageSourceConverter x:Key="filePathToImageConv" />
     </Window.Resources>
     <Grid
         Width="{Binding OverlaySize, Mode=OneWay}"
@@ -73,7 +74,7 @@
                 <Grid>
                     <ui:Image
                         CornerRadius="8"
-                        Source="{Binding ImagePath}"
+                        Source="{Binding ImagePath, Converter={StaticResource filePathToImageConv}}"
                         Visibility="{Binding IsVisibleImage, Converter={StaticResource b2vConv}}" />
                     <ItemsControl
                         Margin="12"
