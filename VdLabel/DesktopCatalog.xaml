@@ -73,6 +73,26 @@
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                             </ItemsControl>
+                            <ItemsControl
+                                Margin="6"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                ItemsSource="{Binding WindowIcons}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image
+                                            Width="24"
+                                            Height="24"
+                                            Margin="2"
+                                            Source="{Binding}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
                     </DockPanel>
                     <Grid.ContextMenu>

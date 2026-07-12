@@ -7,15 +7,21 @@ using static Windows.Win32.PInvoke;
 using static VdLabel.ProcessUtility;
 
 namespace VdLabel;
-class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : BackgroundService
+class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : BackgroundService, IWindowMonitor
 {
     private readonly ILogger<WindowMonitor> logger = logger;
     private readonly IConfigStore configStore = configStore;
     private readonly Dictionary<IntPtr, string> checkedWindows = [];
     private bool needReload = true;
     private TargetWindow[] targetWindows = [];
+    private IReadOnlyDictionary<Guid, IReadOnlyList<string>> desktopWindows = new Dictionary<Guid, IReadOnlyList<string>>();
 
     private record TargetWindow(Guid DesktopId, WindowMatchType MatchType, Regex Regex);
+
+    public event EventHandler? DesktopWindowsChanged;
+
+    public IReadOnlyList<string> GetDesktopWindows(Guid desktopId)
+        => this.desktopWindows.TryGetValue(desktopId, out var windows) ? windows : [];
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -67,11 +73,8 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
     {
         var now = DateTime.Now;
         this.logger.LogDebug("ウィンドウチェック開始");
-        if (this.targetWindows.Length == 0)
-        {
-            return;
-        }
         var windows = new HashSet<nint>();
+        var desktopWindows = new Dictionary<Guid, List<string>>();
         User32.EnumWindows((hWnd, lParam) =>
         {
             windows.Add(hWnd);
@@ -93,6 +96,27 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
                 return true;
             }
 
+            if (VirtualDesktop.FromHwnd(hWnd) is not { } desktop)
+            {
+                return true;
+            }
+
+            if (GetProcessPath(processId) is not { } path)
+            {
+                return true;
+            }
+            if (!desktopWindows.TryGetValue(desktop.Id, out var processPaths))
+            {
+                processPaths = [];
+                desktopWindows.Add(desktop.Id, processPaths);
+            }
+            processPaths.Add(path);
+
+            if (this.targetWindows.Length == 0)
+            {
+                return true;
+            }
+
             // ウィンドウタイトルが取得できない場合はスキップ
             if (GetWindowTitle(hWnd) is not { } windowTitle)
             {
@@ -106,12 +130,6 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             }
 
             // ウィンドウが所属するプロセスのパスが取得できない場合はスキップ
-            if (GetProcessPath(processId) is not { } path)
-            {
-                this.checkedWindows[hWnd] = windowTitle;
-                return true;
-            }
-
             // ウィンドウが所属するプロセスのコマンドラインが取得できない場合はスキップ
             if (GetCommandLine(processId) is not { } commandLine)
             {
@@ -135,12 +153,12 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
                         VirtualDesktop.PinWindow(hWnd);
                     }
                 }
-                else if (VirtualDesktop.FromId(target.DesktopId) is { } desktop)
+                else if (VirtualDesktop.FromId(target.DesktopId) is { } targetDesktop)
                 {
-                    if (VirtualDesktop.FromHwnd(hWnd)?.Id != desktop.Id)
+                    if (VirtualDesktop.FromHwnd(hWnd)?.Id != targetDesktop.Id)
                     {
-                        this.logger.LogDebug($"ウィンドウ検出: {windowTitle} to {desktop.Name}");
-                        VirtualDesktop.MoveToDesktop(hWnd, desktop);
+                        this.logger.LogDebug($"ウィンドウ検出: {windowTitle} to {targetDesktop.Name}");
+                        VirtualDesktop.MoveToDesktop(hWnd, targetDesktop);
                     }
                 }
 
@@ -159,8 +177,20 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
         {
             this.checkedWindows.Remove(hWnd);
         }
+        var newDesktopWindows = desktopWindows.ToDictionary(
+            pair => pair.Key,
+            pair => (IReadOnlyList<string>)pair.Value.ToArray());
+        if (!DesktopWindowsEqual(this.desktopWindows, newDesktopWindows))
+        {
+            this.desktopWindows = newDesktopWindows;
+            this.DesktopWindowsChanged?.Invoke(this, EventArgs.Empty);
+        }
         this.logger.LogDebug($"ウィンドウチェック終了: {DateTime.Now - now}");
     }
+
+    private static bool DesktopWindowsEqual(IReadOnlyDictionary<Guid, IReadOnlyList<string>> left, IReadOnlyDictionary<Guid, IReadOnlyList<string>> right)
+        => left.Count == right.Count
+            && left.All(pair => right.TryGetValue(pair.Key, out var windows) && pair.Value.SequenceEqual(windows, StringComparer.OrdinalIgnoreCase));
 
     private static string GetCheckText(WindowMatchType type, string path, string commandLine, string windowTitle)
         => type switch
@@ -170,4 +200,10 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore) : B
             WindowMatchType.Path => path,
             _ => string.Empty,
         };
+}
+
+interface IWindowMonitor
+{
+    event EventHandler? DesktopWindowsChanged;
+    IReadOnlyList<string> GetDesktopWindows(Guid desktopId);
 }

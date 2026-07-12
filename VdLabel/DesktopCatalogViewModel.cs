@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,6 +11,8 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private readonly IVirualDesktopService virualDesktopService;
     private readonly ICommandService commandService;
     private readonly IConfigStore configStore;
+    private readonly IWindowMonitor windowMonitor;
+    private readonly IWindowIconCache windowIconCache;
     private readonly int maxColumns;
     [ObservableProperty]
     private IReadOnlyList<DesktopViewModel> desktops = [];
@@ -28,13 +31,16 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     [ObservableProperty]
     private double height;
 
-    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandService commandService, IConfigStore configStore)
+    public DesktopCatalogViewModel(IVirualDesktopService virualDesktopService, ICommandService commandService, IConfigStore configStore, IWindowMonitor windowMonitor, IWindowIconCache windowIconCache)
     {
         this.virualDesktopService = virualDesktopService;
         this.commandService = commandService;
         this.configStore = configStore;
+        this.windowMonitor = windowMonitor;
+        this.windowIconCache = windowIconCache;
         this.configStore.Saved += ConfigStore_Saved;
         this.commandService.BadgeResultsUpdated += CommandService_BadgeResultsUpdated;
+        this.windowMonitor.DesktopWindowsChanged += WindowMonitor_DesktopWindowsChanged;
         this.maxColumns = (int)(SystemParameters.PrimaryScreenWidth * 0.8 / 280);
         Setup();
     }
@@ -69,7 +75,11 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
                         var cached = this.commandService.GetBadgeResult(b.Id, c.Id);
                         return cached ?? new ResolvedBadge(b.Label, b.Color);
                     });
-                return new DesktopViewModel(i + 1, c, commandLabel, wallpaperPath, pos, resolvedBadges, ToggleBadgeAsync);
+                var windowIcons = this.windowMonitor.GetDesktopWindows(c.Id)
+                    .Select(this.windowIconCache.Get)
+                    .OfType<ImageSource>()
+                    .ToArray();
+                return new DesktopViewModel(i + 1, c, commandLabel, wallpaperPath, pos, resolvedBadges, windowIcons, ToggleBadgeAsync);
             })
             .ToArray();
         var currentDesktop = this.virualDesktopService.GetCurrent();
@@ -101,10 +111,14 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
         => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
 
+    private void WindowMonitor_DesktopWindowsChanged(object? sender, EventArgs e)
+        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
+
     public void Dispose()
     {
         this.configStore.Saved -= ConfigStore_Saved;
         this.commandService.BadgeResultsUpdated -= CommandService_BadgeResultsUpdated;
+        this.windowMonitor.DesktopWindowsChanged -= WindowMonitor_DesktopWindowsChanged;
     }
 
     partial void OnSelectedDesktopChanged(DesktopViewModel? value)
@@ -121,7 +135,7 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         => this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
 }
 
-internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyDictionary<Guid, ResolvedBadge> resolvedBadges, Func<Guid, Guid, Task> toggleBadge)
+internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? commandLabel, string? wallpaperPath, Dock pos, IReadOnlyDictionary<Guid, ResolvedBadge> resolvedBadges, IReadOnlyList<ImageSource> windowIcons, Func<Guid, Guid, Task> toggleBadge)
 {
     private readonly int index = index;
     private DesktopConfig desktopConfig = desktopConfig;
@@ -140,6 +154,8 @@ internal class DesktopViewModel(int index, DesktopConfig desktopConfig, string? 
         .Where(id => resolvedBadges.ContainsKey(id))
         .Select(id => resolvedBadges[id])
         .ToArray();
+
+    public IReadOnlyList<ImageSource> WindowIcons { get; } = windowIcons;
 
     public IReadOnlyList<BadgeMenuItem> BadgeMenuItems { get; } = resolvedBadges
         .Select(kvp => new BadgeMenuItem(kvp.Key, kvp.Value, desktopConfig.Id, desktopConfig.BadgeIds.Contains(kvp.Key), toggleBadge))
