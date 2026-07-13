@@ -57,39 +57,38 @@
                             Text="{Binding Label}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
+                        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding WindowIcons}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Image
+                                        Width="24"
+                                        Height="24"
+                                        Margin="2"
+                                        Source="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Grid>
                             <ui:Image
                                 CornerRadius="8"
                                 Focusable="False"
                                 Source="{Binding ImagePath, Converter={StaticResource filePathToImageConv}}" />
-                            <StackPanel
+                            <ItemsControl
                                 Margin="6"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Bottom">
-                                <ItemsControl ItemsSource="{Binding AssignedBadges}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                                <ItemsControl ItemsSource="{Binding WindowIcons}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Image
-                                                Width="24"
-                                                Height="24"
-                                                Margin="2"
-                                                Source="{Binding}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
+                                VerticalAlignment="Bottom"
+                                ItemsSource="{Binding AssignedBadges}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
                         </Grid>
                     </DockPanel>
                     <Grid.ContextMenu>
