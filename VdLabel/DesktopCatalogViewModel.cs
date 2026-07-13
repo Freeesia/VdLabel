@@ -40,7 +40,6 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
         this.windowIconCache = windowIconCache;
         this.configStore.Saved += ConfigStore_Saved;
         this.commandService.BadgeResultsUpdated += CommandService_BadgeResultsUpdated;
-        this.windowMonitor.DesktopWindowsChanged += WindowMonitor_DesktopWindowsChanged;
         this.maxColumns = (int)(SystemParameters.PrimaryScreenWidth * 0.8 / 280);
         Setup();
     }
@@ -111,14 +110,10 @@ internal sealed partial class DesktopCatalogViewModel : ObservableObject, IDispo
     private void CommandService_BadgeResultsUpdated(object? sender, EventArgs e)
         => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
 
-    private void WindowMonitor_DesktopWindowsChanged(object? sender, EventArgs e)
-        => System.Windows.Application.Current.Dispatcher.BeginInvoke(Setup);
-
     public void Dispose()
     {
         this.configStore.Saved -= ConfigStore_Saved;
         this.commandService.BadgeResultsUpdated -= CommandService_BadgeResultsUpdated;
-        this.windowMonitor.DesktopWindowsChanged -= WindowMonitor_DesktopWindowsChanged;
     }
 
     partial void OnSelectedDesktopChanged(DesktopViewModel? value)

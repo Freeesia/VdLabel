@@ -19,8 +19,6 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore, App
 
     private record TargetWindow(Guid DesktopId, WindowMatchType MatchType, Regex Regex);
 
-    public event EventHandler? DesktopWindowsChanged;
-
     public IReadOnlyList<string> GetDesktopWindows(Guid desktopId)
         => this.desktopWindows.TryGetValue(desktopId, out var windows) ? windows : [];
 
@@ -179,17 +177,9 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore, App
         {
             this.checkedWindows.Remove(hWnd);
         }
-        if (!DesktopWindowsEqual(this.desktopWindows, desktopWindows))
-        {
-            this.desktopWindows = desktopWindows;
-            this.DesktopWindowsChanged?.Invoke(this, EventArgs.Empty);
-        }
+        this.desktopWindows = desktopWindows;
         this.logger.LogDebug($"ウィンドウチェック終了: {DateTime.Now - now}");
     }
-
-    private static bool DesktopWindowsEqual(Dictionary<Guid, List<string>> left, Dictionary<Guid, List<string>> right)
-        => left.Count == right.Count
-            && left.All(pair => right.TryGetValue(pair.Key, out var windows) && pair.Value.SequenceEqual(windows, StringComparer.OrdinalIgnoreCase));
 
     private static string GetCheckText(WindowMatchType type, string path, string commandLine, string windowTitle)
         => type switch
@@ -203,6 +193,5 @@ class WindowMonitor(ILogger<WindowMonitor> logger, IConfigStore configStore, App
 
 interface IWindowMonitor
 {
-    event EventHandler? DesktopWindowsChanged;
     IReadOnlyList<string> GetDesktopWindows(Guid desktopId);
 }
