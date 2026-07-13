@@ -31,7 +31,7 @@ sealed class WindowIconCache : IWindowIconCache
             var source = Imaging.CreateBitmapSourceFromHIcon(
                 icon.Handle,
                 Int32Rect.Empty,
-                BitmapSizeOptions.FromWidthAndHeight(24, 24));
+                BitmapSizeOptions.FromWidthAndHeight(64, 64));
             source.Freeze();
             return source;
         }
