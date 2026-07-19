@@ -50,13 +50,32 @@
                     <DockPanel HorizontalAlignment="Center">
                         <emoji:TextBlock
                             MaxHeight="120"
-                            Margin="8"
+                            Margin="4,8"
                             HorizontalAlignment="Center"
                             DockPanel.Dock="{Binding Position, Mode=OneWay}"
                             FontSize="28"
                             Text="{Binding Label}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
+                        <ItemsControl
+                            HorizontalAlignment="Center"
+                            DockPanel.Dock="Bottom"
+                            ItemsSource="{Binding WindowIcons}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Image
+                                        Width="24"
+                                        Height="24"
+                                        Margin="2"
+                                        Source="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Grid>
                             <ui:Image
                                 CornerRadius="8"
